@@ -27,7 +27,7 @@ namespace Omnitrack.Controllers
             public IActionResult Register() => View();
 
             [HttpPost]
-            public async Task<IActionResult> Register(  RegisterViewModel model)
+            public async Task<IActionResult> Register(RegisterViewModel model)
             {
                 if (!ModelState.IsValid) return View(model);
 
@@ -40,7 +40,13 @@ namespace Omnitrack.Controllers
                     var confirmationLink = Url.Action("ConfirmEmail", "Account",
                         new { userId = user.Id, token }, Request.Scheme);
 
-                    await _emailSender.SendConfirmationLinkAsync(user, model.Email, confirmationLink); // Updated method call
+                    if (string.IsNullOrEmpty(confirmationLink))
+                    {
+                        ModelState.AddModelError("", "Failed to generate confirmation link.");
+                        return View(model);
+                    }
+
+                    await _emailSender.SendConfirmationLinkAsync(user, model.Email, confirmationLink);
 
                     return RedirectToAction("Login");
                 }

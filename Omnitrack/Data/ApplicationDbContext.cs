@@ -10,8 +10,18 @@ namespace Omnitrack.Data
             : base(options)
         {
         }
+        private DbSet<User> users;
 
-        public DbSet<User> Users {  get; set; }
+        public DbSet<User> GetUsers()
+        {
+            return users;
+        }
+
+        public void SetUsers(DbSet<User> value)
+        {
+            users = value;
+        }
+
         public DbSet<Omnitrack.Models.Tasks> Tasks { get; set; } = default!;
         
     }

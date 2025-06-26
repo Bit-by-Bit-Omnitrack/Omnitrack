@@ -22,7 +22,7 @@ namespace Omnitrack.Controllers
         // GET: Users
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Users.ToListAsync());
+            return View(await _context.GetUsers().ToListAsync());
         }
 
         // GET: Users/Details/5
@@ -33,7 +33,7 @@ namespace Omnitrack.Controllers
                 return NotFound();
             }
 
-            var user = await _context.Users
+            var user = await _context.GetUsers()
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (user == null)
             {
@@ -76,7 +76,7 @@ namespace Omnitrack.Controllers
                 return NotFound();
             }
 
-            var user = await _context.Users.FindAsync(id);
+            var user = await _context.GetUsers().FindAsync(id);
             if (user == null)
             {
                 return NotFound();
@@ -127,7 +127,7 @@ namespace Omnitrack.Controllers
                 return NotFound();
             }
 
-            var user = await _context.Users
+            var user = await _context.GetUsers()
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (user == null)
             {
@@ -142,10 +142,10 @@ namespace Omnitrack.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var user = await _context.Users.FindAsync(id);
+            var user = await _context.GetUsers().FindAsync(id);
             if (user != null)
             {
-                _context.Users.Remove(user);
+                _context.GetUsers().Remove(user);
             }
 
             await _context.SaveChangesAsync();
@@ -154,7 +154,7 @@ namespace Omnitrack.Controllers
 
         private bool UserExists(int id)
         {
-            return _context.Users.Any(e => e.Id == id);
+            return _context.GetUsers().Any(e => e.Id == id);
         }
     }
 }

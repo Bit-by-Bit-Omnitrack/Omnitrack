@@ -21,7 +21,7 @@ namespace Omnitrack
             builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<ApplicationDbContext>();
             builder.Services.AddControllersWithViews();
-            builder.Services.AddTransient<IEmailSender, EmailSender>(); // Register EmailSender service
+            IServiceCollection services = builder.Services.AddTransient<IEmailSender, EmailSender>(); // Register EmailSender service
 
             var app = builder.Build();
 
