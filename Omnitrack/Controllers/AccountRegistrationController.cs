@@ -1,6 +1,7 @@
 ﻿using Azure.Core;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Omnitrack.Models.ViewModels; // Add this using directive
 using System.Security.Policy;
 
 namespace Omnitrack.Controllers
@@ -11,11 +12,11 @@ namespace Omnitrack.Controllers
         {
             private readonly UserManager<IdentityUser> _userManager;
             private readonly SignInManager<IdentityUser> _signInManager;
-            private readonly IEmailSender _emailSender;
+            private readonly IEmailSender<IdentityUser> _emailSender; // Fixed: Added the required type argument
 
             public AccountController(UserManager<IdentityUser> userManager,
                                      SignInManager<IdentityUser> signInManager,
-                                     IEmailSender emailSender)
+                                     IEmailSender<IdentityUser> emailSender) // Fixed: Updated constructor parameter
             {
                 _userManager = userManager;
                 _signInManager = signInManager;
@@ -26,7 +27,7 @@ namespace Omnitrack.Controllers
             public IActionResult Register() => View();
 
             [HttpPost]
-            public async Task<IActionResult> Register(RegisterViewModel model)
+            public async Task<IActionResult> Register(  RegisterViewModel model)
             {
                 if (!ModelState.IsValid) return View(model);
 
@@ -39,8 +40,7 @@ namespace Omnitrack.Controllers
                     var confirmationLink = Url.Action("ConfirmEmail", "Account",
                         new { userId = user.Id, token }, Request.Scheme);
 
-                    await _emailSender.SendEmailAsync(model.Email, "Confirm your email",
-                        $"Click to confirm: <a href='{confirmationLink}'>link</a>");
+                    await _emailSender.SendConfirmationLinkAsync(user, model.Email, confirmationLink); // Updated method call
 
                     return RedirectToAction("Login");
                 }

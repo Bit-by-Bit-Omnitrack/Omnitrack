@@ -1,12 +1,30 @@
-﻿@using static Omnitrack.Models.RegistorViewModelcs
+﻿@using Omnitrack.Models
+@model Omnitrack.Models.ViewModels.RegisterViewModel
 
-@model RegisterViewModel
-@{
-
-    <form asp-action="Register">
+<form asp-action="Register" method="post">
+    <div>
+        <label asp-for="Email"></label>
         <input asp-for="Email" placeholder="Email" />
-        <input asp-for="Password" placeholder="Password" type="password" />
-        <input asp-for="ConfirmPassword" placeholder="Confirm Password" type="password" />
-        <button type="submit">Register</button>
-    </form>
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+
+    <div>
+        <label asp-for="Password"></label>
+        <input asp-for="Password" type="password" placeholder="Password" />
+        <span asp-validation-for="Password" class="text-danger"></span>
+    </div>
+
+    <div>
+        <label asp-for="ConfirmPassword"></label>
+        <input asp-for="ConfirmPassword" type="password" placeholder="Confirm Password" />
+        <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+    </div>
+
+    <button type="submit">Register</button>
+</form>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

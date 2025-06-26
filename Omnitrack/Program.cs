@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using Omnitrack.Data;
+using Omnitrack.Services;
 
 namespace Omnitrack
 {
@@ -19,6 +21,7 @@ namespace Omnitrack
             builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<ApplicationDbContext>();
             builder.Services.AddControllersWithViews();
+            builder.Services.AddTransient<IEmailSender, EmailSender>(); // Register EmailSender service
 
             var app = builder.Build();
 
@@ -30,7 +33,6 @@ namespace Omnitrack
             else
             {
                 app.UseExceptionHandler("/Home/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
 
