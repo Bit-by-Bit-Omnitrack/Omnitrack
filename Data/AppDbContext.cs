@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using UserRoles.Models;
+using UserRoles.ViewModels;
 
 namespace UserRoles.Data
 {
@@ -10,5 +11,7 @@ namespace UserRoles.Data
         {
         }
         public DbSet<UserRoles.Models.User> User { get; set; } = default!;
+        // public DbSet<RegisterViewModel> AspNetUsers { get; set; }
+     
     }
 }
