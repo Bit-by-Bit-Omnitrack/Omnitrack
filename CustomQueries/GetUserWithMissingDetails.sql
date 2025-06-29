@@ -16,8 +16,7 @@ SELECT TOP (100)
 [LockoutEnabled],
 [AccessFailedCount],
 [IsActive],
-FROM [UserRoles510].[dbo].[Users]
+FROM [UserRoles510].[dbo].[AspNetUsers]
 WHERE 
-Fullname IS NULL OR Fullname = ''
+Fullname IS NULL OR Fullname = ' '
 OR PhoneNumber IS NULL OR PhoneNumber = ''
-
