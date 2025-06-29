@@ -20,4 +20,3 @@ WHERE
     OR Country IS NULL OR Country = ''
     OR Address IS NULL OR Address = ''
     OR Role IS NULL OR Role = '';
-
