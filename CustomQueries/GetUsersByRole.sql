@@ -1,15 +1,3 @@
-﻿SELECT 
-    Id,
-    EmployeeNumber,
-    FirstName,
-    MiddleName,
-    LastName,
-    CONCAT(FirstName, ' ', MiddleName, ' ', LastName) AS Fullname,
-    PhoneNumber,
-    EmailAddress,
-    Country,
-    DateOfBirth,
-    Address,
-    Role
-FROM Users
-WHERE Role = 'Admin';
+SELECT [Id], [FirstName], [LastName], [Role]
+FROM [dbo].[Users]
+WHERE [Role] = 'Manager';  -- Change this to any role you want to filter by role
