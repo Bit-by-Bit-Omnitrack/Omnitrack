@@ -4,9 +4,10 @@
     background-position:center;
     background-repeat: repeat-y;
     display:flex;
-    justify-content:center;
+    justify-content:flex-start;
     align-items:center;
     min-height: 100vh;
+    padding-left:80px;
     padding: 2rem 0;
 }
 
@@ -18,4 +19,5 @@
     max-width:500px;
     width:100%;
     opacity:.9;
+    margin:left 40px;
 }
