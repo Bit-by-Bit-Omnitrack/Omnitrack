@@ -15,7 +15,11 @@ namespace UserRoles.Controllers
         {
             _userManager = userManager;
         }
-
+        public IActionResult Index()
+        {
+            var users = _userManager.Users.Where(u => u.IsActive).ToList();
+            return View(users);
+        }
         public IActionResult Authenticate()
         {
             var pendingUsers = _userManager.Users.Where(u => !u.IsActive).ToList();
