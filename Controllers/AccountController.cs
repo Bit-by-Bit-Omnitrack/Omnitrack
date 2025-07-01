@@ -33,6 +33,16 @@ namespace UserRoles.Controllers
                 return View(model);
             }
 
+            var user = await userManager.FindByEmailAsync(model.Email);
+            if (user != null)
+            {
+                if (!user.IsActive)
+                {
+                    ModelState.AddModelError(string.Empty, "Your account is not active. Please wait for approval.");
+                    return View(model);
+                }
+            }
+
             var result = await signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
 
             if (result.Succeeded)
@@ -47,6 +57,7 @@ namespace UserRoles.Controllers
         [HttpGet]
         public IActionResult Register()
         {
+            ViewBag.Roles = new List<string> { "System Administrator", "Developer", "Tester", "Project Leader" };
             return View();
         }
 
@@ -54,6 +65,8 @@ namespace UserRoles.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(RegisterViewModel model)
         {
+            ViewBag.Roles = new List<string> { "System Administrator", "Developer", "Tester", "Project Leader" };
+
             if (!ModelState.IsValid)
             {
                 return View(model);
@@ -63,25 +76,23 @@ namespace UserRoles.Controllers
             {
                 FullName = model.Name,
                 UserName = model.Email,
-                NormalizedUserName = model.Email.ToUpper(),
                 Email = model.Email,
-                NormalizedEmail = model.Email.ToUpper()
+                NormalizedUserName = model.Email.ToUpper(),
+                NormalizedEmail = model.Email.ToUpper(),
+                IsActive = false // User cannot log in until approved
             };
 
             var result = await userManager.CreateAsync(user, model.Password);
 
             if (result.Succeeded)
             {
-                var roleExist = await roleManager.RoleExistsAsync("User");
-
+                var roleExist = await roleManager.RoleExistsAsync(model.Role);
                 if (!roleExist)
                 {
-                    var role = new IdentityRole("User");
-                    await roleManager.CreateAsync(role);
+                    await roleManager.CreateAsync(new IdentityRole(model.Role));
                 }
 
-                await userManager.AddToRoleAsync(user, "User");
-
+                await userManager.AddToRoleAsync(user, model.Role);
                 await signInManager.SignInAsync(user, isPersistent: false);
                 return RedirectToAction("Login", "Account");
             }
@@ -93,6 +104,13 @@ namespace UserRoles.Controllers
 
             return View(model);
         }
+        // In AccountController.cs
+        [HttpGet]
+        public IActionResult AccessDenied()
+        {
+            return View();
+        }
+
 
         [HttpGet]
         public IActionResult VerifyEmail()

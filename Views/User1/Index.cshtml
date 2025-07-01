@@ -16,6 +16,9 @@
                 <th>
                     Edit
                 </th>
+                    <th>
+                        View
+                    </th>
             
                 <th>
                     Delete
@@ -26,14 +29,17 @@
         @foreach (var user in Model)
         {
                 <tr>
-                    <td>@Html.DisplayFor(modelItem => user.Email)l</td>
+                    <td>@Html.DisplayFor(modelItem => user.Email)</td>
                     <td>@Html.DisplayFor(modelItem => user.UserName)</td>
                         <td>@Html.DisplayFor(modelItem => user.IsActive)</td>
                     <td>
                         <a asp-action="Edit" asp-route-id="@user.Id" class="btn btn-primary">Edit</a>
 
                     </td>
-                       
+                        <td>
+                            <a asp-action="Details" asp-route-id="@user.Id" class="btn btn-warning">View</a>
+
+                        </td>
                     <td>
                         <a asp-action="Delete" asp-route-id="@user.Id" class="btn btn-danger">Delete</a>
 

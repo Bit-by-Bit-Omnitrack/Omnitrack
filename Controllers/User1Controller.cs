@@ -16,11 +16,12 @@ namespace UserRoles.Controllers
             _userManager = userManager;
         }
 
-        public IActionResult Index()
+        public IActionResult Authenticate()
         {
-            var users = _userManager.Users.Where(u => u.IsActive).ToList();
-            return View(users);
+            var pendingUsers = _userManager.Users.Where(u => !u.IsActive).ToList();
+            return View(pendingUsers); // Will be used by Authenticate.cshtml
         }
+
 
         [HttpGet("Users/Edit/{id}")]
         public async Task<IActionResult> Edit(string id)
@@ -70,7 +71,19 @@ namespace UserRoles.Controllers
         }
 
         // POST: Users/Delete/5
-    
+
+        [HttpGet("Users/Details/{id}")]
+        public async Task<IActionResult> Details(string id)
+        {
+            if (string.IsNullOrEmpty(id)) return NotFound();
+
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null || !user.IsActive) return NotFound();
+
+            return View(user);
+        }
+
+
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(string id)
@@ -83,6 +96,23 @@ namespace UserRoles.Controllers
 
             return RedirectToAction(nameof(Index));
         }
+        [HttpPost]
+        public async Task<IActionResult> Approve(string id)
+        {
+            if (string.IsNullOrEmpty(id)) return NotFound();
+
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null) return NotFound();
+
+            user.IsActive = true;
+            await _userManager.UpdateAsync(user);
+
+            TempData["Message"] = "User approved successfully.";
+
+            return RedirectToAction(nameof(Authenticate));
+        }
+
+
 
     }
 }
