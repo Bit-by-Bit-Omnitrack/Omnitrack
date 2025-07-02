@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using UserRoles.Models;
 using UserRoles.Services; // For email service
@@ -92,6 +92,7 @@ namespace UserRoles.Controllers
             if (result.Succeeded)
             {
                 var roleExist = await roleManager.RoleExistsAsync("User");
+
                 if (!roleExist)
                 {
                     var role = new IdentityRole("User");

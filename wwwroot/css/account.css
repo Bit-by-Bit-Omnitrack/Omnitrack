@@ -1,10 +1,10 @@
-﻿.account-container {
+.account-container {
     background-image: url('../Images/account-bg.jpg');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
     display: flex;
-    justify-content: center; /* Center by default */
+    justify-content: center; /* Default center */
     align-items: center;
     min-height: 100vh;
     padding: 2rem;
@@ -12,19 +12,19 @@
     width: 100%;
 }
 
-    .account-container .account-box {
-        background-color: white;
-        padding: 30px;
-        border-radius: 10px;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-        max-width: 500px;
-        width: 100%;
-        opacity: 0.95;
-        margin-left: 0; /* default center */
-        position: relative;
-        z-index: 2;
-        transition: margin-left 0.3s ease;
-    }
+.account-box {
+    background-color: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    max-width: 500px;
+    width: 100%;
+    opacity: 0.95;
+    margin-left: 0;
+    position: relative;
+    z-index: 2;
+    transition: margin-left 0.3s ease;
+}
 
 /* Wide screens: shift box slightly right */
 @media (min-width: 1200px) {
@@ -32,19 +32,19 @@
         justify-content: flex-start;
     }
 
-        .account-container .account-box {
-            margin-left: 180px;
-        }
+    .account-container .account-box {
+        margin-left: 180px;
+    }
 }
 
-/* Small screens: center it fully */
+/* Small screens: center fully */
 @media (max-width: 768px) {
     .account-container {
         justify-content: center;
         padding: 1rem;
     }
 
-        .account-container .account-box {
-            margin-left: 0;
-        }
+    .account-container .account-box {
+        margin-left: 0;
+    }
 }

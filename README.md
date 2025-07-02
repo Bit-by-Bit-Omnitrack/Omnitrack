@@ -1,7 +1,5 @@
-<<<<<<< HEAD
-# Omnitrack
-=======
 # ASP.NET Core MVC App with Role-Based Authentication and Authorization
+
 This repository contains an ASP.NET Core MVC application built with a robust role-based authentication and authorization system. The application is designed to demonstrate secure user management and access control, making it a perfect starting point for scalable web applications.
 
 ## Features
@@ -16,4 +14,3 @@ This repository contains an ASP.NET Core MVC application built with a robust rol
 * Scalable Architecture:
   Clean and modular code structure for easy customization. <br />
   Implements best practices in ASP.NET Core MVC development. <br />
->>>>>>> ade2f57 (Upload my changes to Tshenolo's branch)

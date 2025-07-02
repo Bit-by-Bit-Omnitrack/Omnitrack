@@ -6,14 +6,12 @@ using UserRoles.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container (MVC controllers with views)
+// Add services to the container
 builder.Services.AddControllersWithViews();
 
-// Configure the database context with SQL Server connection string from appsettings.json
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
 
-// Configure Identity with password and user settings
 builder.Services.AddIdentity<Users, IdentityRole>(options =>
 {
     options.Password.RequireDigit = true;
@@ -27,7 +25,7 @@ builder.Services.AddIdentity<Users, IdentityRole>(options =>
 .AddEntityFrameworkStores<AppDbContext>()
 .AddDefaultTokenProviders();
 
-// Register EmailService for dependency injection so it can be injected where needed
+// Register EmailService for dependency injection
 builder.Services.AddScoped<IEmailService, EmailService>();
 
 var app = builder.Build();
@@ -39,27 +37,25 @@ using (var scope = app.Services.CreateScope())
     dbContext.Database.Migrate();
 }
 
-// Seed the database with default data such as roles and admin user
+// Seed the database with default data
 await SeedService.SeedDatabase(app.Services);
 
-// Configure middleware for handling requests and responses
+// Configure middleware for handling requests
 if (!app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Home/Error");  // Use error page in production
-    app.UseHsts();                           // Use HTTP Strict Transport Security
+    app.UseExceptionHandler("/Home/Error");
+    app.UseHsts();
 }
 
-app.UseHttpsRedirection();  // Redirect HTTP requests to HTTPS
-app.UseStaticFiles();       // Serve static files like CSS, JS, images
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+app.UseRouting();
 
-app.UseRouting();           // Enable routing
+app.UseAuthentication();
+app.UseAuthorization();
 
-app.UseAuthentication();    // Enable authentication middleware
-app.UseAuthorization();     // Enable authorization middleware
-
-// Map default controller route to Account/Login
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Account}/{action=Login}/{id?}");
 
-app.Run();  // Run the application
+app.Run();
