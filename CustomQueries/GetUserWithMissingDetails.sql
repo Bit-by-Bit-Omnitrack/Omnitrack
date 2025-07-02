@@ -1,0 +1,21 @@
+SELECT TOP (1000) [Id]
+      ,[FullName]
+      ,[UserName]
+      ,[NormalizedUserName]
+      ,[Email]
+      ,[NormalizedEmail]
+      ,[EmailConfirmed]
+      ,[PasswordHash]
+      ,[SecurityStamp]
+      ,[ConcurrencyStamp]
+      ,[PhoneNumber]
+      ,[PhoneNumberConfirmed]
+      ,[TwoFactorEnabled]
+      ,[LockoutEnd]
+      ,[LockoutEnabled]
+      ,[AccessFailedCount]
+      ,[IsActive]
+  FROM [UserRoles510].[dbo].[AspNetUsers]
+WHERE 
+Fullname IS NULL OR Fullname = ' '
+OR PhoneNumber IS NULL OR PhoneNumber = ''
