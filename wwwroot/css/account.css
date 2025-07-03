@@ -4,10 +4,9 @@
     background-position:center;
     background-repeat: repeat-y;
     display:flex;
-    justify-content:flex-start;
+    justify-content:Left;
     align-items:center;
     min-height: 100vh;
-    padding-left:80px;
     padding: 2rem 0;
 }
 
