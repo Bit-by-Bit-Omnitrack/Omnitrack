@@ -10,9 +10,9 @@ namespace UserRoles.Data
         public AppDbContext(DbContextOptions options) : base(options)
         {
         }
-      // public DbSet<UserRoles.Models.User> User { get; set; } = default!;
+       public DbSet<UserRoles.Models.Checklists> Checklists { get; set; } = default!;
         // public DbSet<RegisterViewModel> AspNetUsers { get; set; }
-     
+        public DbSet<UserRoles.Models.Comments> comments { get; set; } = default!;
     }
 }
 
@@ -23,4 +23,8 @@ public class AppDbContext : DbContext
 
     public AppDbContext(DbContextOptions<AppDbContext> options)
         : base(options) { }
+
+public DbSet<UserRoles.Models.Checklists> Checklists { get; set; } = default!;
+
+public DbSet<UserRoles.Models.Comments> Comments { get; set; } = default!;
 }
