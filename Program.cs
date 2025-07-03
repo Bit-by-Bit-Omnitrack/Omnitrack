@@ -6,6 +6,10 @@ using UserRoles.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Clear default logging providers and enable console logging
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+
 // Add services to the container
 builder.Services.AddControllersWithViews();
 
@@ -19,7 +23,7 @@ builder.Services.AddIdentity<Users, IdentityRole>(options =>
     options.Password.RequiredLength = 6;
     options.User.RequireUniqueEmail = true;
     options.SignIn.RequireConfirmedAccount = false;
-    options.SignIn.RequireConfirmedEmail = false;
+    options.SignIn.RequireConfirmedEmail = true;
     options.SignIn.RequireConfirmedPhoneNumber = false;
 })
 .AddEntityFrameworkStores<AppDbContext>()
