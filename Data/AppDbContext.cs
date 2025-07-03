@@ -15,3 +15,12 @@ namespace UserRoles.Data
         public DbSet<UserRoles.Models.Comments> comments { get; set; } = default!;
     }
 }
+
+public class AppDbContext : DbContext
+{
+    public DbSet<Priority> Priorities { get; set; }
+    public DbSet<TaskItem> TaskItems { get; set; }
+
+    public AppDbContext(DbContextOptions<AppDbContext> options)
+        : base(options) { }
+}
