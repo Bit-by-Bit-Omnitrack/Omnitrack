@@ -4,13 +4,14 @@
     background-position: center;
     background-repeat: no-repeat;
     display: flex;
-    justify-content: center; /* Default center */
+    justify-content: center;
     align-items: center;
     min-height: 100vh;
     padding: 2rem;
     position: relative;
     width: 100%;
 }
+
 
 .account-box {
     background-color: white;

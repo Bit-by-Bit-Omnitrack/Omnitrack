@@ -41,16 +41,24 @@ namespace UserRoles.Controllers
                 return View(model);
             }
 
-            // Find user by email to check if email is confirmed before sign-in
-            var user = await userManager.FindByEmailAsync(model.Email);
-            if (user != null)
-            {
-                if (!await userManager.IsEmailConfirmedAsync(user))
-                {
-                    ModelState.AddModelError(string.Empty, "You need to confirm your email before you can log in.");
-                    return View(model);
-                }
-            }
+// Find user by email to check if email is confirmed and active before sign-in
+var user = await userManager.FindByEmailAsync(model.Email);
+if (user != null)
+{
+    if (!await userManager.IsEmailConfirmedAsync(user))
+    {
+        ModelState.AddModelError(string.Empty, "You need to confirm your email before you can log in.");
+        return View(model);
+    }
+
+    if (!user.IsActive)
+    {
+        ModelState.AddModelError(string.Empty, "Your account is not active. Please wait for approval.");
+        return View(model);
+    }
+}
+
+                    
 
             var result = await signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
 
@@ -66,6 +74,7 @@ namespace UserRoles.Controllers
         [HttpGet]
         public IActionResult Register()
         {
+            ViewBag.Roles = new List<string> { "System Administrator", "Developer", "Tester", "Project Leader" };
             return View();
         }
 
@@ -73,6 +82,8 @@ namespace UserRoles.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(RegisterViewModel model)
         {
+            ViewBag.Roles = new List<string> { "System Administrator", "Developer", "Tester", "Project Leader" };
+
             if (!ModelState.IsValid)
             {
                 return View(model);
@@ -82,40 +93,41 @@ namespace UserRoles.Controllers
             {
                 FullName = model.Name,
                 UserName = model.Email,
-                NormalizedUserName = model.Email.ToUpper(),
                 Email = model.Email,
-                NormalizedEmail = model.Email.ToUpper()
+                NormalizedUserName = model.Email.ToUpper(),
+                NormalizedEmail = model.Email.ToUpper(),
+                IsActive = false // User cannot log in until approved
             };
 
             var result = await userManager.CreateAsync(user, model.Password);
 
             if (result.Succeeded)
             {
-                var roleExist = await roleManager.RoleExistsAsync("User");
-
+                var roleExist = await roleManager.RoleExistsAsync(model.Role);
                 if (!roleExist)
                 {
-                    var role = new IdentityRole("User");
-                    await roleManager.CreateAsync(role);
+                    await roleManager.CreateAsync(new IdentityRole(model.Role));
                 }
 
-                await userManager.AddToRoleAsync(user, "User");
+// Add user to selected role
+await userManager.AddToRoleAsync(user, model.Role);
 
-                // Generate the email confirmation token
-                var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
+// Generate the email confirmation token
+var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
 
-                // Build confirmation URL to ConfirmEmail action
-                var confirmationLink = Url.Action("ConfirmEmail", "Account", new { userId = user.Id, token = token }, Request.Scheme);
+// Build confirmation URL to ConfirmEmail action
+var confirmationLink = Url.Action("ConfirmEmail", "Account", new { userId = user.Id, token = token }, Request.Scheme);
 
-                // Send confirmation email with link
-                await emailService.SendEmailAsync(
-                    user.Email,
-                    "Confirm your email - OmniTrack",
-                    $"Hi {user.FullName},\n\nThank you for registering with OmniTrack! Please confirm your email by clicking the link below:\n\n{confirmationLink}\n\nTrace Every Task. Own Every Outcome."
-                );
+// Send confirmation email with link
+await emailService.SendEmailAsync(
+    user.Email,
+    "Confirm your email - OmniTrack",
+    $"Hi {user.FullName},\n\nThank you for registering with OmniTrack! Please confirm your email by clicking the link below:\n\n{confirmationLink}\n\nTrace Every Task. Own Every Outcome."
+);
 
-                // Redirect to a page telling user to check email for confirmation
-                return RedirectToAction("RegistrationSuccessful");
+// Redirect to a page telling user to check email for confirmation
+return RedirectToAction("RegistrationSuccessful");
+
             }
 
             foreach (var error in result.Errors)
@@ -125,6 +137,13 @@ namespace UserRoles.Controllers
 
             return View(model);
         }
+        // In AccountController.cs
+        [HttpGet]
+        public IActionResult AccessDenied()
+        {
+            return View();
+        }
+
 
         // New action to handle email confirmation link clicks
         [HttpGet]

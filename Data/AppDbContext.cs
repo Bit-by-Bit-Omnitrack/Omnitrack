@@ -10,7 +10,7 @@ namespace UserRoles.Data
         public AppDbContext(DbContextOptions options) : base(options)
         {
         }
-        public DbSet<UserRoles.Models.User> User { get; set; } = default!;
+      // public DbSet<UserRoles.Models.User> User { get; set; } = default!;
         // public DbSet<RegisterViewModel> AspNetUsers { get; set; }
      
     }
