@@ -19,17 +19,8 @@ namespace UserRoles.Data
         public DbSet<Ticket> Tickets { get; set; }
         public DbSet<Priority> Priorities { get; set; }
         public DbSet<TaskItem> TaskItems { get; set; }
-
-
-
-
+        public DbSet<TicketAssignment> TicketAssignments { get; set; }
+        public DbSet<TicketStatus> TicketStatuses { get; set; }
+        public DbSet<ChecklistItem> ChecklistItems { get; set; }
     }
 }
-
-//public class AppDbContext : DbContext
-//{
-  //  public DbSet<Priority> Priorities { get; set; }
-   // public DbSet<TaskItem> TaskItems { get; set; }
-    
-   // public AppDbContext(DbContextOptions<AppDbContext> options): base(options) { }
-//}
