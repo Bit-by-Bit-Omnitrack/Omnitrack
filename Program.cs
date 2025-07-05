@@ -12,10 +12,18 @@ builder.Logging.AddConsole();
 
 // Add services to the container
 builder.Services.AddControllersWithViews();
-
+// Added SQL Server retry options to improve connection reliability
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
-
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("Default"),
+        sqlOptions =>
+        {
+            sqlOptions.EnableRetryOnFailure(                      
+                maxRetryCount: 5,                                  
+                maxRetryDelay: TimeSpan.FromSeconds(10),           
+                errorNumbersToAdd: null                            
+            );                                                     
+        }));
 builder.Services.AddIdentity<Users, IdentityRole>(options =>
 {
     options.Password.RequireDigit = true;
@@ -42,6 +50,7 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    dbContext.Database.EnsureCreated();
     dbContext.Database.Migrate();
 }
 
