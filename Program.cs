@@ -6,12 +6,24 @@ using UserRoles.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// Clear default logging providers and enable console logging
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+
+// Add services to the container
 builder.Services.AddControllersWithViews();
-
+// Added SQL Server retry options to improve connection reliability
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
-
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("Default"),
+        sqlOptions =>
+        {
+            sqlOptions.EnableRetryOnFailure(                      
+                maxRetryCount: 5,                                  
+                maxRetryDelay: TimeSpan.FromSeconds(10),           
+                errorNumbersToAdd: null                            
+            );                                                     
+        }));
 builder.Services.AddIdentity<Users, IdentityRole>(options =>
 {
     options.Password.RequireDigit = true;
@@ -19,7 +31,7 @@ builder.Services.AddIdentity<Users, IdentityRole>(options =>
     options.Password.RequiredLength = 6;
     options.User.RequireUniqueEmail = true;
     options.SignIn.RequireConfirmedAccount = false;
-    options.SignIn.RequireConfirmedEmail = false;
+    options.SignIn.RequireConfirmedEmail = true;
     options.SignIn.RequireConfirmedPhoneNumber = false;
 })
 .AddEntityFrameworkStores<AppDbContext>()
@@ -29,18 +41,23 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.AccessDeniedPath = "/Account/AccessDenied";
 });
 
+// Register EmailService for dependency injection
+builder.Services.AddScoped<IEmailService, EmailService>();
+
 var app = builder.Build();
 
-// ?? Auto-create database on first run
+// Automatically apply any pending migrations and create the database if it doesn't exist
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    dbContext.Database.Migrate(); // Applies pending migrations and creates DB if needed
+    dbContext.Database.EnsureCreated();
+    dbContext.Database.Migrate();
 }
 
-await SeedService.SeedDatabase(app.Services); // Optional: Seed data
+// Seed the database with default data
+await SeedService.SeedDatabase(app.Services);
 
-// Configure the HTTP request pipeline.
+// Configure middleware for handling requests
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -48,16 +65,14 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseStaticFiles();
 app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapStaticAssets();
-
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Account}/{action=Login}/{id?}")
-    .WithStaticAssets();
+    pattern: "{controller=Account}/{action=Login}/{id?}");
 
 app.Run();
