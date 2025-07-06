@@ -116,7 +116,21 @@ namespace UserRoles.Controllers
             return RedirectToAction(nameof(Authenticate));
         }
 
+        [HttpPost]
+        public async Task<IActionResult> Reject(string id)
+        {
+            if (string.IsNullOrEmpty(id)) return NotFound();
 
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null) return NotFound();
+
+            user.IsActive = false;
+            await _userManager.UpdateAsync(user);
+
+            TempData["Message"] = "User rejected successfully.";
+
+            return RedirectToAction(nameof(Authenticate));
+        }
 
     }
 }
