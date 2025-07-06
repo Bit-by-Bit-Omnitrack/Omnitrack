@@ -33,6 +33,12 @@ else
                                 <i class="fa fa-check"></i> Approve
                             </button>
                         </form>
+                        <form asp-action="Reject" method="post" style="display:inline">
+                            <input type="hidden" name="id" value="@user.Id" />
+                            <button type="submit" class="btn btn-danger btn-sm">
+                                <i class="fa fa-check"></i> Reject
+                            </button>
+                        </form>
                     </td>
                 </tr>
             }
