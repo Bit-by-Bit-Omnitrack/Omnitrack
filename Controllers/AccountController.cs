@@ -1,6 +1,7 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using UserRoles.Models;
+using UserRoles.Services; // For email service
 using UserRoles.ViewModels;
 
 namespace UserRoles.Controllers
@@ -10,12 +11,19 @@ namespace UserRoles.Controllers
         private readonly SignInManager<Users> signInManager;
         private readonly UserManager<Users> userManager;
         private readonly RoleManager<IdentityRole> roleManager;
+        private readonly IEmailService emailService; // Email service field
 
-        public AccountController(SignInManager<Users> signInManager, UserManager<Users> userManager, RoleManager<IdentityRole> roleManager)
+        // Constructor injects email service along with Identity managers
+        public AccountController(
+            SignInManager<Users> signInManager,
+            UserManager<Users> userManager,
+            RoleManager<IdentityRole> roleManager,
+            IEmailService emailService)
         {
             this.signInManager = signInManager;
             this.userManager = userManager;
             this.roleManager = roleManager;
+            this.emailService = emailService;
         }
 
         [HttpGet]
@@ -33,15 +41,24 @@ namespace UserRoles.Controllers
                 return View(model);
             }
 
-            var user = await userManager.FindByEmailAsync(model.Email);
-            if (user != null)
-            {
-                if (!user.IsActive)
-                {
-                    ModelState.AddModelError(string.Empty, "Your account is not active. Please wait for approval.");
-                    return View(model);
-                }
-            }
+// Find user by email to check if email is confirmed and active before sign-in
+var user = await userManager.FindByEmailAsync(model.Email);
+if (user != null)
+{
+    if (!await userManager.IsEmailConfirmedAsync(user))
+    {
+        ModelState.AddModelError(string.Empty, "You need to confirm your email before you can log in.");
+        return View(model);
+    }
+
+    if (!user.IsActive)
+    {
+        ModelState.AddModelError(string.Empty, "Your account is not active. Please wait for approval.");
+        return View(model);
+    }
+}
+
+                    
 
             var result = await signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
 
@@ -92,9 +109,25 @@ namespace UserRoles.Controllers
                     await roleManager.CreateAsync(new IdentityRole(model.Role));
                 }
 
-                await userManager.AddToRoleAsync(user, model.Role);
-                await signInManager.SignInAsync(user, isPersistent: false);
-                return RedirectToAction("Login", "Account");
+// Add user to selected role
+await userManager.AddToRoleAsync(user, model.Role);
+
+// Generate the email confirmation token
+var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
+
+// Build confirmation URL to ConfirmEmail action
+var confirmationLink = Url.Action("ConfirmEmail", "Account", new { userId = user.Id, token = token }, Request.Scheme);
+
+// Send confirmation email with link
+await emailService.SendEmailAsync(
+    user.Email,
+    "Confirm your email - OmniTrack",
+    $"Hi {user.FullName},\n\nThank you for registering with OmniTrack! Please confirm your email by clicking the link below:\n\n{confirmationLink}\n\nTrace Every Task. Own Every Outcome."
+);
+
+// Redirect to a page telling user to check email for confirmation
+return RedirectToAction("RegistrationSuccessful");
+
             }
 
             foreach (var error in result.Errors)
@@ -111,6 +144,40 @@ namespace UserRoles.Controllers
             return View();
         }
 
+
+        // New action to handle email confirmation link clicks
+        [HttpGet]
+        public async Task<IActionResult> ConfirmEmail(string userId, string token)
+        {
+            if (userId == null || token == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            var user = await userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return NotFound($"Unable to load user with ID '{userId}'.");
+            }
+
+            var result = await userManager.ConfirmEmailAsync(user, token);
+
+            if (result.Succeeded)
+            {
+                return View("ConfirmEmail"); // You should create this view to inform user their email is confirmed
+            }
+            else
+            {
+                return View("Error"); // Create or reuse error view for failure
+            }
+        }
+
+        [HttpGet]
+        public IActionResult RegistrationSuccessful()
+        {
+            // Create this simple view to tell user to check their email for confirmation
+            return View();
+        }
 
         [HttpGet]
         public IActionResult VerifyEmail()
@@ -134,10 +201,8 @@ namespace UserRoles.Controllers
                 ModelState.AddModelError("", "User not found!");
                 return View(model);
             }
-            else
-            {
-                return RedirectToAction("ChangePassword", "Account", new { username = user.UserName });
-            }
+
+            return RedirectToAction("ChangePassword", "Account", new { username = user.UserName });
         }
 
         [HttpGet]
@@ -162,7 +227,7 @@ namespace UserRoles.Controllers
 
             var user = await userManager.FindByNameAsync(model.Email);
 
-            if(user == null)
+            if (user == null)
             {
                 ModelState.AddModelError("", "User not found!");
                 return View(model);
@@ -176,7 +241,7 @@ namespace UserRoles.Controllers
             }
             else
             {
-                foreach(var error in result.Errors)
+                foreach (var error in result.Errors)
                 {
                     ModelState.AddModelError("", error.Description);
                 }
