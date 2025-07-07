@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using System.Data;
+using System.Net.Sockets;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using UserRoles.Models;
 using UserRoles.ViewModels;
@@ -26,6 +28,11 @@ namespace UserRoles.Data
 
         public DbSet<UserRoles.Models.Checklists> Checklists { get; set; } = default!;
 
-        public DbSet<UserRoles.Models.Comments> Comments { get; set; } = default!
-     //kdkd
+    public DbSet<UserRoles.Models.Comments> Comments { get; set; } = default!;
+
+          // public DbSet<UserRoles.Models.User> User { get; set; } = default!;
+          // public DbSet<RegisterViewModel> AspNetUsers { get; set; }
+
+
+   
     }
