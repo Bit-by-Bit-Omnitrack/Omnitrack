@@ -4,6 +4,7 @@ namespace UserRoles.Models
 {
     public class TicketAssignment
     {
+        public int Id { get; set; }
         public int AssignmentID { get; set; }
 
         // Foreign Keys
