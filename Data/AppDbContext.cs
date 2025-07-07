@@ -26,5 +26,6 @@ namespace UserRoles.Data
 
         public DbSet<UserRoles.Models.Checklists> Checklists { get; set; } = default!;
 
-        public DbSet<UserRoles.Models.Comments> Comments { get; set; } = default!;
+        public DbSet<UserRoles.Models.Comments> Comments { get; set; } = default!
+     //kdkd
     }
