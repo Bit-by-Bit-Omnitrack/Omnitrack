@@ -1,4 +1,6 @@
-using System.Data;
+
+﻿using System.Data;
+
 using System.Net.Sockets;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -17,13 +19,20 @@ namespace UserRoles.Data
 }
 
 
+
+
     public class AppDbContext : IdentityDbContext<Users>
 {
 
     public AppDbContext(DbContextOptions<AppDbContext> options)
             : base(options) { }
 
-     
+        
+    public DbSet<UserRoles.Models.Priority> Priorities { get; set; } = default!;
+    public DbSet<UserRoles.Models.TaskItem> TaskItems { get; set; } = default!;
+    public DbSet<UserRoles.Models.Checklists> Checklists { get; set; } = default!;
+
+    public DbSet<UserRoles.Models.Comments> Comments { get; set; } = default!;
     // public DbSet<UserRoles.Models.User> User { get; set; } = default!;
     // public DbSet<RegisterViewModel> AspNetUsers { get; set; }
     public DbSet<Role> Roles { get; set; } = default!;
@@ -34,3 +43,4 @@ namespace UserRoles.Data
     public DbSet<TicketStatus> TicketStatuses { get; set; } = default!;
     public DbSet<ChecklistItem> ChecklistItems { get; set; } = default!;
 }
+
