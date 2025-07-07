@@ -1,0 +1,17 @@
+﻿@model UserRoles.Models.Ticket
+
+@{
+    ViewData["Title"] = "Ticket Details";
+}
+
+<h1>Ticket Details</h1>
+
+<div>
+    <h4>@Model.Subject</h4>
+    <p>Status: @Model.Status</p>
+</div>
+
+<p>
+    <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a> |
+    <a asp-action="Index">Back to List</a>
+</p>

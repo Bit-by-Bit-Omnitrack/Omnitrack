@@ -1,0 +1,10 @@
+@model UserRoles.Models.TicketAssignment
+<h2>Edit Ticket Assignment</h2>
+<form asp-action="Edit">
+    <input type="hidden" asp-for="AssignmentID" />
+    <label>Ticket ID</label>
+    <input asp-for="TicketID" />
+    <label>User ID</label>
+    <input asp-for="UserID" />
+    <button type="submit">Save</button>
+</form>
