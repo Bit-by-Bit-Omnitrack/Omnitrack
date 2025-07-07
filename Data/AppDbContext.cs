@@ -17,11 +17,8 @@ namespace UserRoles.Data
 }
 
 
-
     public class AppDbContext : IdentityDbContext<Users>
 {
-        public DbSet<UserRoles.Models.Priority> Priorities { get; set; } = default!;
-    public DbSet<UserRoles.Models.TaskItem> TaskItems { get; set; } = default!;
 
     public AppDbContext(DbContextOptions<AppDbContext> options)
             : base(options) { }
