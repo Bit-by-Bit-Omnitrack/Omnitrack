@@ -4,6 +4,7 @@ namespace UserRoles.Models
 {
     public class ChecklistItem
     {
+        public int Id { get; set; }
         public int ItemID { get; set; }
 
         // Foreign Key
