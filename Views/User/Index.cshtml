@@ -1,0 +1,63 @@
+﻿@model List<UserRoles.Models.Domain.User>
+
+@{
+    ViewData["Title"] = "Users List";
+}
+
+<h2 class="mb-3">All Users</h2>
+
+<!-- This takes me to the form to add a new user manually -->
+<a asp-action="Create" class="btn btn-success mb-3">Add New User</a>
+
+<table class="table table-bordered table-striped datatable">
+    <thead class="thead-dark">
+        <tr>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Role</th>
+            <th>Status</th> <!-- Shows if the user is approved or not -->
+            <th>Actions</th> <!-- Edit / Delete / Approve / Reject buttons -->
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Model)
+        {
+            <tr>
+                <td>@user.FirstName</td>
+                <td>@user.LastName</td>
+                <td>@user.EmailAddress</td>
+                <td>@user.PhoneNumber</td>
+                <td>@user.Role</td>
+                <td>
+                    @if (user.IsActive)
+                    {
+                        <span class="badge bg-success">Approved</span> <!-- Green if approved -->
+                    }
+                    else
+                    {
+                        <span class="badge bg-secondary">Pending</span> <!-- Grey if still waiting -->
+                    }
+                </td>
+                <td class="action-buttons">
+                    <!-- These buttons let me manage each user -->
+                    <a asp-action="Edit" asp-route-id="@user.Id" class="btn btn-sm btn-primary">Edit</a>
+                    <a asp-action="Details" asp-route-id="@user.Id" class="btn btn-sm btn-info">Details</a>
+                    <a asp-action="Delete" asp-route-id="@user.Id" class="btn btn-sm btn-danger">Delete</a>
+
+                    <!-- Only show Approve / Reject if user is not active yet -->
+                    @if (!user.IsActive)
+                    {
+                        <form asp-action="Approve" asp-route-id="@user.Id" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-sm btn-success">Approve</button>
+                        </form>
+                        <form asp-action="Reject" asp-route-id="@user.Id" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-sm btn-warning">Reject</button>
+                        </form>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

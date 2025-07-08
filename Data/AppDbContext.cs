@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using UserRoles.Models;
-using UserRoles.ViewModels;
+using UserRoles.Models.Domain;
 
 namespace UserRoles.Data
 {
@@ -10,8 +10,10 @@ namespace UserRoles.Data
         public AppDbContext(DbContextOptions options) : base(options)
         {
         }
-      // public DbSet<UserRoles.Models.User> User { get; set; } = default!;
-        // public DbSet<RegisterViewModel> AspNetUsers { get; set; }
-     
+
+        // This is where I connect the domain User model to the database
+        public DbSet<User> UsersTable { get; set; }
+
+        // Identity stuff (like Users, Roles, Claims) is handled automatically by IdentityDbContext<Users>
     }
 }
