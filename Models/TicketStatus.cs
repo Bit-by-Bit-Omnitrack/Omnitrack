@@ -4,6 +4,7 @@ namespace UserRoles.Models
 {
     public class TicketStatus
     {
+        public int Id { get; set; }
         public int StatusID { get; set; }
 
         [Required, StringLength(50)]

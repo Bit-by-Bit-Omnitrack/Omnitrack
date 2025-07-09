@@ -2,6 +2,7 @@
 {
     public class AppTask
     {
+        public int Id { get; set; }
         public int TaskID { get; set; }
         public string TaskName { get; set; }
         public int CreatedByID { get; set; }

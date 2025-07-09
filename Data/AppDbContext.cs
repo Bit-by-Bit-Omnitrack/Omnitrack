@@ -36,7 +36,7 @@ namespace UserRoles.Data
     // public DbSet<UserRoles.Models.User> User { get; set; } = default!;
     // public DbSet<RegisterViewModel> AspNetUsers { get; set; }
     public DbSet<Role> Roles { get; set; } = default!;
-    public DbSet<AppTask> AppTasks { get; set; } = default!;
+    public DbSet<AppTask> AppTask { get; set; } = default!;
     public DbSet<Ticket> Tickets { get; set; } = default!;
    
     public DbSet<TicketAssignment> TicketAssignments { get; set; } = default!;
