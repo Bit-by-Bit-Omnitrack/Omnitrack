@@ -9,7 +9,7 @@ namespace UserRoles.Models
 
         // Foreign Keys
         public int TicketID { get; set; }
-        public int UserID { get; set; }
+        //   public int UserID { get; set; }
 
         // Navigation Properties
         public Ticket Ticket { get; set; }

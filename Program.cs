@@ -64,8 +64,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger(); // Enable Swagger middleware
     app.UseSwaggerUI(c =>
     {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Your API Name V1");
-        
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "OmniTrack V1");
+
         // c.RoutePrefix = string.Empty;
     });
 }

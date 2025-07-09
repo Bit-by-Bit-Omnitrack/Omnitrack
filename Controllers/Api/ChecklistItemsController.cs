@@ -21,7 +21,7 @@ namespace UserRoles.Controllers.Api
         public async Task<ActionResult<IEnumerable<ChecklistItem>>> GetChecklistItems()
         {
             return await _context.ChecklistItems
-                                 .Include(c => c.Checklist)
+                                 .Include(c => c.Checklists)
                                  .ToListAsync();
         }
 
