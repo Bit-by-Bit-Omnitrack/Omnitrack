@@ -16,9 +16,6 @@ namespace UserRoles.Models
         public bool IsCompleted { get; set; }
 
         // Navigation Property
-
-       public Checklist Checklist { get; set; }
-
         public Checklists Checklists { get; set; }
     }
 }
