@@ -42,5 +42,8 @@ namespace UserRoles.Data
     public DbSet<TicketAssignment> TicketAssignments { get; set; } = default!;
     public DbSet<TicketStatus> TicketStatuses { get; set; } = default!;
     public DbSet<ChecklistItem> ChecklistItems { get; set; } = default!;
+
+    public DbSet<Chats> Chats { get; set; } = default!;
+
 }
 
