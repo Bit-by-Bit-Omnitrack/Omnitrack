@@ -361,14 +361,9 @@ namespace UserRoles.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("AssignedToUserId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("CreatedByID")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("CreatedByUserId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
@@ -401,7 +396,6 @@ namespace UserRoles.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UpdatedBy")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("UpdatedDate")
@@ -413,7 +407,7 @@ namespace UserRoles.Migrations
 
                     b.HasIndex("CreatedByID");
 
-                    b.HasIndex("CreatedByUserId");
+                    b.HasIndex("StatusID");
 
                     b.HasIndex("TicketStatusId");
 
@@ -617,19 +611,18 @@ namespace UserRoles.Migrations
                     b.HasOne("UserRoles.Models.Users", "AssignedToUser")
                         .WithMany()
                         .HasForeignKey("AssignedToUserId")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.SetNull);
 
-                    b.HasOne("UserRoles.Models.Users", null)
+                    b.HasOne("UserRoles.Models.Users", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedByID")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("UserRoles.Models.Users", "CreatedByUser")
+                    b.HasOne("UserRoles.Models.TicketStatus", "Status")
                         .WithMany()
-                        .HasForeignKey("CreatedByUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasForeignKey("StatusID")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("UserRoles.Models.TicketStatus", null)
@@ -639,6 +632,8 @@ namespace UserRoles.Migrations
                     b.Navigation("AssignedToUser");
 
                     b.Navigation("CreatedByUser");
+
+                    b.Navigation("Status");
                 });
 
             modelBuilder.Entity("UserRoles.Models.TicketAssignment", b =>
