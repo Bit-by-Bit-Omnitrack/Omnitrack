@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace UserRoles.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250710085525_checking")]
+    partial class checking
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -360,17 +363,8 @@ namespace UserRoles.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("AssignedToUserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("CreatedByID")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("CreatedByUserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<int>("CreatedByID")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
@@ -379,19 +373,17 @@ namespace UserRoles.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime?>("DueDate")
+                    b.Property<DateTime>("DueDate")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("StatusID")
                         .HasColumnType("int");
 
-                    b.Property<string>("TaskID")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("TaskID")
+                        .HasColumnType("int");
 
-                    b.Property<string>("TicketID")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("TicketID")
+                        .HasColumnType("int");
 
                     b.Property<int?>("TicketStatusId")
                         .HasColumnType("int");
@@ -400,20 +392,13 @@ namespace UserRoles.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("UpdatedBy")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("UpdatedBy")
+                        .HasColumnType("int");
 
-                    b.Property<DateTime?>("UpdatedDate")
+                    b.Property<DateTime>("UpdatedDate")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("AssignedToUserId");
-
-                    b.HasIndex("CreatedByID");
-
-                    b.HasIndex("CreatedByUserId");
 
                     b.HasIndex("TicketStatusId");
 
@@ -614,31 +599,9 @@ namespace UserRoles.Migrations
 
             modelBuilder.Entity("UserRoles.Models.Ticket", b =>
                 {
-                    b.HasOne("UserRoles.Models.Users", "AssignedToUser")
-                        .WithMany()
-                        .HasForeignKey("AssignedToUserId")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .IsRequired();
-
-                    b.HasOne("UserRoles.Models.Users", null)
-                        .WithMany()
-                        .HasForeignKey("CreatedByID")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("UserRoles.Models.Users", "CreatedByUser")
-                        .WithMany()
-                        .HasForeignKey("CreatedByUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("UserRoles.Models.TicketStatus", null)
                         .WithMany("Tickets")
                         .HasForeignKey("TicketStatusId");
-
-                    b.Navigation("AssignedToUser");
-
-                    b.Navigation("CreatedByUser");
                 });
 
             modelBuilder.Entity("UserRoles.Models.TicketAssignment", b =>

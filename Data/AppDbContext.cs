@@ -20,8 +20,7 @@ namespace UserRoles.Data
 
 
 
-
-    public class AppDbContext : IdentityDbContext<Users>
+public class AppDbContext : IdentityDbContext<Users>
 {
 
     public AppDbContext(DbContextOptions<AppDbContext> options)
@@ -44,6 +43,23 @@ namespace UserRoles.Data
     public DbSet<ChecklistItem> ChecklistItems { get; set; } = default!;
 
     public DbSet<Chats> Chats { get; set; } = default!;
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+
+        // Configure Ticket -> Users (AssignedToUser and CreatedByID)
+        modelBuilder.Entity<Ticket>()
+            .HasOne(t => t.AssignedToUser)
+            .WithMany()
+            .HasForeignKey(t => t.AssignedToUserId)
+            .OnDelete(DeleteBehavior.SetNull); // or Restrict if you prefer
+
+        modelBuilder.Entity<Ticket>()
+            .HasOne<Users>()
+            .WithMany()
+            .HasForeignKey(t => t.CreatedByID)
+            .OnDelete(DeleteBehavior.Restrict); // Prevents multiple cascade paths
+    }
 
 }
 

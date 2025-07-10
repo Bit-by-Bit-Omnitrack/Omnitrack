@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace UserRoles.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250710122640_TicketSystem")]
+    partial class TicketSystem
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -368,10 +371,6 @@ namespace UserRoles.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("CreatedByUserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
 
@@ -412,8 +411,6 @@ namespace UserRoles.Migrations
                     b.HasIndex("AssignedToUserId");
 
                     b.HasIndex("CreatedByID");
-
-                    b.HasIndex("CreatedByUserId");
 
                     b.HasIndex("TicketStatusId");
 
@@ -617,18 +614,12 @@ namespace UserRoles.Migrations
                     b.HasOne("UserRoles.Models.Users", "AssignedToUser")
                         .WithMany()
                         .HasForeignKey("AssignedToUserId")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .IsRequired();
-
-                    b.HasOne("UserRoles.Models.Users", null)
-                        .WithMany()
-                        .HasForeignKey("CreatedByID")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("UserRoles.Models.Users", "CreatedByUser")
                         .WithMany()
-                        .HasForeignKey("CreatedByUserId")
+                        .HasForeignKey("CreatedByID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

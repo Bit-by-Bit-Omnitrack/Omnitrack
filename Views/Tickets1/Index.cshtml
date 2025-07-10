@@ -1,0 +1,43 @@
+﻿@model IEnumerable<UserRoles.Models.Ticket>
+
+@{
+    ViewData["Title"] = "Tickets Dashboard";
+    var statuses = new[] {
+        new { Id = 1, Name = "To Do", Color = "bg-info" },
+        new { Id = 2, Name = "In Progress", Color = "bg-success" },
+        new { Id = 3, Name = "Complete", Color = "bg-warning" },
+        new { Id = 4, Name = "Blocked", Color = "bg-danger" }
+    };
+}
+
+<br />
+<a asp-action="Create" class="btn btn-sm btn-primary">
+    <i class="fa fa-plus"></i> Add New Ticket
+</a>
+<br />
+<br />
+
+<div class="row">
+    @foreach (var status in statuses)
+    {
+        <div class="col-lg-3 col-6">
+            <h4>@status.Name</h4>
+            @foreach (var ticket in Model.Where(t => t.StatusID == status.Id))
+            {
+                <div class="small-box @status.Color">
+                    <div class="inner">
+                        <h5>@ticket.Title</h5>
+                        <strong>Assigned To:</strong> @ticket.AssignedToUser?.UserName
+                        <strong>Created:</strong> @ticket.CreatedDate.ToString("yyyy-MM-dd") <br />
+                        <strong>Due:</strong> @(ticket.DueDate?.ToString("yyyy-MM-dd") ?? "N/A") <br />
+                        <strong>Updated:</strong> @(ticket.UpdatedDate?.ToString("yyyy-MM-dd") ?? "N/A") <br />
+                    </div>
+                    <a asp-action="Details" asp-route-id="@ticket.Id" class="small-box-footer">
+
+                        More Info <i class="fas fa-arrow-circle-right"></i>
+                    </a>
+                </div>
+            }
+        </div>
+    }
+</div>
