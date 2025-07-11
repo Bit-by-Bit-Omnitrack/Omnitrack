@@ -197,10 +197,11 @@ namespace UserRoles.Controllers
         // POST: Tickets1/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
        
 
+
+        // GET: Tickets1/Delete/5
+        [HttpGet]
         // GET: Tickets1/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
@@ -218,7 +219,6 @@ namespace UserRoles.Controllers
 
             return View(ticket);
         }
-
         // POST: Tickets1/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
