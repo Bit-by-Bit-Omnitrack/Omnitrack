@@ -55,13 +55,13 @@ public class AppDbContext : IdentityDbContext<Users>
             .HasForeignKey(t => t.AssignedToUserId)
             .OnDelete(DeleteBehavior.SetNull); // SetNull is appropriate here
 
-        // Configure Ticket -> Users (CreatedByUser)
+       //  Configure Ticket -> Users (CreatedByUser)
         modelBuilder.Entity<Ticket>()
             .HasOne(t => t.CreatedByUser) // Reference the navigation property
             .WithMany()
             .HasForeignKey(t => t.CreatedByID) // Use the CreatedByID foreign key
-            .OnDelete(DeleteBehavior.Restrict); // Restrict is good for the creator
-
+          .OnDelete(DeleteBehavior.Restrict); // Restrict is good for the creator
+    
         // Configure Ticket -> TicketStatus
         modelBuilder.Entity<Ticket>()
             .HasOne(t => t.Status) // Assuming your Ticket model has a 'Status' navigation property

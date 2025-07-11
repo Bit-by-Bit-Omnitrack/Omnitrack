@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualBasic;
+using UserRoles.Migrations;
 using UserRoles.Models;
 
 namespace UserRoles.Controllers
@@ -24,10 +26,13 @@ namespace UserRoles.Controllers
         // GET: Tickets1
         public async Task<IActionResult> Index()
         {
-            var appDbContext = _context.Tickets
+            // Eager load related data for display in the dashboard
+            var tickets = await _context.Tickets
+                .Include(t => t.CreatedByUser)
                 .Include(t => t.AssignedToUser)
-                .Include(t => t.CreatedByUser); // Include CreatedByUser as well if you want to display it
-            return View(await appDbContext.ToListAsync());
+                .Include(t => t.Status)
+                .ToListAsync();
+            return View(tickets);
         }
 
         // GET: Tickets1/Details/5
@@ -52,9 +57,10 @@ namespace UserRoles.Controllers
         }
 
         // GET: Tickets1/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-        
+            // Populate ViewBag.Users for the dropdown in the Create view
+            ViewBag.Users = new SelectList(await _userManager.Users.Where(u => u.IsActive).ToListAsync(), "Id", "UserName");
             return View();
         }
 
@@ -64,7 +70,7 @@ namespace UserRoles.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         
-        public async Task<IActionResult> Create([Bind("Title,Description,AssignedToUserId,DueDate")] Ticket ticket)
+        public async Task<IActionResult> Create([Bind("Title, Description, AssignedToUser, DueDate")] Ticket ticket)
         {
             if (ModelState.IsValid)
             {
@@ -75,6 +81,7 @@ namespace UserRoles.Controllers
                 // Default status: 1 = To Do
                 ticket.StatusID = 1;
 
+            
                 // Set CreatedByID to current logged-in username
                 var currentUser = await _userManager.GetUserAsync(User);
                 if (currentUser != null)
@@ -88,13 +95,15 @@ namespace UserRoles.Controllers
 
                 // Set CreatedDate to now
                 ticket.CreatedDate = DateTime.UtcNow;
+             
 
                 _context.Add(ticket);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
-            }
-            ViewBag.Users = new SelectList(await _userManager.Users.Where(u => u.IsActive).ToListAsync(), "Id", "UserName");
-            ViewBag.Statuses = new SelectList(await _context.TicketStatuses.ToListAsync(), "Id", "Name"); 
+                
+           }
+         ViewBag.Users = new SelectList(await _userManager.Users.Where(u => u.IsActive).ToListAsync(), "Id", "UserName");
+           ViewBag.Statuses = new SelectList(await _context.TicketStatuses.ToListAsync(), "Id", "Name"); 
             return View(ticket);
         }
 
