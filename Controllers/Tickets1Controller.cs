@@ -105,7 +105,31 @@ namespace UserRoles.Controllers
             return View(ticket);
         }
 
+        [HttpGet]
+        public async Task<IActionResult> Edit(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
 
+            var ticket = await _context.Tickets.FindAsync(id);
+            if (ticket == null)
+            {
+                return NotFound();
+            }
+
+            // Populate dropdowns (just like in POST)
+            ViewBag.Users = new SelectList(
+                await _userManager.Users.Where(u => u.IsActive).ToListAsync(),
+                "Id", "UserName", ticket.AssignedToUserId);
+
+            ViewBag.Statuses = new SelectList(
+                await _context.TicketStatuses.ToListAsync(),
+                "Id", "StatusName", ticket.StatusID);
+
+            return View(ticket);
+        }
         // GET: Tickets1/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -115,6 +139,7 @@ namespace UserRoles.Controllers
             {
                 return NotFound();
             }
+
 
             if (ModelState.IsValid)
             {
@@ -161,10 +186,10 @@ namespace UserRoles.Controllers
                 return RedirectToAction(nameof(Index));
 
           //      ViewBag.Users = new SelectList(await _userManager.Users.Where(u => u.IsActive).ToListAsync(), "Id", "UserName", ticket.AssignedToUserId);
-           //     ViewBag.Statuses = new SelectList(await _context.TicketStatuses.ToListAsync(), "Id", "Name", ticket.StatusID);
+         //     ViewBag.Statuses = new SelectList(await _context.TicketStatuses.ToListAsync(), "Id", "Name", ticket.StatusID);
             }
             // Repopulate ViewBag for dropdowns if model state is invalid
-            ViewBag.Users = new SelectList(await _userManager.Users.Where(u => u.IsActive).ToListAsync(), "Id", "UserName", ticket.AssignedToUserId);
+           ViewBag.Users = new SelectList(await _userManager.Users.Where(u => u.IsActive).ToListAsync(), "Id", "UserName", ticket.AssignedToUserId);
            ViewBag.Statuses = new SelectList(await _context.TicketStatuses.ToListAsync(), "Id", "Name", ticket.StatusID);
             return View(ticket);
         }
