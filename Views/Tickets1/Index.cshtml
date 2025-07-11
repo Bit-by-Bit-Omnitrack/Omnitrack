@@ -27,7 +27,7 @@
                 <div class="small-box @status.Color">
                     <div class="inner">
                         <h5>@ticket.Title</h5>
-                        <strong>Assigned To:</strong> @ticket.AssignedToUser?.UserName
+                        <strong>Assigned To:</strong> @ticket.AssignedToUser?.UserName <br />
                         <strong>Created:</strong> @ticket.CreatedDate.ToString("yyyy-MM-dd") <br />
                         <strong>Due:</strong> @(ticket.DueDate?.ToString("yyyy-MM-dd") ?? "N/A") <br />
                         <strong>Updated:</strong> @(ticket.UpdatedDate?.ToString("yyyy-MM-dd") ?? "N/A") <br />
