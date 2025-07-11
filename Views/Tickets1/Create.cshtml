@@ -28,6 +28,7 @@
                 <select asp-for="AssignedToUserId" class="form-control" asp-items="ViewBag.Users">
                     <option value="">-- Select User --</option>
                 </select>
+                <span asp-validation-for="AssignedToUserId" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="DueDate" class="control-label"></label>
