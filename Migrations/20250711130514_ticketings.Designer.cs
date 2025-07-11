@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace UserRoles.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250710160434_NewInitialMigration")]
-    partial class NewInitialMigration
+    [Migration("20250711130514_ticketings")]
+    partial class ticketings
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -368,7 +368,7 @@ namespace UserRoles.Migrations
 
                     b.Property<string>("CreatedByID")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
@@ -407,8 +407,6 @@ namespace UserRoles.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("AssignedToUserId");
-
-                    b.HasIndex("CreatedByID");
 
                     b.HasIndex("StatusID");
 
@@ -616,12 +614,6 @@ namespace UserRoles.Migrations
                         .HasForeignKey("AssignedToUserId")
                         .OnDelete(DeleteBehavior.SetNull);
 
-                    b.HasOne("UserRoles.Models.Users", "CreatedByUser")
-                        .WithMany()
-                        .HasForeignKey("CreatedByID")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("UserRoles.Models.TicketStatus", "Status")
                         .WithMany()
                         .HasForeignKey("StatusID")
@@ -633,8 +625,6 @@ namespace UserRoles.Migrations
                         .HasForeignKey("TicketStatusId");
 
                     b.Navigation("AssignedToUser");
-
-                    b.Navigation("CreatedByUser");
 
                     b.Navigation("Status");
                 });

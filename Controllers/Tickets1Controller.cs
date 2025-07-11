@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualBasic;
+using UserRoles.Migrations;
 using UserRoles.Models;
 
 namespace UserRoles.Controllers
@@ -24,10 +26,13 @@ namespace UserRoles.Controllers
         // GET: Tickets1
         public async Task<IActionResult> Index()
         {
-            var appDbContext = _context.Tickets
+            // Eager load related data for display in the dashboard
+            var tickets = await _context.Tickets
+                .Include(t => t.CreatedByUser)
                 .Include(t => t.AssignedToUser)
-                .Include(t => t.CreatedByUser); // Include CreatedByUser as well if you want to display it
-            return View(await appDbContext.ToListAsync());
+                .Include(t => t.Status)
+                .ToListAsync();
+            return View(tickets);
         }
 
         // GET: Tickets1/Details/5
@@ -52,9 +57,10 @@ namespace UserRoles.Controllers
         }
 
         // GET: Tickets1/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-        
+            // Populate ViewBag.Users for the dropdown in the Create view
+            ViewBag.Users = new SelectList(await _userManager.Users.Where(u => u.IsActive).ToListAsync(), "Id", "UserName");
             return View();
         }
 
@@ -63,9 +69,8 @@ namespace UserRoles.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-
         
-        public async Task<IActionResult> Create([Bind("Title,Description,AssignedToUserId,DueDate")] Ticket ticket)
+        public async Task<IActionResult> Create([Bind("Title, Description, AssignedToUser, DueDate")] Ticket ticket)
         {
             // --- Set auto-generated and default values BEFORE ModelState.IsValid check ---
 
@@ -74,51 +79,29 @@ namespace UserRoles.Controllers
             ticket.StatusID = 1; // Default status: 1 = To Do
             ticket.CreatedDate = DateTime.UtcNow;
 
-            var currentUser = await _userManager.GetUserAsync(User);
-            if (currentUser != null)
-            {
-                ticket.CreatedByID = currentUser.Id;
-            }
-            else
-            {
-                // IMPORTANT: If CreatedByID is [Required] in your model and nullable: false in DB,
-                // this "System" string might not be a valid user ID, causing validation issues.
-                // If the user MUST be logged in to create a ticket, consider:
-                // return Unauthorized(); // Or redirect to login
-                // For now, let's assume it can be "System" if the field allows non-GUID string.
-                // If CreatedByID MUST be a valid user ID, you cannot allow an unauthenticated user to create.
-                ticket.CreatedByID = "System"; // Fallback, but be careful with DB constraints
-            }
+                // Default status: 1 = To Do
+                ticket.StatusID = 1;
 
-            // Add dummy values for UpdatedBy and UpdatedDate if they are required and you don't want them null for new tickets
-            // Although your model and migration indicate they are nullable.
-            ticket.UpdatedBy = null;
-            ticket.UpdatedDate = null;
+                // Set CreatedByID to current logged-in username
+                var currentUser = await _userManager.GetUserAsync(User);
+                if (currentUser != null)
+                {
+                    ticket.CreatedByID = currentUser.Id;
+                }
+                else
+                {
+                    ticket.CreatedByID = "System"; // Fallback
+                }
 
+                // Set CreatedDate to now
+                ticket.CreatedDate = DateTime.UtcNow;
 
-            // --- Now check ModelState.IsValid ---
-            if (ModelState.IsValid)
-            {
                 _context.Add(ticket);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-
-            // If ModelState is not valid, repopulate ViewBags and return the view
-            // IMPORTANT: Use the correct role filtering for ViewBag.Users as discussed before
-            string approverRoleName = "Admin"; // Or whatever your role is
-            var allUsers = await _userManager.Users.ToListAsync();
-            var approverUsers = new List<Users>();
-            foreach (var user in allUsers)
-            {
-                if (await _userManager.IsInRoleAsync(user, approverRoleName))
-                {
-                    approverUsers.Add(user);
-                }
-            }
-            ViewBag.Users = new SelectList(approverUsers, "Id", "FullName", ticket.AssignedToUserId); // Pass selected value for repopulation
-
-            ViewBag.StatusID = new SelectList(_context.TicketStatuses, "Id", "StatusName", ticket.StatusID); // Use StatusID for selected value
+            ViewBag.Users = new SelectList(await _userManager.Users.Where(u => u.IsActive).ToListAsync(), "Id", "UserName");
+            ViewBag.Statuses = new SelectList(await _context.TicketStatuses.ToListAsync(), "Id", "Name"); 
             return View(ticket);
         }
 
