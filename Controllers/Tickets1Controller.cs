@@ -99,7 +99,7 @@ namespace UserRoles.Controllers
                 _context.Add(ticket);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
-            }
+            
             ViewBag.Users = new SelectList(await _userManager.Users.Where(u => u.IsActive).ToListAsync(), "Id", "UserName");
             ViewBag.Statuses = new SelectList(await _context.TicketStatuses.ToListAsync(), "Id", "Name"); 
             return View(ticket);
@@ -159,10 +159,13 @@ namespace UserRoles.Controllers
                     }
                 }
                 return RedirectToAction(nameof(Index));
+
+          //      ViewBag.Users = new SelectList(await _userManager.Users.Where(u => u.IsActive).ToListAsync(), "Id", "UserName", ticket.AssignedToUserId);
+           //     ViewBag.Statuses = new SelectList(await _context.TicketStatuses.ToListAsync(), "Id", "Name", ticket.StatusID);
             }
             // Repopulate ViewBag for dropdowns if model state is invalid
             ViewBag.Users = new SelectList(await _userManager.Users.Where(u => u.IsActive).ToListAsync(), "Id", "UserName", ticket.AssignedToUserId);
-            ViewBag.Statuses = new SelectList(await _context.TicketStatuses.ToListAsync(), "Id", "Name", ticket.StatusID);
+           ViewBag.Statuses = new SelectList(await _context.TicketStatuses.ToListAsync(), "Id", "Name", ticket.StatusID);
             return View(ticket);
         }
 

@@ -48,6 +48,15 @@ public class AppDbContext : IdentityDbContext<Users>
     {
         base.OnModelCreating(modelBuilder);
 
+        
+
+        modelBuilder.Entity<TicketStatus>().HasData(
+            new TicketStatus { Id = 1, StatusName = "To Do" },
+            new TicketStatus { Id = 2, StatusName = "In Progress" },
+             new TicketStatus { Id = 3, StatusName = "Blocker" },
+            new TicketStatus { Id = 4, StatusName = "Done" }
+        );
+
         // Configure Ticket -> Users (AssignedToUser)
         modelBuilder.Entity<Ticket>()
             .HasOne(t => t.AssignedToUser)
