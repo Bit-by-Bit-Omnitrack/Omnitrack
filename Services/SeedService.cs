@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using UserRoles.Data;
 using UserRoles.Models;
 
@@ -72,5 +73,6 @@ namespace UserRoles.Services
                 }
             }
         }
+     
     }
 }

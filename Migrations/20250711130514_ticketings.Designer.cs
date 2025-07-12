@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace UserRoles.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250709085259_Omnitrac")]
-    partial class Omnitrac
+    [Migration("20250711130514_ticketings")]
+    partial class ticketings
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -187,6 +187,33 @@ namespace UserRoles.Migrations
                     b.ToTable("AppTask");
                 });
 
+            modelBuilder.Entity("UserRoles.Models.Chats", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Sender")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("SentAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("TicketId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Chats");
+                });
+
             modelBuilder.Entity("UserRoles.Models.ChecklistItem", b =>
                 {
                     b.Property<int>("Id")
@@ -336,8 +363,12 @@ namespace UserRoles.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("CreatedByID")
-                        .HasColumnType("int");
+                    b.Property<string>("AssignedToUserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("CreatedByID")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
@@ -346,17 +377,19 @@ namespace UserRoles.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("DueDate")
+                    b.Property<DateTime?>("DueDate")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("StatusID")
                         .HasColumnType("int");
 
-                    b.Property<int>("TaskID")
-                        .HasColumnType("int");
+                    b.Property<string>("TaskID")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("TicketID")
-                        .HasColumnType("int");
+                    b.Property<string>("TicketID")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("TicketStatusId")
                         .HasColumnType("int");
@@ -365,13 +398,17 @@ namespace UserRoles.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("UpdatedBy")
-                        .HasColumnType("int");
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("UpdatedDate")
+                    b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("AssignedToUserId");
+
+                    b.HasIndex("StatusID");
 
                     b.HasIndex("TicketStatusId");
 
@@ -572,9 +609,24 @@ namespace UserRoles.Migrations
 
             modelBuilder.Entity("UserRoles.Models.Ticket", b =>
                 {
+                    b.HasOne("UserRoles.Models.Users", "AssignedToUser")
+                        .WithMany()
+                        .HasForeignKey("AssignedToUserId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("UserRoles.Models.TicketStatus", "Status")
+                        .WithMany()
+                        .HasForeignKey("StatusID")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("UserRoles.Models.TicketStatus", null)
                         .WithMany("Tickets")
                         .HasForeignKey("TicketStatusId");
+
+                    b.Navigation("AssignedToUser");
+
+                    b.Navigation("Status");
                 });
 
             modelBuilder.Entity("UserRoles.Models.TicketAssignment", b =>
