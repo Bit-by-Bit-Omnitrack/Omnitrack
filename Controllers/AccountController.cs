@@ -41,24 +41,24 @@ namespace UserRoles.Controllers
                 return View(model);
             }
 
-// Find user by email to check if email is confirmed and active before sign-in
-var user = await userManager.FindByEmailAsync(model.Email);
-if (user != null)
-{
-    if (!await userManager.IsEmailConfirmedAsync(user))
-    {
-        ModelState.AddModelError(string.Empty, "You need to confirm your email before you can log in.");
-        return View(model);
-    }
+            // Find user by email to check if email is confirmed and active before sign-in
+            var user = await userManager.FindByEmailAsync(model.Email);
+            if (user != null)
+            {
+                if (!await userManager.IsEmailConfirmedAsync(user))
+                {
+                    ModelState.AddModelError(string.Empty, "You need to confirm your email before you can log in.");
+                    return View(model);
+                }
 
-    if (!user.IsActive)
-    {
-        ModelState.AddModelError(string.Empty, "Your account is not active. Please wait for approval.");
-        return View(model);
-    }
-}
+                if (!user.IsActive)
+                {
+                    ModelState.AddModelError(string.Empty, "Your account is not active. Please wait for approval.");
+                    return View(model);
+                }
+            }
 
-                    
+
 
             var result = await signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
 
@@ -109,24 +109,33 @@ if (user != null)
                     await roleManager.CreateAsync(new IdentityRole(model.Role));
                 }
 
-// Add user to selected role
-await userManager.AddToRoleAsync(user, model.Role);
+                // Add user to selected role
+                await userManager.AddToRoleAsync(user, model.Role);
 
-// Generate the email confirmation token
-var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
+                // Generate the email confirmation token
+                var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
 
-// Build confirmation URL to ConfirmEmail action
-var confirmationLink = Url.Action("ConfirmEmail", "Account", new { userId = user.Id, token = token }, Request.Scheme);
+                // Build confirmation URL to ConfirmEmail action
+                var confirmationLink = Url.Action("ConfirmEmail", "Account", new { userId = user.Id, token = token }, Request.Scheme);
 
-// Send confirmation email with link
-await emailService.SendEmailAsync(
-    user.Email,
-    "Confirm your email - OmniTrack",
-    $"Hi {user.FullName},\n\nThank you for registering with OmniTrack! Please confirm your email by clicking the link below:\n\n{confirmationLink}\n\nTrace Every Task. Own Every Outcome."
-);
+                // Try sending email – if it fails, still keep user registered
+                try
+                {
+                    await emailService.SendEmailAsync(
+                        user.Email,
+                        "Confirm your email - OmniTrack",
+                        $"Hi {user.FullName},\n\nThank you for registering with OmniTrack! Please confirm your email by clicking the link below:\n\n{confirmationLink}\n\nTrace Every Task. Own Every Outcome.");
+                }
+                catch (Exception ex)
+                {
+                    // log the exception or show a fallback message
+                    ModelState.AddModelError("", "User registered but confirmation email failed to send. Please contact support.");
+                    return View(model);
+                }
 
-// Redirect to a page telling user to check email for confirmation
-return RedirectToAction("RegistrationSuccessful");
+
+                // Redirect to a page telling user to check email for confirmation
+                return RedirectToAction("RegistrationSuccessful");
 
             }
 
@@ -257,5 +266,8 @@ return RedirectToAction("RegistrationSuccessful");
             await signInManager.SignOutAsync();
             return RedirectToAction("Login", "Account");
         }
+
     }
-}
+
+    }
+

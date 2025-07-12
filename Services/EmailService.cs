@@ -37,6 +37,9 @@ namespace UserRoles.Services
 
             try
             {
+                // TEMP: Disable SSL certificate validation (DEV ONLY!)
+                // smtp.ServerCertificateValidationCallback = (s, c, h, e) => true;
+
                 // Connect to the SMTP server using STARTTLS for encryption
                 _logger.LogInformation($"Connecting to SMTP server {_config["EmailSettings:SmtpHost"]}...");
                 await smtp.ConnectAsync(
@@ -60,7 +63,7 @@ namespace UserRoles.Services
             {
                 // Log any errors that occur during the send process
                 _logger.LogError(ex, "Email send failed for {Recipient}", toEmail);
-                
+                throw;
             }
             finally
             {

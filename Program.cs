@@ -6,6 +6,9 @@ using UserRoles.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Added for User Secrets
+builder.Configuration.AddUserSecrets<Program>();
+
 // Clear default logging providers and enable console logging
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
