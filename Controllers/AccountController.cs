@@ -25,8 +25,6 @@ namespace UserRoles.Controllers
         {
             return View();
         }
-
-        // Handle login logic
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginViewModel model)
@@ -34,21 +32,30 @@ namespace UserRoles.Controllers
             if (!ModelState.IsValid)
                 return View(model);
 
+            // Find user by email to check if email is confirmed and active
             var user = await userManager.FindByEmailAsync(model.Email);
 
             if (user != null)
             {
-                // If user is found but not approved, redirect to the pending approval screen
+                if (!await userManager.IsEmailConfirmedAsync(user))
+                {
+                    ModelState.AddModelError(string.Empty, "Email is not confirmed.");
+                    return View(model);
+                }
+
                 if (!user.IsActive)
                 {
-                    return RedirectToAction("PendingApproval", "Account");
+                    ModelState.AddModelError(string.Empty, "Your account is not approved yet.");
+                    return View(model);
                 }
             }
 
             var result = await signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
 
             if (result.Succeeded)
+            {
                 return RedirectToAction("Index", "Home");
+            }
 
             ModelState.AddModelError(string.Empty, "Invalid login attempt.");
             return View(model);
@@ -87,7 +94,7 @@ namespace UserRoles.Controllers
                 Email = model.Email,
                 NormalizedUserName = model.Email.ToUpper(),
                 NormalizedEmail = model.Email.ToUpper(),
-                IsActive = false // They won’t be able to log in until admin approves
+                IsActive = false // They won�t be able to log in until admin approves
             };
 
             var result = await userManager.CreateAsync(user, model.Password);
@@ -101,10 +108,34 @@ namespace UserRoles.Controllers
                     await roleManager.CreateAsync(new IdentityRole(model.Role));
                 }
 
+                // Add user to selected role
                 await userManager.AddToRoleAsync(user, model.Role);
 
-                // Don’t sign them in — show pending screen instead
-                return RedirectToAction("PendingApproval", "Account");
+                // Generate the email confirmation token
+                var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
+
+                // Build confirmation URL to ConfirmEmail action
+                var confirmationLink = Url.Action("ConfirmEmail", "Account", new { userId = user.Id, token = token }, Request.Scheme);
+
+                // Try sending email – if it fails, still keep user registered
+                try
+                {
+                    await emailService.SendEmailAsync(
+                        user.Email,
+                        "Confirm your email - OmniTrack",
+                        $"Hi {user.FullName},\n\nThank you for registering with OmniTrack! Please confirm your email by clicking the link below:\n\n{confirmationLink}\n\nTrace Every Task. Own Every Outcome.");
+                }
+                catch (Exception ex)
+                {
+                    // log the exception or show a fallback message
+                    ModelState.AddModelError("", "User registered but confirmation email failed to send. Please contact support.");
+                    return View(model);
+                }
+
+
+                // Redirect to a page telling user to check email for confirmation
+                return RedirectToAction("RegistrationSuccessful");
+
             }
 
             // Display any validation errors
@@ -196,5 +227,8 @@ namespace UserRoles.Controllers
             await signInManager.SignOutAsync();
             return RedirectToAction("Login", "Account");
         }
+
     }
-}
+
+    }
+
