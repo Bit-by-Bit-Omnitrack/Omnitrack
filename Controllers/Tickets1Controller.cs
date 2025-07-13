@@ -105,7 +105,8 @@ namespace UserRoles.Controllers
             return View(ticket);
         }
 
-        [HttpGet]
+        // GET: Tickets1/Edit/5
+       [HttpGet]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -119,85 +120,75 @@ namespace UserRoles.Controllers
                 return NotFound();
             }
 
-            // Populate dropdowns (just like in POST)
-            ViewBag.Users = new SelectList(
-                await _userManager.Users.Where(u => u.IsActive).ToListAsync(),
-                "Id", "UserName", ticket.AssignedToUserId);
+            ViewBag.Users = new SelectList(await _userManager.Users
+                .Where(u => u.IsActive).ToListAsync(), "Id", "UserName", ticket.AssignedToUserId);
 
-            ViewBag.Statuses = new SelectList(
-                await _context.TicketStatuses.ToListAsync(),
-                "Id", "StatusName", ticket.StatusID);
+            ViewBag.Statuses = new SelectList(await _context.TicketStatuses
+                .ToListAsync(), "Id", "StatusName", ticket.StatusID);
 
             return View(ticket);
         }
-        // GET: Tickets1/Edit/5
+
+        // POST: Tickets1/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,TicketID,Title,Description,StatusID,TaskID,CreatedByID,CreatedDate,DueDate,AssignedToUserId")] Ticket ticket) // Add AssignedToUserId to bind
+       
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Description,AssignedToUserId,DueDate,StatusID")] Ticket ticket)
         {
             if (id != ticket.Id)
             {
                 return NotFound();
             }
 
-
             if (ModelState.IsValid)
             {
                 try
                 {
-                    // Retrieve the existing ticket to preserve CreatedByID and CreatedDate
                     var existingTicket = await _context.Tickets.AsNoTracking().FirstOrDefaultAsync(t => t.Id == id);
                     if (existingTicket == null)
                     {
                         return NotFound();
                     }
 
-                    // Manually set properties that are not bound or should be auto-updated
+                    // Preserve non-editable fields
                     ticket.CreatedByID = existingTicket.CreatedByID;
                     ticket.CreatedDate = existingTicket.CreatedDate;
                     ticket.TicketID = existingTicket.TicketID;
                     ticket.TaskID = existingTicket.TaskID;
 
+                    // Updated info
                     var currentUser = await _userManager.GetUserAsync(User);
-                    if (currentUser != null)
-                    {
-                        ticket.UpdatedBy = currentUser.Id; // Assuming UpdatedBy is also a UserId
-                    }
-                    else
-                    {
-                        ticket.UpdatedBy = "System";
-                    }// Set current user as updater
-                    ticket.UpdatedDate = DateTime.UtcNow; // Set update date
+                    ticket.UpdatedBy = currentUser?.Id ?? "System";
+                    ticket.UpdatedDate = DateTime.UtcNow;
 
-                    _context.Update(ticket);
+                    _context.Update(ticket); // Or use .Entry(...) for partial update
                     await _context.SaveChangesAsync();
+
+                    return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateConcurrencyException)
                 {
                     if (!TicketExists(ticket.Id))
-                    {
                         return NotFound();
-                    }
                     else
-                    {
                         throw;
-                    }
                 }
-                return RedirectToAction(nameof(Index));
-
-          //      ViewBag.Users = new SelectList(await _userManager.Users.Where(u => u.IsActive).ToListAsync(), "Id", "UserName", ticket.AssignedToUserId);
-         //     ViewBag.Statuses = new SelectList(await _context.TicketStatuses.ToListAsync(), "Id", "Name", ticket.StatusID);
             }
-            // Repopulate ViewBag for dropdowns if model state is invalid
-           ViewBag.Users = new SelectList(await _userManager.Users.Where(u => u.IsActive).ToListAsync(), "Id", "UserName", ticket.AssignedToUserId);
-           ViewBag.Statuses = new SelectList(await _context.TicketStatuses.ToListAsync(), "Id", "Name", ticket.StatusID);
+
+            ViewBag.Users = new SelectList(await _userManager.Users
+                .Where(u => u.IsActive).ToListAsync(), "Id", "UserName", ticket.AssignedToUserId);
+            
+            ViewBag.Statuses = new SelectList(await _context.TicketStatuses
+                .ToListAsync(), "Id", "StatusName", ticket.StatusID);
+
             return View(ticket);
         }
+
 
         // POST: Tickets1/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-       
+
 
 
         // GET: Tickets1/Delete/5
