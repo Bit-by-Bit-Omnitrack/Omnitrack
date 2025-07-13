@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+//#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
 
 namespace UserRoles.Migrations
 {
@@ -383,13 +383,23 @@ namespace UserRoles.Migrations
             migrationBuilder.InsertData(
                 table: "TicketStatuses",
                 columns: new[] { "Id", "StatusName" },
+               values: new object[,]
+               {
+                 { 1, "To Do" },
+                 { 2, "In Progress" },
+                 { 3, "Blocker" },
+                 { 4, "Done" }
+               });
+            migrationBuilder.InsertData(
+                table: "Priorities",
+                columns: new[] { "Id", "Name", "Color" },
                 values: new object[,]
-                {
-                    { 1, "To Do" },
-                    { 2, "In Progress" },
-                    { 3, "Blocker" },
-                    { 4, "Done" }
-                });
+               {
+                { 1, "High", "red" },
+                { 2, "Medium", "green" },
+                { 3, "Low", "blue" }
+               });
+
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
