@@ -34,8 +34,9 @@ namespace UserRoles.Models
       //   Navigation property for Status
         [ForeignKey("StatusID")]
       public TicketStatus Status { get; set; }
-      
-     
+
+        public int PriorityId { get; set; } // Foreign key reference
+        public Priority Priority { get; set; } // Navigation property
     }
 
 }

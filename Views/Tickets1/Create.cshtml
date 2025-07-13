@@ -47,6 +47,10 @@
                 <span asp-validation-for="DueDate" class="text-danger"></span>
             </div>
             <div class="form-group">
+                <label>Priority</label>
+                @Html.DropDownListFor(model => model.Priority, (SelectList)ViewBag.Priorities, "Select", new { @class = "form-control" })
+            </div>
+            <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary" />
             </div>
         </form>
@@ -56,6 +60,8 @@
 <div>
     <a asp-action="Index">Back to List</a>
 </div>
+
+
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
