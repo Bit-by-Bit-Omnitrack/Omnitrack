@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace UserRoles.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250713140943_Omnitak")]
-    partial class Omnitak
+    [Migration("20250714101551_ooq")]
+    partial class ooq
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -384,9 +384,6 @@ namespace UserRoles.Migrations
                     b.Property<DateTime?>("DueDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("PriorityId")
-                        .HasColumnType("int");
-
                     b.Property<int>("StatusID")
                         .HasColumnType("int");
 
@@ -416,8 +413,6 @@ namespace UserRoles.Migrations
                     b.HasIndex("AssignedToUserId");
 
                     b.HasIndex("CreatedByID");
-
-                    b.HasIndex("PriorityId");
 
                     b.HasIndex("StatusID");
 
@@ -650,12 +645,6 @@ namespace UserRoles.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("UserRoles.Models.Priority", "Priority")
-                        .WithMany()
-                        .HasForeignKey("PriorityId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("UserRoles.Models.TicketStatus", "Status")
                         .WithMany()
                         .HasForeignKey("StatusID")
@@ -669,8 +658,6 @@ namespace UserRoles.Migrations
                     b.Navigation("AssignedToUser");
 
                     b.Navigation("CreatedByUser");
-
-                    b.Navigation("Priority");
 
                     b.Navigation("Status");
                 });

@@ -69,7 +69,7 @@ namespace UserRoles.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        
+
         public async Task<IActionResult> Create([Bind("Title, Description, AssignedToUser, DueDate")] Ticket ticket)
         {
             // --- Set auto-generated and default values BEFORE ModelState.IsValid check ---
@@ -79,34 +79,34 @@ namespace UserRoles.Controllers
             ticket.StatusID = 1; // Default status: 1 = To Do
             ticket.CreatedDate = DateTime.UtcNow;
 
-                // Default status: 1 = To Do
-                ticket.StatusID = 1;
+            // Default status: 1 = To Do
+            ticket.StatusID = 1;
 
-                // Set CreatedByID to current logged-in username
-                var currentUser = await _userManager.GetUserAsync(User);
-                if (currentUser != null)
-                {
-                    ticket.CreatedByID = currentUser.Id;
-                }
-                else
-                {
-                    ticket.CreatedByID = "System"; // Fallback
-                }
+            // Set CreatedByID to current logged-in username
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser != null)
+            {
+                ticket.CreatedByID = currentUser.Id;
+            }
+            else
+            {
+                ticket.CreatedByID = "System"; // Fallback
+            }
 
-                // Set CreatedDate to now
-                ticket.CreatedDate = DateTime.UtcNow;
+            // Set CreatedDate to now
+            ticket.CreatedDate = DateTime.UtcNow;
 
-                _context.Add(ticket);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            
+            _context.Add(ticket);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+
             ViewBag.Users = new SelectList(await _userManager.Users.Where(u => u.IsActive).ToListAsync(), "Id", "UserName");
-            ViewBag.Statuses = new SelectList(await _context.TicketStatuses.ToListAsync(), "Id", "Name"); 
+            ViewBag.Statuses = new SelectList(await _context.TicketStatuses.ToListAsync(), "Id", "Name");
             return View(ticket);
         }
 
         // GET: Tickets1/Edit/5
-       [HttpGet]
+        [HttpGet]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -162,7 +162,7 @@ namespace UserRoles.Controllers
                 existingTicket.UpdatedBy = currentUser?.Id ?? "System";
                 existingTicket.UpdatedDate = DateTime.UtcNow;
 
-                
+
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
@@ -215,7 +215,7 @@ namespace UserRoles.Controllers
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
-      
+
         private bool TicketExists(int id)
         {
             return _context.Tickets.Any(e => e.Id == id);

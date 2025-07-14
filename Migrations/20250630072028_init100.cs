@@ -5,7 +5,7 @@
 namespace UserRoles.Migrations
 {
     /// <inheritdoc />
-    public partial class AppTasks : Migration
+    public partial class init100 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
