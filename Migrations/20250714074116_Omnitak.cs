@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace UserRoles.Migrations
 {
     /// <inheritdoc />
-    public partial class Omni : Migration
+    public partial class Omnitak : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -123,7 +123,8 @@ namespace UserRoles.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Level = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Color = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -324,6 +325,7 @@ namespace UserRoles.Migrations
                     UpdatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     AssignedToUserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    PriorityId = table.Column<int>(type: "int", nullable: false),
                     TicketStatusId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
@@ -341,6 +343,12 @@ namespace UserRoles.Migrations
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Tickets_Priorities_PriorityId",
+                        column: x => x.PriorityId,
+                        principalTable: "Priorities",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Tickets_TicketStatuses_StatusID",
                         column: x => x.StatusID,
@@ -461,6 +469,11 @@ namespace UserRoles.Migrations
                 column: "CreatedByID");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Tickets_PriorityId",
+                table: "Tickets",
+                column: "PriorityId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Tickets_StatusID",
                 table: "Tickets",
                 column: "StatusID");
@@ -517,13 +530,13 @@ namespace UserRoles.Migrations
                 name: "Checklists");
 
             migrationBuilder.DropTable(
-                name: "Priorities");
-
-            migrationBuilder.DropTable(
                 name: "Tickets");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
+
+            migrationBuilder.DropTable(
+                name: "Priorities");
 
             migrationBuilder.DropTable(
                 name: "TicketStatuses");

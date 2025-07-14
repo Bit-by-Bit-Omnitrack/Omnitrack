@@ -6,9 +6,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.VisualBasic;
-//using UserRoles.Migration;
 using UserRoles.Models;
+
+
 
 namespace UserRoles.Controllers
 {
@@ -22,6 +22,7 @@ namespace UserRoles.Controllers
             _context = context;
             _userManager = userManager;
         }
+
         public async Task<IActionResult> Index(string searchTerm)
         {
             var currentUser = await _userManager.GetUserAsync(User);
@@ -31,7 +32,7 @@ namespace UserRoles.Controllers
                 .Include(t => t.CreatedByUser)
                 .Include(t => t.AssignedToUser)
                 .Include(t => t.Status)
-                .Include(t => t.Priority) // Include priority
+                .Include(t => t.Priority)
                 .AsQueryable();
 
             if (!isAdmin)
@@ -56,8 +57,11 @@ namespace UserRoles.Controllers
         // GET: Tickets1/Create
         public async Task<IActionResult> Create()
         {
+            // Seed priorities if none exist
+            await PrioritySeeder.SeedAsync(_context);
+
             ViewBag.Users = new SelectList(await _userManager.Users.Where(u => u.IsActive).ToListAsync(), "Id", "UserName");
-            ViewBag.Priorities = new SelectList(await _context.Priorities.ToListAsync(), "Id", "Name"); // Add priorities
+            ViewBag.Priorities = new SelectList(await _context.Priorities.ToListAsync(), "Id", "Name");
             return View();
         }
 
@@ -82,16 +86,10 @@ namespace UserRoles.Controllers
         // GET: Tickets1/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
             var ticket = await _context.Tickets.FindAsync(id);
-            if (ticket == null)
-            {
-                return NotFound();
-            }
+            if (ticket == null) return NotFound();
 
             ViewBag.Users = new SelectList(await _userManager.Users.Where(u => u.IsActive).ToListAsync(), "Id", "UserName", ticket.AssignedToUserId);
             ViewBag.Statuses = new SelectList(await _context.TicketStatuses.ToListAsync(), "Id", "StatusName", ticket.StatusID);
@@ -104,18 +102,12 @@ namespace UserRoles.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,TicketID,Title,Description,StatusID,TaskID,CreatedByID,CreatedDate,DueDate,AssignedToUserId,PriorityId")] Ticket ticket)
         {
-            if (id != ticket.Id)
-            {
-                return NotFound();
-            }
+            if (id != ticket.Id) return NotFound();
 
             if (ModelState.IsValid)
             {
                 var existingTicket = await _context.Tickets.AsNoTracking().FirstOrDefaultAsync(t => t.Id == id);
-                if (existingTicket == null)
-                {
-                    return NotFound();
-                }
+                if (existingTicket == null) return NotFound();
 
                 ticket.CreatedByID = existingTicket.CreatedByID;
                 ticket.CreatedDate = existingTicket.CreatedDate;
@@ -132,9 +124,30 @@ namespace UserRoles.Controllers
             }
 
             ViewBag.Users = new SelectList(await _userManager.Users.Where(u => u.IsActive).ToListAsync(), "Id", "UserName", ticket.AssignedToUserId);
-            ViewBag.Statuses = new SelectList(await _context.TicketStatuses.ToListAsync(), "Id", "Name", ticket.StatusID);
+            ViewBag.Statuses = new SelectList(await _context.TicketStatuses.ToListAsync(), "Id", "StatusName", ticket.StatusID);
             ViewBag.Priorities = new SelectList(await _context.Priorities.ToListAsync(), "Id", "Name", ticket.PriorityId);
             return View(ticket);
+        }
+    }
+
+    // Seeder class for priorities
+    public static class PrioritySeeder
+    {
+        public static async Task SeedAsync(AppDbContext context)
+        {
+            if (!context.Priorities.Any())
+            {
+                var defaultPriorities = new List<Priority>
+                {
+                    new Priority { Name = "Low" },
+                    new Priority { Name = "Medium" },
+                    new Priority { Name = "High" },
+                    new Priority { Name = "Critical" }
+                };
+
+                context.Priorities.AddRange(defaultPriorities);
+                await context.SaveChangesAsync();
+            }
         }
     }
 }
