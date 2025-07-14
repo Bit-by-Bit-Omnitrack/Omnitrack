@@ -73,7 +73,7 @@ namespace UserRoles.Controllers
 
         // POST: Users/Delete/5
 
-        [HttpGet("Users/Details/{id}")]
+        [HttpGet]
         public async Task<IActionResult> Details(string id)
         {
             if (string.IsNullOrEmpty(id)) return NotFound();
@@ -101,9 +101,13 @@ namespace UserRoles.Controllers
         [Authorize(Roles = "System Administrator")]
         public IActionResult Authenticate()
         {
-            var pendingUsers = _userManager.Users.Where(u => !u.IsActive).ToList();
-            return View(pendingUsers); // Will be used by Authenticate.cshtml
+            var pendingUsers = _userManager.Users
+                .Where(u => !u.IsActive && u.EmailConfirmed) // Optional condition to exclude rejected users
+                .ToList();
+
+            return View(pendingUsers);
         }
+
         [HttpPost]
         public async Task<IActionResult> Approve(string id)
         {
@@ -120,7 +124,25 @@ namespace UserRoles.Controllers
             return RedirectToAction(nameof(Authenticate));
         }
 
+        // Reject a user
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Reject(string id)
+        {
+            if (string.IsNullOrEmpty(id)) return NotFound();
 
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null) return NotFound();
+
+            // Soft-delete or mark user as rejected
+            user.IsActive = false;
+            user.EmailConfirmed = false; // Optionally, to block further login attempts
+            await _userManager.UpdateAsync(user);
+
+            TempData["Message"] = "User rejected successfully.";
+
+            return RedirectToAction(nameof(Authenticate));
+        }
 
     }
 }
