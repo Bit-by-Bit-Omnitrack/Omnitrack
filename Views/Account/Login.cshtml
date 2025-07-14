@@ -12,40 +12,81 @@
         <form asp-action="Login" method="post">
             @Html.AntiForgeryToken()
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <!-- Email Field -->
             <div class="mb-3">
                 <label asp-for="Email" class="form-label"></label>
                 <input asp-for="Email" class="form-control" />
                 <span asp-validation-for="Email" class="text-danger"></span>
             </div>
-            <div class="mb-3">
+
+            <!-- Password field with eye icon properly styled inside input -->
+            <div class="mb-3 position-relative">
                 <label asp-for="Password" class="form-label"></label>
-                <input asp-for="Password" class="form-control" />
+
+                <div class="position-relative">
+                    <!--  allows icon to sit inside input field -->
+                    <input asp-for="Password" class="form-control pe-5" id="passwordInput" type="password" /> <!-- added pe-5 for spacing -->
+
+                    <button type="button"
+                            id="togglePassword"
+                            class="btn btn-sm btn-light border-0 position-absolute top-50 end-0 translate-middle-y me-2"
+                            style="z-index: 2;">
+                        <!--  styled icon button -->
+                        <i class="bi bi-eye-slash" id="toggleIcon"></i>
+
+                    </button>
+                </div>
+
                 <span asp-validation-for="Password" class="text-danger"></span>
             </div>
+
+
             <div class="float-end">
                 <a asp-controller="Account" asp-action="VerifyEmail" class="text-decoration-none">
                     Forgot password?
                 </a>
             </div>
+
             <div class="form-check mb-3">
                 <label class="form-check-label">
                     <input asp-for="RememberMe" class="form-check-input" />
                     @Html.DisplayNameFor(a => a.RememberMe)
                 </label>
             </div>
+
             <input type="submit" value="Login" class="btn btn-success w-100 p-2" />
+
             <p class="text-center mt-2">
                 Don't have an account? <a asp-controller="Account" asp-action="Register" class="text-decoration-none">Register</a>
             </p>
+
+            <!--  Navigates the user back to the main landing or home page -->
             <div class="text-center">
-                <a asp-controller="Account" asp-action="Login" class="text-decoration-none mt-3">Back</a>
+                <a asp-controller="Home" asp-action="Index" class="text-decoration-none mt-3">Back</a>
             </div>
+
         </form>
     </div>
 </div>
 
 @section Scripts {
+
+    <script> 
+        const togglePassword = document.getElementById('togglePassword');
+        const passwordInput = document.getElementById('passwordInput');
+        const toggleIcon = document.getElementById('toggleIcon');
+
+        togglePassword.addEventListener('click', function () {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            toggleIcon.classList.toggle('bi-eye');
+            toggleIcon.classList.toggle('bi-eye-slash');
+        });
+    </script>
+
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial.cshtml");
     }
+
 }
