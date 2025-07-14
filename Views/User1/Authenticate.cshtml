@@ -4,6 +4,14 @@
     ViewData["Title"] = "Pending User Approvals";
 }
 
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["Message"]
+    </div>
+}
+
+
 <h2>Pending User Approvals</h2>
 
 @if (!Model.Any(u => !u.IsActive))
