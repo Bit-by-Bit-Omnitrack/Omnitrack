@@ -46,10 +46,13 @@
                 <input asp-for="DueDate" class="form-control" />
                 <span asp-validation-for="DueDate" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label>Priority</label>
-                @Html.DropDownListFor(model => model.Priority, (SelectList)ViewBag.Priorities, "Select", new { @class = "form-control" })
-            </div>
+             <div class="mb-3">
+                 <label asp-for="PriorityId" class="form-label">Priority</label>
+                 <select asp-for="PriorityId" class="form-control" asp-items="ViewBag.Priorities">
+                     <option value="">-- Select Priority --</option>
+                 </select>
+                 <span asp-validation-for="PriorityId" class="text-danger"></span>
+             </div>
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary" />
             </div>
