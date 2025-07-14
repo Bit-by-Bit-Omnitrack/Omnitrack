@@ -1,4 +1,4 @@
-﻿@model UserRoles.Models.Ticket
+@model UserRoles.Models.Ticket
 
 @{
     ViewData["Title"] = "Create";
@@ -12,51 +12,37 @@
     <div class="col-md-4">
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-
+           
             <div class="form-group">
                 <label asp-for="Title" class="control-label"></label>
                 <input asp-for="Title" class="form-control" />
                 <span asp-validation-for="Title" class="text-danger"></span>
             </div>
-
             <div class="form-group">
                 <label asp-for="Description" class="control-label"></label>
                 <input asp-for="Description" class="form-control" />
                 <span asp-validation-for="Description" class="text-danger"></span>
             </div>
-
             <div class="form-group">
-                <label asp-for="AssignedToUserId" class="control-label">Assign To</label>
+                <label for="AssignedToUserId">Assign To</label>
                 <select asp-for="AssignedToUserId" class="form-control" asp-items="ViewBag.Users">
                     <option value="">-- Select User --</option>
                 </select>
                 <span asp-validation-for="AssignedToUserId" class="text-danger"></span>
             </div>
-
-            <div class="form-group">
-                <label asp-for="CreatedByUser" class="control-label"></label>
-                <input asp-for="CreatedByUser" class="form-control" />
-                <span asp-validation-for="CreatedByUser" class="text-danger"></span>
-            </div>
-
-            <div class="form-group">
-                <label asp-for="UpdatedBy" class="control-label"></label>
-                <input asp-for="UpdatedBy" class="form-control" />
-                <span asp-validation-for="UpdatedBy" class="text-danger"></span>
-            </div>
-
+                 
+        
             <div class="form-group">
                 <label asp-for="DueDate" class="control-label"></label>
                 <input asp-for="DueDate" class="form-control" />
                 <span asp-validation-for="DueDate" class="text-danger"></span>
             </div>
-
             <div class="form-group">
-                <label asp-for="PriorityId" class="control-label">Priority</label>
-                @Html.DropDownListFor(model => model.PriorityId, (SelectList)ViewBag.Priorities, "Select", new { @class = "form-control" })
-                <span asp-validation-for="PriorityId" class="text-danger"></span>
-            </div>
-
+    <label asp-for="PriorityId" class="control-label">Priority</label>
+    @Html.DropDownListFor(model => model.PriorityId, (SelectList)ViewBag.Priorities, "Select", new { @class = "form-control" })
+    <span asp-validation-for="PriorityId" class="text-danger"></span>
+</div>
+          
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary" />
             </div>
@@ -68,8 +54,8 @@
     <a asp-action="Index">Back to List</a>
 </div>
 
+
+
 @section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 }
