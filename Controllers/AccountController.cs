@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using UserRoles.Models;
+using UserRoles.Services; // Added to use our custom IEmailService for sending emails
 using UserRoles.ViewModels;
+using UserRoles.Data; // Added to allow logging email activity to the database
 
 namespace UserRoles.Controllers
 {
@@ -10,13 +12,30 @@ namespace UserRoles.Controllers
         private readonly SignInManager<Users> signInManager;
         private readonly UserManager<Users> userManager;
         private readonly RoleManager<IdentityRole> roleManager;
+        
+        //  Injecting a custom email service to send confirmation emails after registration
+        private readonly IEmailService emailService; // Added for email service
+        private readonly AppDbContext _context; // Used to log email results to the EmailLogs table
 
-        public AccountController(SignInManager<Users> signInManager, UserManager<Users> userManager, RoleManager<IdentityRole> roleManager)
+
+        public AccountController(
+        SignInManager<Users> signInManager,
+        UserManager<Users> userManager,
+        RoleManager<IdentityRole> roleManager,
+        IEmailService emailService,// Added this to inject email functionality
+         AppDbContext context      // Injected AppDbContext for email logging
+
+        )
         {
             this.signInManager = signInManager;
             this.userManager = userManager;
             this.roleManager = roleManager;
+            this.emailService = emailService;
+            this._context = context; // Assigned the injected context to the local field
+
         }
+
+
 
         [HttpGet]
         public IActionResult Login()
@@ -39,7 +58,7 @@ namespace UserRoles.Controllers
                 if (!user.IsActive)
                 {
                     ModelState.AddModelError(string.Empty, "Your account is not active. Please wait for approval.");
-                    return View(model);
+                    return RedirectToAction("AwaitingApproval", "Account"); // Redirect to awaiting screen;
                 }
             }
 
@@ -57,7 +76,7 @@ namespace UserRoles.Controllers
         [HttpGet]
         public IActionResult Register()
         {
-            ViewBag.Roles = new List<string> { "System Administrator", "Developer", "Tester", "Project Leader" };
+            ViewBag.Roles = new List<string> { "Developer", "Tester", "Project Leader" }; // Removed "System Administrator"
             return View();
         }
 
@@ -65,7 +84,7 @@ namespace UserRoles.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(RegisterViewModel model)
         {
-            ViewBag.Roles = new List<string> { "System Administrator", "Developer", "Tester", "Project Leader" };
+            ViewBag.Roles = new List<string> { "Developer", "Tester", "Project Leader" }; // Removed "System Administrator"
 
             if (!ModelState.IsValid)
             {
@@ -79,7 +98,7 @@ namespace UserRoles.Controllers
                 Email = model.Email,
                 NormalizedUserName = model.Email.ToUpper(),
                 NormalizedEmail = model.Email.ToUpper(),
-                IsActive = true // User cannot log in until approved
+                IsActive = false // User cannot log in until approved
             };
 
             var result = await userManager.CreateAsync(user, model.Password);
@@ -92,9 +111,50 @@ namespace UserRoles.Controllers
                     await roleManager.CreateAsync(new IdentityRole(model.Role));
                 }
 
+
+
+                // Send email and log result in EmailLogs table
+                try
+                {
+                    await emailService.SendEmailAsync(
+                        model.Email,
+                        "OmniTrack Registration Received",
+                        $"Dear {model.Name},\n\nThank you for registering with OmniTrack. Your account has been successfully created.\n\nPlease note that your access is currently pending approval by a System Administrator. You will be notified once your account is activated.\n\nIf you believe this is a mistake or have any questions, feel free to contact support.\n\nBest regards,\nThe OmniTrack Team"
+                    );
+
+                    // Log success
+                    var log = new EmailLog
+                    {
+                        Recipient = model.Email,
+                        Subject = "OmniTrack Registration Received",
+                        SentAt = DateTime.UtcNow,
+                        IsSuccess = true
+                    };
+                    _context.EmailLogs.Add(log);
+                }
+                catch (Exception ex)
+                {
+                    // Log failure
+                    var log = new EmailLog
+                    {
+                        Recipient = model.Email,
+                        Subject = "OmniTrack Registration Received",
+                        SentAt = DateTime.UtcNow,
+                        IsSuccess = false,
+                        ErrorMessage = ex.Message
+                    };
+                    _context.EmailLogs.Add(log);
+                }
+
+                //  Save the log entry
+                await _context.SaveChangesAsync();
+
+
                 await userManager.AddToRoleAsync(user, model.Role);
-                await signInManager.SignInAsync(user, isPersistent: false);
-                return RedirectToAction("Login", "Account");
+
+                // await signInManager.SignInAsync(user, isPersistent: false);
+                return RedirectToAction("AwaitingApproval", "Account");
+
             }
 
             foreach (var error in result.Errors)
@@ -172,7 +232,9 @@ namespace UserRoles.Controllers
             if (result.Succeeded)
             {
                 result = await userManager.AddPasswordAsync(user, model.NewPassword);
-                return RedirectToAction("Login", "Account");
+                TempData["Message"] = "Your password has been successfully updated. You may now log in once your account is approved.";
+                return RedirectToAction("AwaitingApproval", "Account");
+
             }
             else
             {
@@ -191,6 +253,12 @@ namespace UserRoles.Controllers
         {
             await signInManager.SignOutAsync();
             return RedirectToAction("Login", "Account");
+        }
+
+        [HttpGet]
+        public IActionResult AwaitingApproval() 
+        {
+            return View();
         }
     }
 }

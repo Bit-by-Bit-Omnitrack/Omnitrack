@@ -1,0 +1,26 @@
+﻿@{
+    ViewData["Title"] = "Awaiting Approval";
+}
+
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["Message"]
+    </div>
+}
+
+<div class="container mt-5 text-center">
+    <div class="card shadow-lg p-4">
+        <h2 class="text-warning mb-3">Registration Pending</h2>
+        <p class="lead">
+            Thank you for registering with <strong>OmniTrack</strong>.
+        </p>
+        <p>
+            Your account has been created successfully and is currently <strong>pending approval</strong> by a System Administrator.
+        </p>
+        <p>
+            You will receive an email notification once your account is activated.
+        </p>
+        
+    </div>
+</div>

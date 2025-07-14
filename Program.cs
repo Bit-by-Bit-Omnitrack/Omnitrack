@@ -3,19 +3,22 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using UserRoles.Data;
 using UserRoles.Models;
-using UserRoles.Services;
+using UserRoles.Services; // for email + seeding
 
 var builder = WebApplication.CreateBuilder(args);
+builder.WebHost.UseKestrel();
 
-// Add services to the container.
+// This is for adding support for MVC + API controllers
 builder.Services.AddControllersWithViews();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
+
+// Swagger configuration
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Your API Name", Version = "v1" });
 
-    // Optional: Include XML comments for API documentation
+   
     var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
     var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
     if (File.Exists(xmlPath))
@@ -24,6 +27,10 @@ builder.Services.AddSwaggerGen(c =>
     }
 });
 
+
+// Add our EmailService so we can inject and send real emails
+builder.Services.AddScoped<IEmailService, EmailService>();  // use scoped for DB-safe access
+builder.Services.AddScoped<SeedService>(); //  Needed to make seeding work when called
 
 
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -55,7 +62,13 @@ using (var scope = app.Services.CreateScope())
     dbContext.Database.Migrate(); // Applies pending migrations and creates DB if needed
 }
 
-await SeedService.SeedDatabase(app.Services); // Optional: Seed data
+// Seed admin users and roles
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    await SeedService.SeedDatabase(services);
+}
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

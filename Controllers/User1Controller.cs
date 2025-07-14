@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using UserRoles.ViewModels;
 using Microsoft.AspNetCore.Authorization;
+using UserRoles.Data; // Gives access to AppDbContext and other data-related classes
 
 namespace UserRoles.Controllers
 {

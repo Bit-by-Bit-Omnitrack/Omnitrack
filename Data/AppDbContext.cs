@@ -9,78 +9,73 @@ using UserRoles.ViewModels;
 
 namespace UserRoles.Data
 {
+
+
+
+
     public class AppDbContext : IdentityDbContext<Users>
     {
-        public AppDbContext(DbContextOptions options) : base(options)
+
+        public AppDbContext(DbContextOptions<AppDbContext> options)
+                : base(options) { }
+
+
+        public DbSet<UserRoles.Models.Priority> Priorities { get; set; } = default!;
+        public DbSet<UserRoles.Models.TaskItem> TaskItems { get; set; } = default!;
+        public DbSet<UserRoles.Models.Checklists> Checklists { get; set; } = default!;
+
+        public DbSet<UserRoles.Models.Comments> Comments { get; set; } = default!;
+        // public DbSet<UserRoles.Models.User> User { get; set; } = default!;
+        // public DbSet<RegisterViewModel> AspNetUsers { get; set; }
+        public DbSet<Role> Roles { get; set; } = default!;
+        public DbSet<AppTask> AppTask { get; set; } = default!;
+        public DbSet<Ticket> Tickets { get; set; } = default!;
+
+        public DbSet<TicketAssignment> TicketAssignments { get; set; } = default!;
+        public DbSet<TicketStatus> TicketStatuses { get; set; } = default!;
+        public DbSet<ChecklistItem> ChecklistItems { get; set; } = default!;
+
+        public DbSet<Chats> Chats { get; set; } = default!;
+        public DbSet<EmailLog> EmailLogs { get; set; } = default!;
+
+        // In UserRoles.Data/AppDbContext.cs
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
+
+
+
+            modelBuilder.Entity<TicketStatus>().HasData(
+                new TicketStatus { Id = 1, StatusName = "To Do" },
+                new TicketStatus { Id = 2, StatusName = "In Progress" },
+                 new TicketStatus { Id = 3, StatusName = "Blocker" },
+                new TicketStatus { Id = 4, StatusName = "Done" }
+            );
+
+            // Configure Ticket -> Users (AssignedToUser)
+            modelBuilder.Entity<Ticket>()
+                .HasOne(t => t.AssignedToUser)
+                .WithMany()
+                .HasForeignKey(t => t.AssignedToUserId)
+                .OnDelete(DeleteBehavior.SetNull); // SetNull is appropriate here
+
+            //  Configure Ticket -> Users (CreatedByUser)
+            modelBuilder.Entity<Ticket>()
+                .HasOne(t => t.CreatedByUser) // Reference the navigation property
+                .WithMany()
+                .HasForeignKey(t => t.CreatedByID) // Use the CreatedByID foreign key
+              .OnDelete(DeleteBehavior.Restrict); // Restrict is good for the creator
+
+            // Configure Ticket -> TicketStatus
+            modelBuilder.Entity<Ticket>()
+                .HasOne(t => t.Status) // Assuming your Ticket model has a 'Status' navigation property
+                .WithMany() // Or WithMany(s => s.Tickets) if you add a collection to TicketStatus
+                .HasForeignKey(t => t.StatusID)
+                .OnDelete(DeleteBehavior.Restrict); // Changed from Cascade to Restrict for safety
+
+            
         }
-       
-    }
-}
 
-
-
-public class AppDbContext : IdentityDbContext<Users>
-{
-
-    public AppDbContext(DbContextOptions<AppDbContext> options)
-            : base(options) { }
-
-        
-    public DbSet<UserRoles.Models.Priority> Priorities { get; set; } = default!;
-    public DbSet<UserRoles.Models.TaskItem> TaskItems { get; set; } = default!;
-    public DbSet<UserRoles.Models.Checklists> Checklists { get; set; } = default!;
-
-    public DbSet<UserRoles.Models.Comments> Comments { get; set; } = default!;
-    // public DbSet<UserRoles.Models.User> User { get; set; } = default!;
-    // public DbSet<RegisterViewModel> AspNetUsers { get; set; }
-    public DbSet<Role> Roles { get; set; } = default!;
-    public DbSet<AppTask> AppTask { get; set; } = default!;
-    public DbSet<Ticket> Tickets { get; set; } = default!;
-   
-    public DbSet<TicketAssignment> TicketAssignments { get; set; } = default!;
-    public DbSet<TicketStatus> TicketStatuses { get; set; } = default!;
-    public DbSet<ChecklistItem> ChecklistItems { get; set; } = default!;
-
-    public DbSet<Chats> Chats { get; set; } = default!;
-    // In UserRoles.Data/AppDbContext.cs
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {
-        base.OnModelCreating(modelBuilder);
-
-        
-
-        modelBuilder.Entity<TicketStatus>().HasData(
-            new TicketStatus { Id = 1, StatusName = "To Do" },
-            new TicketStatus { Id = 2, StatusName = "In Progress" },
-             new TicketStatus { Id = 3, StatusName = "Blocker" },
-            new TicketStatus { Id = 4, StatusName = "Done" }
-        );
-
-        // Configure Ticket -> Users (AssignedToUser)
-        modelBuilder.Entity<Ticket>()
-            .HasOne(t => t.AssignedToUser)
-            .WithMany()
-            .HasForeignKey(t => t.AssignedToUserId)
-            .OnDelete(DeleteBehavior.SetNull); // SetNull is appropriate here
-
-       //  Configure Ticket -> Users (CreatedByUser)
-        modelBuilder.Entity<Ticket>()
-            .HasOne(t => t.CreatedByUser) // Reference the navigation property
-            .WithMany()
-            .HasForeignKey(t => t.CreatedByID) // Use the CreatedByID foreign key
-          .OnDelete(DeleteBehavior.Restrict); // Restrict is good for the creator
-    
-        // Configure Ticket -> TicketStatus
-        modelBuilder.Entity<Ticket>()
-            .HasOne(t => t.Status) // Assuming your Ticket model has a 'Status' navigation property
-            .WithMany() // Or WithMany(s => s.Tickets) if you add a collection to TicketStatus
-            .HasForeignKey(t => t.StatusID)
-            .OnDelete(DeleteBehavior.Restrict); // Changed from Cascade to Restrict for safety
-
-        // Ensure AppUser configuration (IdentityUser properties) are handled by base.OnModelCreating
-        // If you had custom IdentityUser relationships, they would go here too.
     }
 
 }
-

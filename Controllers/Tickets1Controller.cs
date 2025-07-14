@@ -7,8 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualBasic;
-using UserRoles.Migrations;
 using UserRoles.Models;
+using UserRoles.Data; // Gives access to AppDbContext and other data-related classes
 
 namespace UserRoles.Controllers
 {
