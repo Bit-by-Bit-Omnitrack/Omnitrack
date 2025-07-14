@@ -16,7 +16,8 @@ namespace UserRoles.Models
         public string TaskID { get; set; }
 
         // Use this for the creator's User ID
-      //  [ForeignKey("CreatedByID")]
+        //  [ForeignKey("CreatedByID")]
+        [Editable(false)]
         public string CreatedByID { get; set; }
         [ForeignKey("CreatedByID")]
        

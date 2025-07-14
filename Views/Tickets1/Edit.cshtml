@@ -19,6 +19,7 @@
                 <input asp-for="Title" class="form-control" />
                 <span asp-validation-for="Title" class="text-danger"></span>
             </div>
+            
             <div class="form-group">
                 <label asp-for="Description" class="control-label"></label>
                 <input asp-for="Description" class="form-control" />
@@ -30,7 +31,7 @@
                     <option value="">-- Select User --</option>
                 </select>
             </div>
-          
+            
             <div class="form-group">
                 <label asp-for="StatusID" class="control-label">Status</label>
                 <select asp-for="StatusID" class="form-control" asp-items="ViewBag.Statuses">
@@ -38,9 +39,6 @@
                 </select>
                 <span asp-validation-for="StatusID" class="text-danger"></span>
             </div>
-          
-
-      
             <div class="form-group">
                 <label asp-for="DueDate" class="control-label"></label>
                 <input asp-for="DueDate" class="form-control" />
