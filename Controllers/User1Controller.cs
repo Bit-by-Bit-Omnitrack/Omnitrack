@@ -4,8 +4,6 @@ using UserRoles.Models;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using UserRoles.ViewModels;
-using Microsoft.AspNetCore.Authorization;
-using UserRoles.Data; // Gives access to AppDbContext and other data-related classes
 
 namespace UserRoles.Controllers
 {
@@ -22,7 +20,11 @@ namespace UserRoles.Controllers
             var users = _userManager.Users.Where(u => u.IsActive).ToList();
             return View(users);
         }
-       
+        public IActionResult Authenticate()
+        {
+            var pendingUsers = _userManager.Users.Where(u => !u.IsActive).ToList();
+            return View(pendingUsers); // Will be used by Authenticate.cshtml
+        }
 
 
         [HttpGet("Users/Edit/{id}")]
@@ -98,13 +100,6 @@ namespace UserRoles.Controllers
 
             return RedirectToAction(nameof(Index));
         }
-
-        [Authorize(Roles = "System Administrator")]
-        public IActionResult Authenticate()
-        {
-            var pendingUsers = _userManager.Users.Where(u => !u.IsActive).ToList();
-            return View(pendingUsers); // Will be used by Authenticate.cshtml
-        }
         [HttpPost]
         public async Task<IActionResult> Approve(string id)
         {
@@ -121,7 +116,21 @@ namespace UserRoles.Controllers
             return RedirectToAction(nameof(Authenticate));
         }
 
+        [HttpPost]
+        public async Task<IActionResult> Reject(string id)
+        {
+            if (string.IsNullOrEmpty(id)) return NotFound();
 
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null) return NotFound();
+
+            user.IsActive = false;
+            await _userManager.UpdateAsync(user);
+
+            TempData["Message"] = "User rejected successfully.";
+
+            return RedirectToAction(nameof(Authenticate));
+        }
 
     }
 }

@@ -1,9 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using UserRoles.Models;
-using UserRoles.Services; // Added to use our custom IEmailService for sending emails
 using UserRoles.ViewModels;
-using UserRoles.Data; // Added to allow logging email activity to the database
 
 namespace UserRoles.Controllers
 {
@@ -12,85 +10,76 @@ namespace UserRoles.Controllers
         private readonly SignInManager<Users> signInManager;
         private readonly UserManager<Users> userManager;
         private readonly RoleManager<IdentityRole> roleManager;
-        
-        //  Injecting a custom email service to send confirmation emails after registration
-        private readonly IEmailService emailService; // Added for email service
-        private readonly AppDbContext _context; // Used to log email results to the EmailLogs table
 
-
-        public AccountController(
-        SignInManager<Users> signInManager,
-        UserManager<Users> userManager,
-        RoleManager<IdentityRole> roleManager,
-        IEmailService emailService,// Added this to inject email functionality
-         AppDbContext context      // Injected AppDbContext for email logging
-
-        )
+        // Injecting identity services into this controller
+        public AccountController(SignInManager<Users> signInManager, UserManager<Users> userManager, RoleManager<IdentityRole> roleManager)
         {
             this.signInManager = signInManager;
             this.userManager = userManager;
             this.roleManager = roleManager;
-            this.emailService = emailService;
-            this._context = context; // Assigned the injected context to the local field
-
         }
 
-
-
+        // Load the login form
         [HttpGet]
         public IActionResult Login()
         {
             return View();
         }
 
+        // Handle login logic
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginViewModel model)
         {
             if (!ModelState.IsValid)
-            {
                 return View(model);
-            }
 
             var user = await userManager.FindByEmailAsync(model.Email);
+
             if (user != null)
             {
+                // If user is found but not approved, redirect to the pending approval screen
                 if (!user.IsActive)
                 {
-                    ModelState.AddModelError(string.Empty, "Your account is not active. Please wait for approval.");
-                    return RedirectToAction("AwaitingApproval", "Account"); // Redirect to awaiting screen;
+                    return RedirectToAction("PendingApproval", "Account");
                 }
             }
 
             var result = await signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
 
             if (result.Succeeded)
-            {
-                return RedirectToAction("Index", "Tickets1");
-            }
+                return RedirectToAction("Index", "Home");
 
-            ModelState.AddModelError(string.Empty, "Invalid Login Attempt.");
+            ModelState.AddModelError(string.Empty, "Invalid login attempt.");
             return View(model);
         }
 
+        // Just showing a message while waiting for admin to approve registration
         [HttpGet]
-        public IActionResult Register()
+        public IActionResult PendingApproval()
         {
-            ViewBag.Roles = new List<string> { "Developer", "Tester", "Project Leader" }; // Removed "System Administrator"
             return View();
         }
 
+        // Load registration form
+        [HttpGet]
+        public IActionResult Register()
+        {
+            ViewBag.Roles = new List<string> { "System Administrator", "Developer", "Tester", "Project Leader" };
+            return View();
+        }
+
+        // Handle registration submission
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(RegisterViewModel model)
         {
-            ViewBag.Roles = new List<string> { "Developer", "Tester", "Project Leader" }; // Removed "System Administrator"
+            ViewBag.Roles = new List<string> { "System Administrator", "Developer", "Tester", "Project Leader" };
 
             if (!ModelState.IsValid)
-            {
                 return View(model);
-            }
 
+            // New user gets created in the system with IsActive = false
             var user = new Users
             {
                 FullName = model.Name,
@@ -98,65 +87,27 @@ namespace UserRoles.Controllers
                 Email = model.Email,
                 NormalizedUserName = model.Email.ToUpper(),
                 NormalizedEmail = model.Email.ToUpper(),
-                IsActive = false // User cannot log in until approved
+                IsActive = false // They won’t be able to log in until admin approves
             };
 
             var result = await userManager.CreateAsync(user, model.Password);
 
             if (result.Succeeded)
             {
-                var roleExist = await roleManager.RoleExistsAsync(model.Role);
-                if (!roleExist)
+                // Create the role if it doesn't exist yet
+                var roleExists = await roleManager.RoleExistsAsync(model.Role);
+                if (!roleExists)
                 {
                     await roleManager.CreateAsync(new IdentityRole(model.Role));
                 }
 
-
-
-                // Send email and log result in EmailLogs table
-                try
-                {
-                    await emailService.SendEmailAsync(
-                        model.Email,
-                        "OmniTrack Registration Received",
-                        $"Dear {model.Name},\n\nThank you for registering with OmniTrack. Your account has been successfully created.\n\nPlease note that your access is currently pending approval by a System Administrator. You will be notified once your account is activated.\n\nIf you believe this is a mistake or have any questions, feel free to contact support.\n\nBest regards,\nThe OmniTrack Team"
-                    );
-
-                    // Log success
-                    var log = new EmailLog
-                    {
-                        Recipient = model.Email,
-                        Subject = "OmniTrack Registration Received",
-                        SentAt = DateTime.UtcNow,
-                        IsSuccess = true
-                    };
-                    _context.EmailLogs.Add(log);
-                }
-                catch (Exception ex)
-                {
-                    // Log failure
-                    var log = new EmailLog
-                    {
-                        Recipient = model.Email,
-                        Subject = "OmniTrack Registration Received",
-                        SentAt = DateTime.UtcNow,
-                        IsSuccess = false,
-                        ErrorMessage = ex.Message
-                    };
-                    _context.EmailLogs.Add(log);
-                }
-
-                //  Save the log entry
-                await _context.SaveChangesAsync();
-
-
                 await userManager.AddToRoleAsync(user, model.Role);
 
-                // await signInManager.SignInAsync(user, isPersistent: false);
-                return RedirectToAction("AwaitingApproval", "Account");
-
+                // Don’t sign them in — show pending screen instead
+                return RedirectToAction("PendingApproval", "Account");
             }
 
+            // Display any validation errors
             foreach (var error in result.Errors)
             {
                 ModelState.AddModelError(string.Empty, error.Description);
@@ -164,14 +115,15 @@ namespace UserRoles.Controllers
 
             return View(model);
         }
-        // In AccountController.cs
+
+        // Show a 403 screen if a user isn't allowed to do something
         [HttpGet]
         public IActionResult AccessDenied()
         {
             return View();
         }
 
-
+        // Step 1: Check if the user email exists
         [HttpGet]
         public IActionResult VerifyEmail()
         {
@@ -183,30 +135,24 @@ namespace UserRoles.Controllers
         public async Task<IActionResult> VerifyEmail(VerifyEmailViewModel model)
         {
             if (!ModelState.IsValid)
-            {
                 return View(model);
-            }
 
             var user = await userManager.FindByNameAsync(model.Email);
-
             if (user == null)
             {
                 ModelState.AddModelError("", "User not found!");
                 return View(model);
             }
-            else
-            {
-                return RedirectToAction("ChangePassword", "Account", new { username = user.UserName });
-            }
+
+            return RedirectToAction("ChangePassword", "Account", new { username = user.UserName });
         }
 
+        // Step 2: Let user change password
         [HttpGet]
         public IActionResult ChangePassword(string username)
         {
             if (string.IsNullOrEmpty(username))
-            {
                 return RedirectToAction("VerifyEmail", "Account");
-            }
 
             return View(new ChangePasswordViewModel { Email = username });
         }
@@ -221,7 +167,6 @@ namespace UserRoles.Controllers
             }
 
             var user = await userManager.FindByNameAsync(model.Email);
-
             if (user == null)
             {
                 ModelState.AddModelError("", "User not found!");
@@ -232,33 +177,24 @@ namespace UserRoles.Controllers
             if (result.Succeeded)
             {
                 result = await userManager.AddPasswordAsync(user, model.NewPassword);
-                TempData["Message"] = "Your password has been successfully updated. You may now log in once your account is approved.";
-                return RedirectToAction("AwaitingApproval", "Account");
-
+                return RedirectToAction("Login", "Account");
             }
-            else
+
+            foreach (var error in result.Errors)
             {
-                foreach (var error in result.Errors)
-                {
-                    ModelState.AddModelError("", error.Description);
-                }
-
-                return View(model);
+                ModelState.AddModelError("", error.Description);
             }
+
+            return View(model);
         }
 
+        // Ends user session
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
         {
             await signInManager.SignOutAsync();
             return RedirectToAction("Login", "Account");
-        }
-
-        [HttpGet]
-        public IActionResult AwaitingApproval() 
-        {
-            return View();
         }
     }
 }

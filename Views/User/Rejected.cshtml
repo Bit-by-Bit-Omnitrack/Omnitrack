@@ -1,0 +1,29 @@
+﻿@model IEnumerable<UserRoles.Models.Domain.User>
+
+@{
+    ViewData["Title"] = "Rejected Users";
+}
+
+<h2 class="mb-3">Rejected Users</h2>
+
+<table class="table table-bordered datatable">
+    <thead>
+        <tr>
+            <th>Email</th>
+            <th>Full Name</th>
+            <th>Role</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Model)
+        {
+            <tr>
+                <td>@user.EmailAddress</td> <!-- fixed Email -->
+                <td>@(user.FirstName + " " + user.LastName)</td>
+                <td>@user.Role</td> <!-- fixed Role -->
+                <td><span class="badge badge-danger">Rejected</span></td>
+            </tr>
+        }
+    </tbody>
+</table>
