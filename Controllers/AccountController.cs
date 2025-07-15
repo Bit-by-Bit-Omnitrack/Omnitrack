@@ -79,7 +79,7 @@ namespace UserRoles.Controllers
                 Email = model.Email,
                 NormalizedUserName = model.Email.ToUpper(),
                 NormalizedEmail = model.Email.ToUpper(),
-                IsActive = true // User cannot log in until approved
+                IsActive = false // User cannot log in until approved
             };
 
             var result = await userManager.CreateAsync(user, model.Password);
