@@ -1,5 +1,5 @@
 
-﻿using System.Data;
+using System.Data;
 
 using System.Net.Sockets;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -9,13 +9,13 @@ using UserRoles.ViewModels;
 
 namespace UserRoles.Data
 {
-    public class AppDbContext : IdentityDbContext<Users>
-    {
-        public AppDbContext(DbContextOptions options) : base(options)
-        {
-        }
-       
-    }
+   // public class AppDbContext : IdentityDbContext<Users>
+   // {
+   //     public AppDbContext(DbContextOptions options) : base(options)
+   //     {
+    //    }
+
+  //  }
 }
 
 
@@ -26,7 +26,7 @@ public class AppDbContext : IdentityDbContext<Users>
     public AppDbContext(DbContextOptions<AppDbContext> options)
             : base(options) { }
 
-        
+
     public DbSet<UserRoles.Models.Priority> Priorities { get; set; } = default!;
     public DbSet<UserRoles.Models.TaskItem> TaskItems { get; set; } = default!;
     public DbSet<UserRoles.Models.Checklists> Checklists { get; set; } = default!;
@@ -37,7 +37,7 @@ public class AppDbContext : IdentityDbContext<Users>
     public DbSet<Role> Roles { get; set; } = default!;
     public DbSet<AppTask> AppTask { get; set; } = default!;
     public DbSet<Ticket> Tickets { get; set; } = default!;
-   
+
     public DbSet<TicketAssignment> TicketAssignments { get; set; } = default!;
     public DbSet<TicketStatus> TicketStatuses { get; set; } = default!;
     public DbSet<ChecklistItem> ChecklistItems { get; set; } = default!;
@@ -48,14 +48,12 @@ public class AppDbContext : IdentityDbContext<Users>
     {
         base.OnModelCreating(modelBuilder);
 
-
         modelBuilder.Entity<Priority>().HasData(
-         new Priority { Id = 1, Level = "Low", Color = "#28a745" },      // Green
-                new Priority { Id = 2, Level = "Medium", Color = "#ffc107" },   // Yellow
-                new Priority { Id = 3, Level = "High", Color = "#fd7e14" },     // Orange
-                new Priority { Id = 4, Level = "Critical", Color = "#dc3545" }  // Red
-            );
-
+         new Priority { Id = 1, Name = "Low", Color = "#28a745" },      // Green
+          new Priority { Id = 2, Name = "Medium", Color = "#ffc107" },   // Yellow
+          new Priority { Id = 3, Name = "High", Color = "#fd7e14" },     // Orange
+          new Priority { Id = 4, Name = "Critical", Color = "#dc3545" }  // Red
+    );
 
         modelBuilder.Entity<TicketStatus>().HasData(
             new TicketStatus { Id = 1, StatusName = "To Do" },
@@ -71,13 +69,13 @@ public class AppDbContext : IdentityDbContext<Users>
             .HasForeignKey(t => t.AssignedToUserId)
             .OnDelete(DeleteBehavior.SetNull); // SetNull is appropriate here
 
-       //  Configure Ticket -> Users (CreatedByUser)
+        //  Configure Ticket -> Users (CreatedByUser)
         modelBuilder.Entity<Ticket>()
             .HasOne(t => t.CreatedByUser) // Reference the navigation property
             .WithMany()
             .HasForeignKey(t => t.CreatedByID) // Use the CreatedByID foreign key
           .OnDelete(DeleteBehavior.Restrict); // Restrict is good for the creator
-    
+
         // Configure Ticket -> TicketStatus
         modelBuilder.Entity<Ticket>()
             .HasOne(t => t.Status) // Assuming your Ticket model has a 'Status' navigation property
@@ -90,4 +88,3 @@ public class AppDbContext : IdentityDbContext<Users>
     }
 
 }
-

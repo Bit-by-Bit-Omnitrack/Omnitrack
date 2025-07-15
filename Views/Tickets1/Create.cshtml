@@ -1,6 +1,8 @@
-@model UserRoles.Models.Ticket
+﻿@model UserRoles.Models.Ticket
 
-@{ViewData["Title"]="Create";}
+@{
+    ViewData["Title"] = "Create";
+}
 
 <h1>Create</h1>
 
@@ -28,7 +30,6 @@
                 </select>
                 <span asp-validation-for="AssignedToUserId" class="text-danger"></span>
             </div>
-
             <div class="form-group">
                 <label for="PriorityId">Priority</label>
                 <select asp-for="PriorityId" class="form-control" asp-items="ViewBag.Priorities">
@@ -36,7 +37,7 @@
                 </select>
                 <span asp-validation-for="PriorityId" class="text-danger"></span>
             </div>
-
+        
             <div class="form-group">
                 <label asp-for="DueDate" class="control-label"></label>
                 <input asp-for="DueDate" class="form-control" />

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -59,10 +59,8 @@ namespace UserRoles.Controllers
         }
 
         // GET: Tickets1/Create
-        [HttpGet]
         public async Task<IActionResult> Create()
         {
-            await PrioritySeeder.SeedAsync(_context);
             // Populate ViewBag.Users for the dropdown in the Create view
             ViewBag.Users = new SelectList(await _userManager.Users.Where(u => u.IsActive).ToListAsync(), "Id", "UserName");
             ViewBag.Priorities = new SelectList(await _context.Priorities.ToListAsync(), "Id", "Name");
@@ -75,7 +73,7 @@ namespace UserRoles.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
 
-        public async Task<IActionResult> Create([Bind("Title,Description,AssignedToUserId,DueDate,PriorityId")] Ticket ticket)
+        public async Task<IActionResult> Create([Bind("Title, Description, AssignedToUserId, DueDate, PriorityId")] Ticket ticket)
         {
             // --- Set auto-generated and default values BEFORE ModelState.IsValid check ---
 
@@ -101,14 +99,13 @@ namespace UserRoles.Controllers
             // Set CreatedDate to now
             ticket.CreatedDate = DateTime.UtcNow;
 
-        /*    _context.Add(ticket);
+          /*  _context.Add(ticket);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
-        */
-            ViewBag.Users = new SelectList(await _userManager.Users.Where(u => u.IsActive).ToListAsync(), "Id", "UserName");
+          */
+            ViewBag.Users = new SelectList(await _userManager.Users.Where(u => u.IsActive).ToListAsync(), "Id", "UserName", ticket.AssignedToUserId);
             ViewBag.Statuses = new SelectList(await _context.TicketStatuses.ToListAsync(), "Id", "Name");
             ViewBag.Priorities = new SelectList(await _context.Priorities.ToListAsync(), "Id", "Name", ticket.PriorityId);
-            //   return View(ticket);
             _context.Add(ticket);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
@@ -136,7 +133,6 @@ namespace UserRoles.Controllers
                 .ToListAsync(), "Id", "StatusName", ticket.StatusID);
             ViewBag.Priorities = new SelectList(await _context.Priorities.ToListAsync(), "Id", "Name", ticket.PriorityId);
             return View(ticket);
-            
         }
 
         // POST: Tickets1/Edit/5
@@ -152,7 +148,6 @@ namespace UserRoles.Controllers
                 ViewBag.Users = new SelectList(await _userManager.Users.Where(u => u.IsActive).ToListAsync(), "Id", "UserName", ticket.AssignedToUserId);
                 ViewBag.Statuses = new SelectList(await _context.TicketStatuses.ToListAsync(), "Id", "StatusName", ticket.StatusID);
                 ViewBag.Priorities = new SelectList(await _context.Priorities.ToListAsync(), "Id", "Name", ticket.PriorityId);
-               
                 //return View(ticket);
             }
 
@@ -227,25 +222,7 @@ namespace UserRoles.Controllers
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
-        public static class PrioritySeeder
-        {
-            public static async Task SeedAsync(AppDbContext context)
-            {
-                if (!context.Priorities.Any())
-                {
-                    var defaultPriorities = new List<Priority>
-                {
-                    new Priority { Level = "Low" },
-                    new Priority { Level = "Medium" },
-                    new Priority { Level = "High" },
-                    new Priority { Level = "Critical" }
-                };
 
-                    context.Priorities.AddRange(defaultPriorities);
-                    await context.SaveChangesAsync();
-                }
-            }
-        }
         private bool TicketExists(int id)
         {
             return _context.Tickets.Any(e => e.Id == id);

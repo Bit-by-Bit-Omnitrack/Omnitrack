@@ -301,7 +301,7 @@ namespace UserRoles.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Level")
+                    b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -314,25 +314,25 @@ namespace UserRoles.Migrations
                         {
                             Id = 1,
                             Color = "#28a745",
-                            Level = "Low"
+                            Name = "Low"
                         },
                         new
                         {
                             Id = 2,
                             Color = "#ffc107",
-                            Level = "Medium"
+                            Name = "Medium"
                         },
                         new
                         {
                             Id = 3,
                             Color = "#fd7e14",
-                            Level = "High"
+                            Name = "High"
                         },
                         new
                         {
                             Id = 4,
                             Color = "#dc3545",
-                            Level = "Critical"
+                            Name = "Critical"
                         });
                 });
 
