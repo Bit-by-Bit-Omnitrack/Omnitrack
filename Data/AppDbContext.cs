@@ -50,10 +50,10 @@ public class AppDbContext : IdentityDbContext<Users>
 
 
         modelBuilder.Entity<Priority>().HasData(
-         new Priority { Id = 1, Name = "Low", Color = "#28a745" },      // Green
-                new Priority { Id = 2, Name = "Medium", Color = "#ffc107" },   // Yellow
-                new Priority { Id = 3, Name = "High", Color = "#fd7e14" },     // Orange
-                new Priority { Id = 4, Name = "Critical", Color = "#dc3545" }  // Red
+         new Priority { Id = 1, Level = "Low", Color = "#28a745" },      // Green
+                new Priority { Id = 2, Level = "Medium", Color = "#ffc107" },   // Yellow
+                new Priority { Id = 3, Level = "High", Color = "#fd7e14" },     // Orange
+                new Priority { Id = 4, Level = "Critical", Color = "#dc3545" }  // Red
             );
 
 

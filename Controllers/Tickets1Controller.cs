@@ -24,44 +24,16 @@ namespace UserRoles.Controllers
         }
 
         // GET: Tickets1
-        public async Task<IActionResult> Index(string searchTerm)
+        public async Task<IActionResult> Index()
         {
-     
             // Eager load related data for display in the dashboard
-             var currentUser = await _userManager.GetUserAsync(User);
-              var isAdmin = await _userManager.IsInRoleAsync(currentUser, "Admin");
-
-             var query = _context.Tickets
-            .Include(t => t.CreatedByUser)
-             .Include(t => t.AssignedToUser)
-             .Include(t => t.Status)
-              .Include(t => t.Priority)
-              .AsQueryable();
-
             var tickets = await _context.Tickets
                 .Include(t => t.CreatedByUser)
                 .Include(t => t.AssignedToUser)
                 .Include(t => t.Status)
-                 .Include(t => t.Priority)
+                .Include(t => t.Priority)
                 .ToListAsync();
- if (!isAdmin)
-{
-    query = query.Where(t =>
-        t.CreatedByID == currentUser.Id ||
-        t.AssignedToUserId == currentUser.Id);
-}
-
-if (!string.IsNullOrWhiteSpace(searchTerm))
-{
-    query = query.Where(t =>
-        t.Title.Contains(searchTerm) ||
-        t.Description.Contains(searchTerm));
-}
-
-ViewBag.SearchTerm = searchTerm;
-var tickets = await query.ToListAsync();
-return View(tickets);
-            
+            return View(tickets);
         }
 
         // GET: Tickets1/Details/5
@@ -87,13 +59,14 @@ return View(tickets);
         }
 
         // GET: Tickets1/Create
+        [HttpGet]
         public async Task<IActionResult> Create()
         {
+            await PrioritySeeder.SeedAsync(_context);
             // Populate ViewBag.Users for the dropdown in the Create view
             ViewBag.Users = new SelectList(await _userManager.Users.Where(u => u.IsActive).ToListAsync(), "Id", "UserName");
-           ViewBag.Priorities = new SelectList(await _context.Priorities.ToListAsync(), "Id", "Name");
-return View();
-           return View();
+            ViewBag.Priorities = new SelectList(await _context.Priorities.ToListAsync(), "Id", "Name");
+            return View();
         }
 
         // POST: Tickets1/Create
@@ -101,8 +74,8 @@ return View();
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        
-        public async Task<IActionResult> Create([Bind("Title, Description, AssignedToUser, DueDate,PriorityId")] Ticket ticket)
+
+        public async Task<IActionResult> Create([Bind("Title,Description,AssignedToUserId,DueDate,PriorityId")] Ticket ticket)
         {
             // --- Set auto-generated and default values BEFORE ModelState.IsValid check ---
 
@@ -111,33 +84,37 @@ return View();
             ticket.StatusID = 1; // Default status: 1 = To Do
             ticket.CreatedDate = DateTime.UtcNow;
 
-                // Default status: 1 = To Do
-                ticket.StatusID = 1;
+            // Default status: 1 = To Do
+            ticket.StatusID = 1;
 
-                // Set CreatedByID to current logged-in username
-                var currentUser = await _userManager.GetUserAsync(User);
-                if (currentUser != null)
-                {
-                    ticket.CreatedByID = currentUser.Id;
-                }
-                else
-                {
-                    ticket.CreatedByID = "System"; // Fallback
-                }
+            // Set CreatedByID to current logged-in username
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser != null)
+            {
+                ticket.CreatedByID = currentUser.Id;
+            }
+            else
+            {
+                ticket.CreatedByID = "System"; // Fallback
+            }
 
-                // Set CreatedDate to now
-                ticket.CreatedDate = DateTime.UtcNow;
+            // Set CreatedDate to now
+            ticket.CreatedDate = DateTime.UtcNow;
 
-                _context.Add(ticket);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            
+        /*    _context.Add(ticket);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+        */
             ViewBag.Users = new SelectList(await _userManager.Users.Where(u => u.IsActive).ToListAsync(), "Id", "UserName");
-            ViewBag.Statuses = new SelectList(await _context.TicketStatuses.ToListAsync(), "Id", "Name"); 
+            ViewBag.Statuses = new SelectList(await _context.TicketStatuses.ToListAsync(), "Id", "Name");
             ViewBag.Priorities = new SelectList(await _context.Priorities.ToListAsync(), "Id", "Name", ticket.PriorityId);
-           return View(ticket);
+            //   return View(ticket);
+            _context.Add(ticket);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
         }
 
+        // GET: Tickets1/Edit/5
         [HttpGet]
         public async Task<IActionResult> Edit(int? id)
         {
@@ -152,106 +129,69 @@ return View();
                 return NotFound();
             }
 
-            // Populate dropdowns (just like in POST)
-            ViewBag.Users = new SelectList(
-                await _userManager.Users.Where(u => u.IsActive).ToListAsync(),
-                "Id", "UserName", ticket.AssignedToUserId);
-                  ViewBag.Users = new SelectList(
-                      await _userManager.Users.Where(u => u.IsActive).ToListAsync(), 
-                      "Id", "UserName", ticket.AssignedToUserId);
+            ViewBag.Users = new SelectList(await _userManager.Users
+                .Where(u => u.IsActive).ToListAsync(), "Id", "UserName", ticket.AssignedToUserId);
 
-                  ViewBag.Statuses = new SelectList(
-                      await _context.TicketStatuses.ToListAsync(), 
-                      "Id", "StatusName", ticket.StatusID);
-
-                  ViewBag.Priorities = new SelectList(
-                      await _context.Priorities.ToListAsync(), 
-                      "Id", "Name", ticket.PriorityId);
-
-                  return View(ticket);
+            ViewBag.Statuses = new SelectList(await _context.TicketStatuses
+                .ToListAsync(), "Id", "StatusName", ticket.StatusID);
+            ViewBag.Priorities = new SelectList(await _context.Priorities.ToListAsync(), "Id", "Name", ticket.PriorityId);
+            return View(ticket);
+            
         }
-        // GET: Tickets1/Edit/5
+
+        // POST: Tickets1/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-[HttpPost]
-[ValidateAntiForgeryToken]
-public async Task<IActionResult> Edit(int id, [Bind("Id,TicketID,Title,Description,StatusID,TaskID,CreatedByID,CreatedDate,DueDate,AssignedToUserId,PriorityId")] Ticket ticket)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Description,AssignedToUserId,DueDate,StatusID,PriorityId")] Ticket ticket)
         {
             if (id != ticket.Id)
+                return NotFound();
+
+            if (!ModelState.IsValid)
             {
-    ViewBag.Users = new SelectList(
-        await _userManager.Users.Where(u => u.IsActive).ToListAsync(), 
-        "Id", "UserName", ticket.AssignedToUserId);
-
-    ViewBag.Statuses = new SelectList(
-        await _context.TicketStatuses.ToListAsync(), 
-        "Id", "StatusName", ticket.StatusID);
-
-    ViewBag.Priorities = new SelectList(
-        await _context.Priorities.ToListAsync(), 
-        "Id", "Name", ticket.PriorityId);
-
-    return View(ticket);
+                ViewBag.Users = new SelectList(await _userManager.Users.Where(u => u.IsActive).ToListAsync(), "Id", "UserName", ticket.AssignedToUserId);
+                ViewBag.Statuses = new SelectList(await _context.TicketStatuses.ToListAsync(), "Id", "StatusName", ticket.StatusID);
+                ViewBag.Priorities = new SelectList(await _context.Priorities.ToListAsync(), "Id", "Name", ticket.PriorityId);
+               
+                //return View(ticket);
             }
 
+            var existingTicket = await _context.Tickets.FirstOrDefaultAsync(t => t.Id == id);
+            if (existingTicket == null)
+                return NotFound();
 
-            if (ModelState.IsValid)
+            try
             {
-                try
-                {
-                    // Retrieve the existing ticket to preserve CreatedByID and CreatedDate
-                    var existingTicket = await _context.Tickets.AsNoTracking().FirstOrDefaultAsync(t => t.Id == id);
-                    if (existingTicket == null)
-                    {
-                        return NotFound();
-                    }
+                // Only update fields the user is allowed to change
+                existingTicket.Title = ticket.Title;
+                existingTicket.Description = ticket.Description;
+                existingTicket.AssignedToUserId = ticket.AssignedToUserId;
+                existingTicket.DueDate = ticket.DueDate;
+                existingTicket.StatusID = ticket.StatusID;
 
-                    // Manually set properties that are not bound or should be auto-updated
-                    ticket.CreatedByID = existingTicket.CreatedByID;
-                    ticket.CreatedDate = existingTicket.CreatedDate;
-                    ticket.TicketID = existingTicket.TicketID;
-                    ticket.TaskID = existingTicket.TaskID;
+                // Update metadata
+                var currentUser = await _userManager.GetUserAsync(User);
+                existingTicket.UpdatedBy = currentUser?.Id ?? "System";
+                existingTicket.UpdatedDate = DateTime.UtcNow;
 
-                    var currentUser = await _userManager.GetUserAsync(User);
-                    if (currentUser != null)
-                    {
-                        ticket.UpdatedBy = currentUser.Id; // Assuming UpdatedBy is also a UserId
-                    }
-                    else
-                    {
-                        ticket.UpdatedBy = "System";
-                    }// Set current user as updater
-                    ticket.UpdatedDate = DateTime.UtcNow; // Set update date
 
-                    _context.Update(ticket);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!TicketExists(ticket.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
+                await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
-
-          //      ViewBag.Users = new SelectList(await _userManager.Users.Where(u => u.IsActive).ToListAsync(), "Id", "UserName", ticket.AssignedToUserId);
-         //     ViewBag.Statuses = new SelectList(await _context.TicketStatuses.ToListAsync(), "Id", "Name", ticket.StatusID);
             }
-            // Repopulate ViewBag for dropdowns if model state is invalid
-           ViewBag.Users = new SelectList(await _userManager.Users.Where(u => u.IsActive).ToListAsync(), "Id", "UserName", ticket.AssignedToUserId);
-           ViewBag.Statuses = new SelectList(await _context.TicketStatuses.ToListAsync(), "Id", "Name", ticket.StatusID);
-            return View(ticket);
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!TicketExists(ticket.Id))
+                    return NotFound();
+                else
+                    throw;
+            }
         }
+
 
         // POST: Tickets1/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-       
+
 
 
         // GET: Tickets1/Delete/5
@@ -287,7 +227,25 @@ public async Task<IActionResult> Edit(int id, [Bind("Id,TicketID,Title,Descripti
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
-      
+        public static class PrioritySeeder
+        {
+            public static async Task SeedAsync(AppDbContext context)
+            {
+                if (!context.Priorities.Any())
+                {
+                    var defaultPriorities = new List<Priority>
+                {
+                    new Priority { Level = "Low" },
+                    new Priority { Level = "Medium" },
+                    new Priority { Level = "High" },
+                    new Priority { Level = "Critical" }
+                };
+
+                    context.Priorities.AddRange(defaultPriorities);
+                    await context.SaveChangesAsync();
+                }
+            }
+        }
         private bool TicketExists(int id)
         {
             return _context.Tickets.Any(e => e.Id == id);

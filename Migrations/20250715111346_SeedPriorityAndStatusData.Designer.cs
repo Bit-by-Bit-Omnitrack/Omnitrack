@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace UserRoles.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250714081941_Priority")]
-    partial class Priority
+    [Migration("20250715111346_SeedPriorityAndStatusData")]
+    partial class SeedPriorityAndStatusData
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -304,7 +304,7 @@ namespace UserRoles.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("Level")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -317,25 +317,25 @@ namespace UserRoles.Migrations
                         {
                             Id = 1,
                             Color = "#28a745",
-                            Name = "Low"
+                            Level = "Low"
                         },
                         new
                         {
                             Id = 2,
                             Color = "#ffc107",
-                            Name = "Medium"
+                            Level = "Medium"
                         },
                         new
                         {
                             Id = 3,
                             Color = "#fd7e14",
-                            Name = "High"
+                            Level = "High"
                         },
                         new
                         {
                             Id = 4,
                             Color = "#dc3545",
-                            Name = "Critical"
+                            Level = "Critical"
                         });
                 });
 

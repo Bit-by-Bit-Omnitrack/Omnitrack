@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace UserRoles.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250714074116_Omnitak")]
-    partial class Omnitak
+    [Migration("20250715102511_Priou")]
+    partial class Priou
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -304,13 +304,39 @@ namespace UserRoles.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("Level")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
                     b.ToTable("Priorities");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Color = "#28a745",
+                            Level = "Low"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Color = "#ffc107",
+                            Level = "Medium"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Color = "#fd7e14",
+                            Level = "High"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Color = "#dc3545",
+                            Level = "Critical"
+                        });
                 });
 
             modelBuilder.Entity("UserRoles.Models.Role", b =>

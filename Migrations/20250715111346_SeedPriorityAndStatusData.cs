@@ -5,7 +5,7 @@
 namespace UserRoles.Migrations
 {
     /// <inheritdoc />
-    public partial class buildingTicketSystem : Migration
+    public partial class SeedPriorityAndStatusData : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

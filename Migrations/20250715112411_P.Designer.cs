@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace UserRoles.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250711130514_ticketings")]
-    partial class ticketings
+    [Migration("20250715112411_P")]
+    partial class P
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -300,6 +300,10 @@ namespace UserRoles.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("Color")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Level")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -307,6 +311,32 @@ namespace UserRoles.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Priorities");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Color = "#28a745",
+                            Level = "Low"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Color = "#ffc107",
+                            Level = "Medium"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Color = "#fd7e14",
+                            Level = "High"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Color = "#dc3545",
+                            Level = "Critical"
+                        });
                 });
 
             modelBuilder.Entity("UserRoles.Models.Role", b =>
@@ -368,7 +398,7 @@ namespace UserRoles.Migrations
 
                     b.Property<string>("CreatedByID")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
@@ -379,6 +409,9 @@ namespace UserRoles.Migrations
 
                     b.Property<DateTime?>("DueDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<int>("PriorityId")
+                        .HasColumnType("int");
 
                     b.Property<int>("StatusID")
                         .HasColumnType("int");
@@ -407,6 +440,10 @@ namespace UserRoles.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("AssignedToUserId");
+
+                    b.HasIndex("CreatedByID");
+
+                    b.HasIndex("PriorityId");
 
                     b.HasIndex("StatusID");
 
@@ -449,9 +486,6 @@ namespace UserRoles.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("StatusID")
-                        .HasColumnType("int");
-
                     b.Property<string>("StatusName")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -460,6 +494,28 @@ namespace UserRoles.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("TicketStatuses");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            StatusName = "To Do"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            StatusName = "In Progress"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            StatusName = "Blocker"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            StatusName = "Done"
+                        });
                 });
 
             modelBuilder.Entity("UserRoles.Models.Users", b =>
@@ -614,6 +670,18 @@ namespace UserRoles.Migrations
                         .HasForeignKey("AssignedToUserId")
                         .OnDelete(DeleteBehavior.SetNull);
 
+                    b.HasOne("UserRoles.Models.Users", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedByID")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("UserRoles.Models.Priority", "Priority")
+                        .WithMany()
+                        .HasForeignKey("PriorityId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("UserRoles.Models.TicketStatus", "Status")
                         .WithMany()
                         .HasForeignKey("StatusID")
@@ -625,6 +693,10 @@ namespace UserRoles.Migrations
                         .HasForeignKey("TicketStatusId");
 
                     b.Navigation("AssignedToUser");
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("Priority");
 
                     b.Navigation("Status");
                 });
