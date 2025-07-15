@@ -5,7 +5,9 @@ using UserRoles.Models;
 
 namespace UserRoles.Controllers
 {
-    public class RolesController : Controller
+    [ApiController]
+    [Route("api/[controller]")]
+    public class RolesController : ControllerBase
     {
         private readonly AppDbContext _context;
 
@@ -14,104 +16,80 @@ namespace UserRoles.Controllers
             _context = context;
         }
 
-        // GET: Roles
-        public async Task<IActionResult> Index()
+        /// <summary>
+        /// Get all roles.
+        /// </summary>
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<Role>>> GetAllRoles()
         {
-            var roles = await _context.Roles.ToListAsync();
-            return View(roles);
+            return await _context.Roles.ToListAsync();
         }
 
-        // GET: Roles/Details/5
-        public async Task<IActionResult> Details(int? id)
+        /// <summary>
+        /// Get a specific role by ID.
+        /// </summary>
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Role>> GetRole(int id)
         {
-            if (id == null)
-                return NotFound();
-
             var role = await _context.Roles.FindAsync(id);
             if (role == null)
                 return NotFound();
 
-            return View(role);
+            return role;
         }
 
-        // GET: Roles/Create
-        public IActionResult Create()
-        {
-            return View();
-        }
-
-        // POST: Roles/Create
+        /// <summary>
+        /// Create a new role.
+        /// </summary>
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Role role)
+        public async Task<ActionResult<Role>> CreateRole(Role role)
         {
-            if (ModelState.IsValid)
-            {
-                _context.Roles.Add(role);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
+            _context.Roles.Add(role);
+            await _context.SaveChangesAsync();
 
-            return View(role);
+            return CreatedAtAction(nameof(GetRole), new { id = role.Id }, role);
         }
 
-        // GET: Roles/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-                return NotFound();
-
-            var role = await _context.Roles.FindAsync(id);
-            if (role == null)
-                return NotFound();
-
-            return View(role);
-        }
-
-        // POST: Roles/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Role role)
+        /// <summary>
+        /// Update an existing role.
+        /// </summary>
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateRole(int id, Role role)
         {
             if (id != role.Id)
-                return NotFound();
+                return BadRequest("ID mismatch");
 
-            if (ModelState.IsValid)
+            _context.Entry(role).State = EntityState.Modified;
+
+            try
             {
-                _context.Update(role);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!_context.Roles.Any(e => e.Id == id))
+                    return NotFound();
+
+                throw;
             }
 
-            return View(role);
+            return NoContent();
         }
 
-        // GET: Roles/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        /// <summary>
+        /// Delete a role by ID.
+        /// </summary>
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteRole(int id)
         {
-            if (id == null)
-                return NotFound();
-
             var role = await _context.Roles.FindAsync(id);
             if (role == null)
                 return NotFound();
 
-            return View(role);
-        }
+            _context.Roles.Remove(role);
+            await _context.SaveChangesAsync();
 
-        // POST: Roles/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var role = await _context.Roles.FindAsync(id);
-            if (role != null)
-            {
-                _context.Roles.Remove(role);
-                await _context.SaveChangesAsync();
-            }
-
-            return RedirectToAction(nameof(Index));
+            return NoContent();
         }
     }
 }
