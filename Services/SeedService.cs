@@ -2,7 +2,6 @@
 using Microsoft.EntityFrameworkCore;
 using UserRoles.Data;
 using UserRoles.Models;
-using UserRoles.Services; 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -19,18 +18,15 @@ namespace UserRoles.Services
             var logger = scope.ServiceProvider.GetRequiredService<ILogger<SeedService>>();
             var emailService = scope.ServiceProvider.GetRequiredService<IEmailService>();
 
-
             try
             {
                 logger.LogInformation("Ensuring the database is created.");
                 await context.Database.EnsureCreatedAsync();
 
                 logger.LogInformation("Seeding roles.");
-
                 await AddRoleAsync(roleManager, "System Administrator");
                 await AddRoleAsync(roleManager, "User");
 
-                //  List of admins 
                 var admins = new List<(string Email, string FullName)>
                 {
                     ("millicent9710@gmail.com", "Millicent Mogane"),
@@ -41,10 +37,8 @@ namespace UserRoles.Services
 
                 foreach (var (email, fullName) in admins)
                 {
-                    logger.LogInformation($"Checking if admin user {email} exists.");
-
-                    // DECLARED user OUTSIDE the if block
-                    Users user = await userManager.FindByEmailAsync(email);
+                    logger.LogInformation($"Processing admin user: {email}");
+                    var user = await userManager.FindByEmailAsync(email);
 
                     if (user == null)
                     {
@@ -57,41 +51,45 @@ namespace UserRoles.Services
                             NormalizedEmail = email.ToUpper(),
                             EmailConfirmed = true,
                             SecurityStamp = Guid.NewGuid().ToString(),
-                            IsActive = true // Activate admin accounts immediately
+                            IsActive = true
                         };
 
                         var result = await userManager.CreateAsync(user, "SecureAdmin@2025");
                         if (result.Succeeded)
                         {
-                            await userManager.AddToRoleAsync(user, "System Administrator");
-                            logger.LogInformation($"Created admin user: {email}");
-
-                            // Send welcome email
-                            var subject = "Welcome to OmniTrack!";
-                            var body = $@"
-                                <p>Welcome {fullName},</p>
-                                <p>Thank you for registering with <strong>OmniTrack</strong>.</p>
-                                <p>You have been registered successfully. Please wait for an admin to approve your account.</p>
-                                <p>Kind regards,<br/>OmniTrack Team</p>";
-
-                            await emailService.SendEmailAsync(email, subject, body);
+                            logger.LogInformation($"Created new admin: {email}");
                         }
                         else
                         {
-                            logger.LogError("Failed to create user {Email}: {Errors}", email, string.Join(", ", result.Errors.Select(e => e.Description)));
+                            logger.LogError("Failed to create admin user {Email}: {Errors}", email, string.Join(", ", result.Errors.Select(e => e.Description)));
+                            continue; // skip to next admin
                         }
                     }
                     else
                     {
-                        logger.LogInformation($"Admin user {email} already exists.");
+                        // Update existing user to confirm and activate
+                        user.FullName = fullName;
+                        user.EmailConfirmed = true;
+                        user.IsActive = true;
+                        await userManager.UpdateAsync(user);
+                        logger.LogInformation($"Updated existing user {email}: confirmed and activated.");
                     }
 
-                    // Ensure the role is assigned even if user already existed
                     if (!await userManager.IsInRoleAsync(user, "System Administrator"))
                     {
                         await userManager.AddToRoleAsync(user, "System Administrator");
-                        logger.LogInformation($"Assigned 'System Administrator' role to existing user: {email}");
+                        logger.LogInformation($"Assigned 'System Administrator' role to: {email}");
                     }
+
+                    // Send welcome email
+                    var subject = "Welcome to OmniTrack!";
+                    var body = $@"
+                        <p>Welcome {fullName},</p>
+                        <p>Thank you for registering with <strong>OmniTrack</strong>.</p>
+                        <p>You have been registered successfully as a System Administrator.</p>
+                        <p>Kind regards,<br/>OmniTrack Team</p>";
+
+                    await emailService.SendEmailAsync(email, subject, body);
                 }
             }
             catch (Exception ex)

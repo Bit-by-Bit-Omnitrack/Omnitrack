@@ -75,7 +75,7 @@ namespace UserRoles.Controllers
         [HttpGet]
         public IActionResult Register()
         {
-            ViewBag.Roles = new List<string> { "System Administrator", "Developer", "Tester", "Project Leader" };
+            ViewBag.Roles = new List<string> { "Developer", "Tester", "Project Leader" };
             return View();
         }
 
@@ -84,7 +84,7 @@ namespace UserRoles.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(RegisterViewModel model)
         {
-            ViewBag.Roles = new List<string> { "System Administrator", "Developer", "Tester", "Project Leader" };
+            ViewBag.Roles = new List<string> {"Developer", "Tester", "Project Leader" };
 
             if (!ModelState.IsValid)
                 return View(model);

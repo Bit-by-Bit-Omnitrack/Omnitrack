@@ -50,6 +50,7 @@ builder.Services.AddIdentity<Users, IdentityRole>(options =>
 .AddDefaultTokenProviders();
 builder.Services.ConfigureApplicationCookie(options =>
 {
+    options.LoginPath = "/Account/Login"; // explicitly set login path
     options.AccessDeniedPath = "/Account/AccessDenied";
 });
 
@@ -58,16 +59,12 @@ var app = builder.Build();
 // ?? Auto-create database on first run
 using (var scope = app.Services.CreateScope())
 {
-    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    dbContext.Database.Migrate(); // Applies pending migrations and creates DB if needed
+    var services = scope.ServiceProvider;
+    var dbContext = services.GetRequiredService<AppDbContext>();
+    dbContext.Database.Migrate(); // Applies migrations
+    await SeedService.SeedDatabase(services); // Run seeding inside same scope
 }
 
-// Seed admin users and roles
-using (var scope = app.Services.CreateScope())
-{
-    var services = scope.ServiceProvider;
-    await SeedService.SeedDatabase(services);
-}
 
 
 // Configure the HTTP request pipeline.
@@ -90,16 +87,18 @@ else
 }
 
 app.UseHttpsRedirection();
+app.UseStaticFiles(); // added static files middleware
+
 app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapStaticAssets();
+
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Account}/{action=Login}/{id?}")
-    .WithStaticAssets();
+    pattern: "{controller=Account}/{action=Login}/{id?}");
+    
 
 app.Run();
