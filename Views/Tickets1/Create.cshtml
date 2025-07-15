@@ -30,7 +30,13 @@
                 </select>
                 <span asp-validation-for="AssignedToUserId" class="text-danger"></span>
             </div>
-                 
+            <div class="form-group">
+                <label for="PriorityId">Priority</label>
+                <select asp-for="PriorityId" class="form-control" asp-items="ViewBag.Priorities">
+                    <option value="">-- Select Priority --</option>
+                </select>
+                <span asp-validation-for="PriorityId" class="text-danger"></span>
+            </div>
         
             <div class="form-group">
                 <label asp-for="DueDate" class="control-label"></label>
