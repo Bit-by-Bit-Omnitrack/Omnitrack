@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace UserRoles.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250714053840_AppTasks")]
-    partial class AppTasks
+    [Migration("20250711181829_building Ticket System")]
+    partial class buildingTicketSystem
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -451,6 +451,9 @@ namespace UserRoles.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("StatusID")
+                        .HasColumnType("int");
+
                     b.Property<string>("StatusName")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -459,28 +462,6 @@ namespace UserRoles.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("TicketStatuses");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            StatusName = "To Do"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            StatusName = "In Progress"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            StatusName = "Blocker"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            StatusName = "Done"
-                        });
                 });
 
             modelBuilder.Entity("UserRoles.Models.Users", b =>

@@ -3,12 +3,10 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
-
 namespace UserRoles.Migrations
 {
     /// <inheritdoc />
-    public partial class Ticketing : Migration
+    public partial class ticketing : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -150,6 +148,7 @@ namespace UserRoles.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
+                    StatusID = table.Column<int>(type: "int", nullable: false),
                     StatusName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false)
                 },
                 constraints: table =>
@@ -314,9 +313,6 @@ namespace UserRoles.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     TicketID = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    DueDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     StatusID = table.Column<int>(type: "int", nullable: false),
                     TaskID = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatedByID = table.Column<string>(type: "nvarchar(450)", nullable: false),
@@ -324,6 +320,9 @@ namespace UserRoles.Migrations
                     UpdatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     AssignedToUserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    DueDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     TicketStatusId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
@@ -378,17 +377,6 @@ namespace UserRoles.Migrations
                         principalTable: "Tickets",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.InsertData(
-                table: "TicketStatuses",
-                columns: new[] { "Id", "StatusName" },
-                values: new object[,]
-                {
-                    { 1, "To Do" },
-                    { 2, "In Progress" },
-                    { 3, "Blocker" },
-                    { 4, "Done" }
                 });
 
             migrationBuilder.CreateIndex(

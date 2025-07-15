@@ -4,9 +4,9 @@
     ViewData["Title"] = "Tickets Dashboard";
     var statuses = new[] {
         new { Id = 1, Name = "To Do", Color = "bg-info" },
-        new { Id = 2, Name = "In Progress", Color = "bg-warning" },
-        new { Id = 3, Name = "Blocker", Color = "bg-danger" },
-        new { Id = 4, Name = "Completed", Color = "bg-success" }
+        new { Id = 2, Name = "In Progress", Color = "bg-success" },
+        new { Id = 3, Name = "Complete", Color = "bg-warning" },
+        new { Id = 4, Name = "Blocked", Color = "bg-danger" }
     };
 }
 
@@ -27,14 +27,13 @@
                 <div class="small-box @status.Color">
                     <div class="inner">
                         <h5>@ticket.Title</h5>
-                        <strong>Description:</strong> @ticket.Description <br />
                         <strong>Assigned To:</strong> @ticket.AssignedToUser?.UserName <br />
                         <strong>Created:</strong> @ticket.CreatedDate.ToString("yyyy-MM-dd") <br />
                         <strong>Due:</strong> @(ticket.DueDate?.ToString("yyyy-MM-dd") ?? "N/A") <br />
                         <strong>Updated:</strong> @(ticket.UpdatedDate?.ToString("yyyy-MM-dd") ?? "N/A") <br />
-                        <span class="badge" style="background-color:@ticket.Priority.Color">@ticket.Priority.Name</span>
                     </div>
                     <a asp-action="Details" asp-route-id="@ticket.Id" class="small-box-footer">
+
                         More Info <i class="fas fa-arrow-circle-right"></i>
                     </a>
                 </div>
@@ -42,7 +41,3 @@
         </div>
     }
 </div>
-<form method="get" asp-action="Index" class="form-inline mb-3">
-    <input type="text" name="searchTerm" class="form-control mr-2" value="@ViewBag.SearchTerm" placeholder="Search tickets..." />
-    <button type="submit" class="btn btn-primary">Search</button>
-</form>

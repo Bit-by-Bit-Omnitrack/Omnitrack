@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -138,8 +138,7 @@ return View();
            return View(ticket);
         }
 
-        // GET: Tickets1/Edit/5
-       [HttpGet]
+        [HttpGet]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -153,67 +152,106 @@ return View();
                 return NotFound();
             }
 
-            ViewBag.Users = new SelectList(await _userManager.Users
-                .Where(u => u.IsActive).ToListAsync(), "Id", "UserName", ticket.AssignedToUserId);
+            // Populate dropdowns (just like in POST)
+            ViewBag.Users = new SelectList(
+                await _userManager.Users.Where(u => u.IsActive).ToListAsync(),
+                "Id", "UserName", ticket.AssignedToUserId);
+                  ViewBag.Users = new SelectList(
+                      await _userManager.Users.Where(u => u.IsActive).ToListAsync(), 
+                      "Id", "UserName", ticket.AssignedToUserId);
 
-            ViewBag.Statuses = new SelectList(await _context.TicketStatuses
-                .ToListAsync(), "Id", "StatusName", ticket.StatusID);
-             ViewBag.Priorities = new SelectList(await _context.Priorities.ToListAsync(), "Id", "Name", ticket.PriorityId);
+                  ViewBag.Statuses = new SelectList(
+                      await _context.TicketStatuses.ToListAsync(), 
+                      "Id", "StatusName", ticket.StatusID);
+
+                  ViewBag.Priorities = new SelectList(
+                      await _context.Priorities.ToListAsync(), 
+                      "Id", "Name", ticket.PriorityId);
+
+                  return View(ticket);
+        }
+        // GET: Tickets1/Edit/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+[HttpPost]
+[ValidateAntiForgeryToken]
+public async Task<IActionResult> Edit(int id, [Bind("Id,TicketID,Title,Description,StatusID,TaskID,CreatedByID,CreatedDate,DueDate,AssignedToUserId,PriorityId")] Ticket ticket)
+        {
+            if (id != ticket.Id)
+            {
+    ViewBag.Users = new SelectList(
+        await _userManager.Users.Where(u => u.IsActive).ToListAsync(), 
+        "Id", "UserName", ticket.AssignedToUserId);
+
+    ViewBag.Statuses = new SelectList(
+        await _context.TicketStatuses.ToListAsync(), 
+        "Id", "StatusName", ticket.StatusID);
+
+    ViewBag.Priorities = new SelectList(
+        await _context.Priorities.ToListAsync(), 
+        "Id", "Name", ticket.PriorityId);
+
+    return View(ticket);
+            }
+
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    // Retrieve the existing ticket to preserve CreatedByID and CreatedDate
+                    var existingTicket = await _context.Tickets.AsNoTracking().FirstOrDefaultAsync(t => t.Id == id);
+                    if (existingTicket == null)
+                    {
+                        return NotFound();
+                    }
+
+                    // Manually set properties that are not bound or should be auto-updated
+                    ticket.CreatedByID = existingTicket.CreatedByID;
+                    ticket.CreatedDate = existingTicket.CreatedDate;
+                    ticket.TicketID = existingTicket.TicketID;
+                    ticket.TaskID = existingTicket.TaskID;
+
+                    var currentUser = await _userManager.GetUserAsync(User);
+                    if (currentUser != null)
+                    {
+                        ticket.UpdatedBy = currentUser.Id; // Assuming UpdatedBy is also a UserId
+                    }
+                    else
+                    {
+                        ticket.UpdatedBy = "System";
+                    }// Set current user as updater
+                    ticket.UpdatedDate = DateTime.UtcNow; // Set update date
+
+                    _context.Update(ticket);
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!TicketExists(ticket.Id))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+                return RedirectToAction(nameof(Index));
+
+          //      ViewBag.Users = new SelectList(await _userManager.Users.Where(u => u.IsActive).ToListAsync(), "Id", "UserName", ticket.AssignedToUserId);
+         //     ViewBag.Statuses = new SelectList(await _context.TicketStatuses.ToListAsync(), "Id", "Name", ticket.StatusID);
+            }
+            // Repopulate ViewBag for dropdowns if model state is invalid
+           ViewBag.Users = new SelectList(await _userManager.Users.Where(u => u.IsActive).ToListAsync(), "Id", "UserName", ticket.AssignedToUserId);
+           ViewBag.Statuses = new SelectList(await _context.TicketStatuses.ToListAsync(), "Id", "Name", ticket.StatusID);
             return View(ticket);
         }
 
         // POST: Tickets1/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Description,AssignedToUserId,DueDate,StatusID,PriorityId")] Ticket ticket)
-        {
-            if (id != ticket.Id)
-                return NotFound();
-
-            if (!ModelState.IsValid)
-            {
-                ViewBag.Users = new SelectList(await _userManager.Users.Where(u => u.IsActive).ToListAsync(), "Id", "UserName", ticket.AssignedToUserId);
-                ViewBag.Statuses = new SelectList(await _context.TicketStatuses.ToListAsync(), "Id", "StatusName", ticket.StatusID);
-                ViewBag.Priorities = new SelectList(await _context.Priorities.ToListAsync(), "Id", "Name", ticket.PriorityId);
-               //return View(ticket);
-            }
-
-            var existingTicket = await _context.Tickets.FirstOrDefaultAsync(t => t.Id == id);
-            if (existingTicket == null)
-                return NotFound();
-
-            try
-            {
-                // Only update fields the user is allowed to change
-                existingTicket.Title = ticket.Title;
-                existingTicket.Description = ticket.Description;
-                existingTicket.AssignedToUserId = ticket.AssignedToUserId;
-                existingTicket.DueDate = ticket.DueDate;
-                existingTicket.StatusID = ticket.StatusID;
-
-                // Update metadata
-                var currentUser = await _userManager.GetUserAsync(User);
-                existingTicket.UpdatedBy = currentUser?.Id ?? "System";
-                existingTicket.UpdatedDate = DateTime.UtcNow;
-
-                
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!TicketExists(ticket.Id))
-                    return NotFound();
-                else
-                    throw;
-            }
-        }
-
-
-        // POST: Tickets1/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-
+       
 
 
         // GET: Tickets1/Delete/5

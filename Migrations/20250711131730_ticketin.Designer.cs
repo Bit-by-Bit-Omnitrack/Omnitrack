@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace UserRoles.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250711131730_ticketin")]
+    partial class ticketin
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -304,32 +307,6 @@ namespace UserRoles.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Priorities");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Color = "#28a745",
-                            Name = "Low"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Color = "#ffc107",
-                            Name = "Medium"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Color = "#fd7e14",
-                            Name = "High"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            Color = "#dc3545",
-                            Name = "Critical"
-                        });
                 });
 
             modelBuilder.Entity("UserRoles.Models.Role", b =>
@@ -474,6 +451,9 @@ namespace UserRoles.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("StatusID")
+                        .HasColumnType("int");
+
                     b.Property<string>("StatusName")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -482,28 +462,6 @@ namespace UserRoles.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("TicketStatuses");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            StatusName = "To Do"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            StatusName = "In Progress"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            StatusName = "Blocker"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            StatusName = "Done"
-                        });
                 });
 
             modelBuilder.Entity("UserRoles.Models.Users", b =>

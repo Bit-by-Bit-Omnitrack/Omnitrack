@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace UserRoles.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250711183502_building Ticket Systems")]
+    partial class buildingTicketSystems
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -304,32 +307,6 @@ namespace UserRoles.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Priorities");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Color = "#28a745",
-                            Name = "Low"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Color = "#ffc107",
-                            Name = "Medium"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Color = "#fd7e14",
-                            Name = "High"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            Color = "#dc3545",
-                            Name = "Critical"
-                        });
                 });
 
             modelBuilder.Entity("UserRoles.Models.Role", b =>

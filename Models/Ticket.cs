@@ -1,4 +1,4 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace UserRoles.Models
@@ -16,12 +16,9 @@ namespace UserRoles.Models
         public string TaskID { get; set; }
 
         // Use this for the creator's User ID
-        //  [ForeignKey("CreatedByID")]
-        [Editable(false)]
         public string CreatedByID { get; set; }
         [ForeignKey("CreatedByID")]
-       
-        public Users? CreatedByUser { get; set; } // Navigation property to the creator
+       public Users CreatedByUser { get; set; } // Navigation property to the creator
 
         public DateTime CreatedDate { get; set; }
        
@@ -32,11 +29,11 @@ namespace UserRoles.Models
         public string? AssignedToUserId { get; set; } // Make nullable
 
         [ForeignKey("AssignedToUserId")]
-        public Users? AssignedToUser { get; set; }
+        public Users AssignedToUser { get; set; }
 
       //   Navigation property for Status
         [ForeignKey("StatusID")]
-      public TicketStatus? Status { get; set; }
+      public TicketStatus Status { get; set; }
       
      
     }
