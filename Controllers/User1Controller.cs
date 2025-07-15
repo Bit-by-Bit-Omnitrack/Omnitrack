@@ -16,12 +16,24 @@ namespace UserRoles.Controllers
         {
             _userManager = userManager;
         }
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            var users = _userManager.Users.Where(u => u.IsActive).ToList();
-            return View(users);
+            var users = await _userManager.Users.Where(u => u.IsActive).ToListAsync();
+            var userRoles = new List<UserWithRolesViewModel>();
+
+            foreach (var user in users)
+            {
+                var roles = await _userManager.GetRolesAsync(user);
+                userRoles.Add(new UserWithRolesViewModel
+                {
+                    User = user,
+                    Roles = roles
+                });
+            }
+
+            return View(userRoles);
         }
-       
+
 
 
         [HttpGet("Users/Edit/{id}")]
@@ -119,8 +131,28 @@ namespace UserRoles.Controllers
 
             return RedirectToAction(nameof(Authenticate));
         }
+        [HttpPost]
+      
+        public async Task<IActionResult> Reject(string id)
+        {
+            if (string.IsNullOrEmpty(id)) return NotFound();
 
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null) return NotFound();
 
+            var result = await _userManager.DeleteAsync(user);
+
+            if (result.Succeeded)
+            {
+                TempData["RejectMessage"] = "User has been rejected";
+            }
+            else
+            {
+                TempData["RejectMessage"] = "Failed to reject user.";
+            }
+
+            return RedirectToAction(nameof(Authenticate));
+        }
 
     }
 }

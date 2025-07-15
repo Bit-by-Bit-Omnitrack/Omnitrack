@@ -5,7 +5,9 @@ using UserRoles.Models;
 
 namespace UserRoles.Controllers
 {
-    public class AppTaskController : Controller
+    [ApiController]
+    [Route("api/[controller]")]
+    public class AppTaskController : ControllerBase
     {
         private readonly AppDbContext _context;
 
@@ -14,96 +16,80 @@ namespace UserRoles.Controllers
             _context = context;
         }
 
-        // GET: /AppTask
-        public async Task<IActionResult> Index()
+        /// <summary>
+        /// Get all tasks.
+        /// </summary>
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<AppTask>>> GetAllTasks()
         {
-            return View(await _context.AppTask.ToListAsync());
+            return await _context.AppTask.ToListAsync();
         }
 
-        // GET: /AppTask/Details/5
-        public async Task<IActionResult> Details(int? id)
+        /// <summary>
+        /// Get a task by ID.
+        /// </summary>
+        [HttpGet("{id}")]
+        public async Task<ActionResult<AppTask>> GetTask(int id)
         {
-            if (id == null) return NotFound();
-
             var task = await _context.AppTask.FindAsync(id);
-            if (task == null) return NotFound();
+            if (task == null)
+                return NotFound();
 
-            return View(task);
+            return task;
         }
 
-        // GET: /AppTask/Create
-        public IActionResult Create()
-        {
-            return View();
-        }
-
-        // POST: /AppTask/Create
+        /// <summary>
+        /// Create a new task.
+        /// </summary>
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(AppTask task)
+        public async Task<ActionResult<AppTask>> CreateTask(AppTask task)
         {
-            if (ModelState.IsValid)
+            _context.AppTask.Add(task);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction(nameof(GetTask), new { id = task.Id }, task);
+        }
+
+        /// <summary>
+        /// Update an existing task.
+        /// </summary>
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateTask(int id, AppTask task)
+        {
+            if (id != task.Id)
+                return BadRequest("Task ID mismatch.");
+
+            _context.Entry(task).State = EntityState.Modified;
+
+            try
             {
-                _context.AppTask.Add(task);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-
-            return View(task);
-        }
-
-        // GET: /AppTask/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null) return NotFound();
-
-            var task = await _context.AppTask.FindAsync(id);
-            if (task == null) return NotFound();
-
-            return View(task);
-        }
-
-        // POST: /AppTask/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, AppTask task)
-        {
-            if (id != task.Id) return NotFound();
-
-            if (ModelState.IsValid)
-            {
-                _context.Update(task);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-
-            return View(task);
-        }
-
-        // GET: /AppTask/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null) return NotFound();
-
-            var task = await _context.AppTask.FindAsync(id);
-            if (task == null) return NotFound();
-
-            return View(task);
-        }
-
-        // POST: /AppTask/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var task = await _context.AppTask.FindAsync(id);
-            if (task != null)
-            {
-                _context.AppTask.Remove(task);
                 await _context.SaveChangesAsync();
             }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!_context.AppTask.Any(t => t.Id == id))
+                    return NotFound();
 
-            return RedirectToAction(nameof(Index));
+                throw;
+            }
+
+            return NoContent();
+        }
+
+        /// <summary>
+        /// Delete a task by ID.
+        /// </summary>
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteTask(int id)
+        {
+            var task = await _context.AppTask.FindAsync(id);
+            if (task == null)
+                return NotFound();
+
+            _context.AppTask.Remove(task);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
         }
     }
 }
