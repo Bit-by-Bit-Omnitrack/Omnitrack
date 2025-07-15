@@ -5,7 +5,8 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using UserRoles.Data;
-using UserRoles.Models.Domain;
+using UserRoles.Models;
+
 
 namespace UserRoles.Controllers
 {
@@ -22,7 +23,7 @@ namespace UserRoles.Controllers
         // this shows a list of all users in the system
         public async Task<IActionResult> Index()
         {
-            var users = await _context.UsersTable.ToListAsync();
+            var users = await _context.Users.ToListAsync(); // changed from UsersTable to Users (DbSet<Users>)
             return View(users);
         }
 
@@ -35,7 +36,8 @@ namespace UserRoles.Controllers
         // this saves the new user to the database
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(User user)
+        public async Task<IActionResult> Create(Users user) //  renamed method to Create and corrected model name
+
         {
             if (ModelState.IsValid)
             {
@@ -51,9 +53,9 @@ namespace UserRoles.Controllers
         }
 
         // loads the edit page for a selected user
-        public async Task<IActionResult> Edit(Guid id)
+        public async Task<IActionResult> Edit(string id)
         {
-            var user = await _context.UsersTable.FindAsync(id);
+            var user = await _context.Users.FindAsync(id);
             if (user == null)
                 return NotFound();
 
@@ -63,10 +65,11 @@ namespace UserRoles.Controllers
         // updates the user's info after editing
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id, User user)
+        public async Task<IActionResult> Edit(string id, Users user)
+
         {
             if (id != user.Id)
-                return NotFound();
+                    return NotFound();
 
             if (ModelState.IsValid)
             {
@@ -79,7 +82,7 @@ namespace UserRoles.Controllers
                 catch (DbUpdateConcurrencyException)
                 {
                     // make sure the user wasn't deleted in the meantime
-                    if (!_context.UsersTable.Any(e => e.Id == id))
+                    if (!_context.Users.Any(e => e.Id == id))
                         return NotFound();
                     else
                         throw;
@@ -92,7 +95,7 @@ namespace UserRoles.Controllers
         }
 
         // shows full info about a specific user
-        public async Task<IActionResult> Details(Guid id)
+        public async Task<IActionResult> Details(string id)
         {
             var user = await _context.UsersTable.FirstOrDefaultAsync(m => m.Id == id);
             if (user == null)
@@ -102,7 +105,7 @@ namespace UserRoles.Controllers
         }
 
         // loads the confirmation page before deleting a user
-        public async Task<IActionResult> Delete(Guid id)
+        public async Task<IActionResult> Delete(string id)
         {
             var user = await _context.UsersTable.FirstOrDefaultAsync(m => m.Id == id);
             if (user == null)
@@ -114,12 +117,12 @@ namespace UserRoles.Controllers
         // deletes the user after confirmation
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(Guid id)
+        public async Task<IActionResult> DeleteConfirmed(string id)
         {
-            var user = await _context.UsersTable.FindAsync(id);
+            var user = await _context.Users.FindAsync(id); // changed from UsersTable
             if (user != null)
             {
-                _context.UsersTable.Remove(user);
+                _context.Users.Remove(user); // changed from UsersTable
                 await _context.SaveChangesAsync();
             }
 
@@ -128,9 +131,9 @@ namespace UserRoles.Controllers
 
         // this activates a user after admin approval
         [HttpPost]
-        public async Task<IActionResult> Approve(Guid id)
+        public async Task<IActionResult> Approve(string id)
         {
-            var user = await _context.UsersTable.FindAsync(id);
+            var user = await _context.Users.FindAsync(id); // changed from UsersTable
             if (user != null)
             {
                 user.IsActive = true; // approving user by setting them active
@@ -142,9 +145,9 @@ namespace UserRoles.Controllers
 
         // this deactivates a user (used for rejecting them)
         [HttpPost]
-        public async Task<IActionResult> Reject(Guid id)
+        public async Task<IActionResult> Reject(string id) // changed Guid to string
         {
-            var user = await _context.UsersTable.FindAsync(id);
+            var user = await _context.Users.FindAsync(id); // changed from UsersTable
             if (user != null)
             {
                 user.IsActive = false; // rejecting user by making them inactive

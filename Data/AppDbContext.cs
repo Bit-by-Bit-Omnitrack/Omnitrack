@@ -25,6 +25,7 @@ namespace UserRoles.Data
         public DbSet<UserRoles.Models.Checklists> Checklists { get; set; } = default!;
 
         public DbSet<UserRoles.Models.Comments> Comments { get; set; } = default!;
+        public DbSet<Users> UsersTable { get; set; } = default!;
         // public DbSet<UserRoles.Models.User> User { get; set; } = default!;
         // public DbSet<RegisterViewModel> AspNetUsers { get; set; }
         public DbSet<Role> Roles { get; set; } = default!;

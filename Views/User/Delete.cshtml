@@ -1,5 +1,4 @@
-﻿@model UserRoles.Models.Domain.User
-
+﻿@model UserRoles.Models.Users
 
 @{
     ViewData["Title"] = "Delete User";
@@ -11,11 +10,14 @@
 
 <hr />
 <dl class="row">
-    <dt class="col-sm-3">Name</dt>
-    <dd class="col-sm-9">@Model.FirstName @Model.LastName</dd>
+    <dt class="col-sm-3">Full Name</dt>
+    <dd class="col-sm-9">@Model.FullName</dd>
 
     <dt class="col-sm-3">Email</dt>
-    <dd class="col-sm-9">@Model.EmailAddress</dd>
+    <dd class="col-sm-9">@Model.Email</dd>
+
+    <dt class="col-sm-3">Username</dt>
+    <dd class="col-sm-9">@Model.UserName</dd>
 </dl>
 
 <form asp-action="Delete">

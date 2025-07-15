@@ -1,5 +1,4 @@
-﻿@model UserRoles.Models.Domain.User
-
+﻿@model UserRoles.Models.Users
 
 @{
     ViewData["Title"] = "User Details";
@@ -9,20 +8,20 @@
 
 <hr />
 <dl class="row">
-    <dt class="col-sm-3">First Name</dt>
-    <dd class="col-sm-9">@Model.FirstName</dd>
-
-    <dt class="col-sm-3">Last Name</dt>
-    <dd class="col-sm-9">@Model.LastName</dd>
+    <dt class="col-sm-3">Full Name</dt>
+    <dd class="col-sm-9">@Model.FullName</dd>
 
     <dt class="col-sm-3">Email</dt>
-    <dd class="col-sm-9">@Model.EmailAddress</dd>
+    <dd class="col-sm-9">@Model.Email</dd>
 
-    <dt class="col-sm-3">Phone</dt>
+    <dt class="col-sm-3">Username</dt>
+    <dd class="col-sm-9">@Model.UserName</dd>
+
+    <dt class="col-sm-3">Phone Number</dt>
     <dd class="col-sm-9">@Model.PhoneNumber</dd>
 
-    <dt class="col-sm-3">Role</dt>
-    <dd class="col-sm-9">@Model.Role</dd>
+    <dt class="col-sm-3">Active?</dt>
+    <dd class="col-sm-9">@Model.IsActive</dd>
 </dl>
 
 <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Edit</a>

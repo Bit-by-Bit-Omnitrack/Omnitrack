@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using UserRoles.Models;
 using UserRoles.ViewModels;
+using UserRoles.Services; // Added to recognize IEmailService
 
 namespace UserRoles.Controllers
 {
@@ -10,13 +11,15 @@ namespace UserRoles.Controllers
         private readonly SignInManager<Users> signInManager;
         private readonly UserManager<Users> userManager;
         private readonly RoleManager<IdentityRole> roleManager;
+        private readonly IEmailService emailService; //  Added this line to declare email service
 
         // Injecting identity services into this controller
-        public AccountController(SignInManager<Users> signInManager, UserManager<Users> userManager, RoleManager<IdentityRole> roleManager)
+        public AccountController(SignInManager<Users> signInManager, UserManager<Users> userManager, RoleManager<IdentityRole> roleManager, IEmailService emailService) // Injected email service
         {
             this.signInManager = signInManager;
             this.userManager = userManager;
             this.roleManager = roleManager;
+            this.emailService = emailService; // Assigned injected email service
         }
 
         // Load the login form
@@ -94,7 +97,7 @@ namespace UserRoles.Controllers
                 Email = model.Email,
                 NormalizedUserName = model.Email.ToUpper(),
                 NormalizedEmail = model.Email.ToUpper(),
-                IsActive = false // They won�t be able to log in until admin approves
+                IsActive = false
             };
 
             var result = await userManager.CreateAsync(user, model.Password);
