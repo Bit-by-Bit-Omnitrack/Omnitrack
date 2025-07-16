@@ -84,12 +84,11 @@ namespace UserRoles.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(RegisterViewModel model)
         {
-            ViewBag.Roles = new List<string> {"Developer", "Tester", "Project Leader" };
+            ViewBag.Roles = new List<string> { "Developer", "Tester", "Project Leader" };
 
             if (!ModelState.IsValid)
                 return View(model);
 
-            // New user gets created in the system with IsActive = false
             var user = new Users
             {
                 FullName = model.Name,
@@ -104,44 +103,39 @@ namespace UserRoles.Controllers
 
             if (result.Succeeded)
             {
-                // Create the role if it doesn't exist yet
+                // Create role if it doesn't exist
                 var roleExists = await roleManager.RoleExistsAsync(model.Role);
                 if (!roleExists)
                 {
                     await roleManager.CreateAsync(new IdentityRole(model.Role));
                 }
 
-                // Add user to selected role
+                // Add user to role
                 await userManager.AddToRoleAsync(user, model.Role);
 
-                // Generate the email confirmation token
-                var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
-
-                // Build confirmation URL to ConfirmEmail action
-                var confirmationLink = Url.Action("ConfirmEmail", "Account", new { userId = user.Id, token = token }, Request.Scheme);
-
-                // Try sending email – if it fails, still keep user registered
+                // Send welcome email (no confirmation token/link required)
                 try
                 {
                     await emailService.SendEmailAsync(
                         user.Email,
-                        "Confirm your email - OmniTrack",
-                        $"Hi {user.FullName},\n\nThank you for registering with OmniTrack! Please confirm your email by clicking the link below:\n\n{confirmationLink}\n\nTrace Every Task. Own Every Outcome.");
+                        "Welcome to OmniTrack!",
+                        $@"
+                    <p>Welcome {user.FullName},</p>
+                    <p>Thank you for registering with <strong>OmniTrack</strong>.</p>
+                    <p>You have been registered successfully as a <strong>{model.Role}</strong>.</p>
+                    <p>You will be notified once your account is approved.</p>
+                    <p>Kind regards,<br/>OmniTrack Team</p>");
                 }
                 catch (Exception ex)
                 {
-                    // log the exception or show a fallback message
-                    ModelState.AddModelError("", "User registered but confirmation email failed to send. Please contact support.");
-                    return View(model);
+                    TempData["Message"] = "User registered but welcome email failed to send.";
                 }
 
-
-                // Redirect to a page telling user to check email for confirmation
-                return RedirectToAction("RegistrationSuccessful");
-
+                // Redirect user to Pending Approval screen
+                return RedirectToAction("PendingApproval", "Account");
             }
 
-            // Display any validation errors
+            // If we get here, registration failed – show errors
             foreach (var error in result.Errors)
             {
                 ModelState.AddModelError(string.Empty, error.Description);
@@ -149,6 +143,7 @@ namespace UserRoles.Controllers
 
             return View(model);
         }
+
 
         // Show a 403 screen if a user isn't allowed to do something
         [HttpGet]
