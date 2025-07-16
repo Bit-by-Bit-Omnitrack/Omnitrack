@@ -18,12 +18,14 @@ else
             <tr>
                 <th>Full Name</th>
                 <th>Email</th>
-                <th>Actions</th>
+                <th>Approve</th>
+                <th>Reject</th>
             </tr>
         </thead>
         <tbody>
             @foreach (var user in Model.Where(u => !u.IsActive))
             {
+               
                 <tr>
                     <td>@user.FullName</td>
                     <td>@user.Email</td>
@@ -51,7 +53,27 @@ else
                             </form>
                         </div>
                     </td>
+                    <td>
+                        <form asp-action="Reject" method="post" style="display:inline-block; margin-left: 5px;">
+                            <input type="hidden" name="id" value="@user.Id" />
+                            <button type="submit" class="btn btn-danger btn-sm">
+                                <i class="fa fa-times"></i> Reject
+                            </button>
+                        </form>
+                    </td>
                 </tr>
+                @if (TempData["Message"] != null)
+                {
+                    <div class="alert alert-success">
+                        @TempData["Message"]
+                    </div>
+                }
+                @if (TempData["RejectMessage"] != null)
+                {
+                    <div class="alert alert-danger">
+                        @TempData["RejectMessage"]
+                    </div>
+                }
             }
         </tbody>
     </table>

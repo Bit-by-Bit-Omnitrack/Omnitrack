@@ -29,6 +29,7 @@
     <link rel="stylesheet" href="~/AdminLTE/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css">
     <link rel="stylesheet" href="~/AdminLTE/plugins/datatables-responsive/css/responsive.bootstrap4.min.css">
     <link rel="stylesheet" href="~/AdminLTE//plugins/datatables-buttons/css/buttons.bootstrap4.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 </head>
 <body class="hold-transition sidebar-mini layout-fixed">
     <div class="wrapper">
@@ -122,17 +123,21 @@
                         <!-- Authenticate Users -->
                         <li class="nav-item">
                             <a asp-controller="User1" asp-action="Authenticate" class="nav-link">
-                                <i class="nav-icon fas fa-th"></i>
-                                <p>Authenticate Users</p>
+                                <i class="fa-solid fa-check"></i>
+                                <p>
+                                    Authenticate Users
+                                </p>
                             </a>
                         </li>
 
                         <!-- Authenticated Users -->
                         <li class="nav-item">
                             <a asp-controller="User1" asp-action="Index" class="nav-link">
-                                <i class="nav-icon fas fa-th"></i>
-                                <p>Authenticated Users</p>
-                            </a>
+                            
+                          <i class="fa-solid fa-users"></i>
+                                <p>
+                                    Users
+                                </p>      
                         </li>
 
                         <!-- Rejected Users -->
