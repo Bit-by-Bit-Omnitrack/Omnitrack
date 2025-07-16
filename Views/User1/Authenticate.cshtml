@@ -39,25 +39,15 @@ else
                                 </button>
                             </form>
 
-                            <!-- View (goes to User/Details/id) -->
-                            <a asp-controller="User" asp-action="Details" asp-route-id="@user.Id" class="btn btn-warning btn-sm">
-                                View
-                            </a>
 
-                            <!-- Reject -->
-                            <form asp-action="Reject" method="post">
-                                <input type="hidden" name="id" value="@user.Id" />
-                                <button type="submit" class="btn btn-danger btn-sm">
-                                    Reject
-                                </button>
-                            </form>
                         </div>
                     </td>
                     <td>
-                        <form asp-action="Reject" method="post" style="display:inline-block; margin-left: 5px;">
+                        <!-- Reject -->
+                        <form asp-action="Reject" method="post">
                             <input type="hidden" name="id" value="@user.Id" />
                             <button type="submit" class="btn btn-danger btn-sm">
-                                <i class="fa fa-times"></i> Reject
+                                Reject
                             </button>
                         </form>
                     </td>

@@ -57,7 +57,7 @@ namespace UserRoles.Controllers
 
             if (result.Succeeded)
             {
-                return RedirectToAction("Index", "Home");
+                return RedirectToAction("Index", "Tickets1");
             }
 
             ModelState.AddModelError(string.Empty, "Invalid login attempt.");
@@ -100,7 +100,7 @@ namespace UserRoles.Controllers
                 IsActive = false // User cannot log in until approved
             };
 
-            var result = await userManager.CreateAsync(user, model.Password);
+               var result = await userManager.CreateAsync(user, model.Password);
 
             if (result.Succeeded)
             {
