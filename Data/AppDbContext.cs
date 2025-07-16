@@ -9,6 +9,7 @@ using UserRoles.ViewModels;
 
 namespace UserRoles.Data
 {
+
    // public class AppDbContext : IdentityDbContext<Users>
    // {
    //     public AppDbContext(DbContextOptions options) : base(options)
@@ -18,10 +19,13 @@ namespace UserRoles.Data
   //  }
 }
 
+        public AppDbContext(DbContextOptions<AppDbContext> options)
+                : base(options) { }
 
 
-public class AppDbContext : IdentityDbContext<Users>
-{
+        public DbSet<UserRoles.Models.Priority> Priorities { get; set; } = default!;
+        public DbSet<UserRoles.Models.TaskItem> TaskItems { get; set; } = default!;
+        public DbSet<UserRoles.Models.Checklists> Checklists { get; set; } = default!;
 
     public AppDbContext(DbContextOptions<AppDbContext> options)
             : base(options) { }
@@ -43,6 +47,7 @@ public class AppDbContext : IdentityDbContext<Users>
     public DbSet<ChecklistItem> ChecklistItems { get; set; } = default!;
 
     public DbSet<Chats> Chats { get; set; } = default!;
+    public DbSet<EmailLog> EmailLogs { get; set; } = default!;
     // In UserRoles.Data/AppDbContext.cs
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -86,5 +91,4 @@ public class AppDbContext : IdentityDbContext<Users>
         // Ensure AppUser configuration (IdentityUser properties) are handled by base.OnModelCreating
         // If you had custom IdentityUser relationships, they would go here too.
     }
-
 }

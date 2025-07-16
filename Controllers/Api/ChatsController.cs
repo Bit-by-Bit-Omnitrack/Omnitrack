@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using UserRoles.Models;
+using UserRoles.Data;
+
 
 namespace UserRoles.Controllers
 {

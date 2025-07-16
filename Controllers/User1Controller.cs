@@ -4,7 +4,6 @@ using UserRoles.Models;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using UserRoles.ViewModels;
-using Microsoft.AspNetCore.Authorization;
 
 namespace UserRoles.Controllers
 {
@@ -34,7 +33,11 @@ namespace UserRoles.Controllers
             return View(userRoles);
         }
 
-
+        public IActionResult Authenticate()
+        {
+            var pendingUsers = _userManager.Users.Where(u => !u.IsActive).ToList();
+            return View(pendingUsers); // Will be used by Authenticate.cshtml
+        }
 
         [HttpGet("Users/Edit/{id}")]
         public async Task<IActionResult> Edit(string id)
@@ -108,13 +111,6 @@ namespace UserRoles.Controllers
             await _userManager.UpdateAsync(user);
 
             return RedirectToAction(nameof(Index));
-        }
-
-        [Authorize(Roles = "System Administrator")]
-        public IActionResult Authenticate()
-        {
-            var pendingUsers = _userManager.Users.Where(u => !u.IsActive).ToList();
-            return View(pendingUsers); // Will be used by Authenticate.cshtml
         }
         [HttpPost]
         public async Task<IActionResult> Approve(string id)

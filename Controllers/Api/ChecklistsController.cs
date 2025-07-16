@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using UserRoles.Models;
+using UserRoles.Data;
+
 
 namespace UserRoles.Controllers.Api
 {

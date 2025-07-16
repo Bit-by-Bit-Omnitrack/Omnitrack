@@ -1,0 +1,30 @@
+﻿@{
+    ViewData["Title"] = "System Admin Dashboard";
+}
+
+<div class="content-header">
+    <div class="container-fluid">
+        <h1 class="m-0 text-dark">Welcome, System Administrator</h1>
+        <p class="lead">This is your admin landing page. From here, you can manage users, view system logs, and more.</p>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-4">
+            <a asp-controller="User1" asp-action="Authenticate" class="btn btn-primary btn-block">
+                Authenticate Users
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a asp-controller="User1" asp-action="Index" class="btn btn-success btn-block">
+                View Authenticated Users
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a asp-controller="User1" asp-action="RejectedUsers" class="btn btn-danger btn-block">
+                View Rejected Users
+            </a>
+        </div>
+    </div>
+</div>

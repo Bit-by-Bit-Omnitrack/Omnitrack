@@ -2,6 +2,7 @@ using System.Diagnostics;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using UserRoles.Models;
+using UserRoles.Data; // Gives access to AppDbContext and other data-related classes
 
 namespace UserRoles.Controllers
 {
@@ -37,6 +38,13 @@ namespace UserRoles.Controllers
             return View();
         }
 
+        //  System Admin landing page
+        [Authorize(Roles = "System Administrator")]
+        public IActionResult AdminLanding()
+        {
+            return View(); 
+        }
+        
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {

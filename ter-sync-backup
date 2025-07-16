@@ -1,0 +1,108 @@
+M	.gitignore
+M	Controllers/AccountController.cs
+D	Controllers/Api/AppTaskController.cs
+D	Controllers/Api/ChatsController.cs
+D	Controllers/Api/ChecklistItemsController.cs
+D	Controllers/Api/ChecklistsController.cs
+D	Controllers/Api/CommentsController.cs
+D	Controllers/Api/PrioritiesController.cs
+D	Controllers/Api/RolesController.cs
+D	Controllers/Api/TicketAssignmentsController.cs
+D	Controllers/Api/TicketStatusesController.cs
+D	Controllers/Api/TicketsController.cs
+M	Controllers/HomeController.cs
+D	Controllers/TaskItemsController.cs
+D	Controllers/Tickets1Controller.cs
+M	Controllers/User1Controller.cs
+D	Controllers/UserController.cs
+M	Data/AppDbContext.cs
+D	Data/OldMigrationsBackUp/20250711072039_ticketing.cs
+D	Data/OldMigrationsBackUp/20250711130514_ticketings.cs
+D	Data/OldMigrationsBackUp/20250711131730_ticketin.cs
+D	Data/OldMigrationsBackUp/20250711181829_building Ticket System.Designer.cs
+D	Data/OldMigrationsBackUp/20250711183502_building Ticket Systems.Designer.cs
+D	Data/OldMigrationsBackUp/20250711183502_building Ticket Systems.cs
+A	Migrations/20250627074236_init.Designer.cs
+A	Migrations/20250627074236_init.cs
+R053	Data/OldMigrationsBackUp/20250711130514_ticketings.Designer.cs	Migrations/20250629122447_Init1.Designer.cs
+R052	Data/OldMigrationsBackUp/20250710101138_MyMaster.cs	Migrations/20250629122447_Init1.cs
+R052	Data/OldMigrationsBackUp/20250711131730_ticketin.Designer.cs	Migrations/20250629123932_init2.Designer.cs
+R086	Data/OldMigrationsBackUp/20250711181829_building Ticket System.cs	Migrations/20250629123932_init2.cs
+R055	Data/OldMigrationsBackUp/20250710101138_MyMaster.Designer.cs	Migrations/20250629133151_init8.Designer.cs
+A	Migrations/20250629133151_init8.cs
+R052	Data/OldMigrationsBackUp/20250711072039_ticketing.Designer.cs	Migrations/20250629134814_init9.Designer.cs
+A	Migrations/20250629134814_init9.cs
+A	Migrations/20250629140046_init10.Designer.cs
+A	Migrations/20250629140046_init10.cs
+A	Migrations/20250629140709_init11.Designer.cs
+A	Migrations/20250629140709_init11.cs
+A	Migrations/20250629141156_init15.Designer.cs
+A	Migrations/20250629141156_init15.cs
+A	Migrations/20250630064029_init99.Designer.cs
+R052	Migrations/20250714115445_UpdateDatabaseSchema.cs	Migrations/20250630064029_init99.cs
+A	Migrations/20250630072028_init100.Designer.cs
+A	Migrations/20250630072028_init100.cs
+A	Migrations/20250630072357_init111.Designer.cs
+A	Migrations/20250630072357_init111.cs
+A	Migrations/20250701111456_Init88.Designer.cs
+A	Migrations/20250701111456_Init88.cs
+A	Migrations/20250701114701_Init66.Designer.cs
+A	Migrations/20250701114701_Init66.cs
+A	Migrations/20250701115800_Init69.Designer.cs
+A	Migrations/20250701115800_Init69.cs
+D	Migrations/20250713012035_CleanStart.Designer.cs
+D	Migrations/20250713012035_CleanStart.cs
+D	Migrations/20250714115445_UpdateDatabaseSchema.Designer.cs
+M	Migrations/AppDbContextModelSnapshot.cs
+D	Models/AppTask.cs
+D	Models/Chats.cs
+D	Models/ChecklistItem.cs
+D	Models/Checklists.cs
+D	Models/Comments.cs
+D	Models/EmailLog.cs
+D	Models/Priority.cs
+D	Models/Role.cs
+D	Models/TaskItem.cs
+D	Models/Ticket.cs
+D	Models/TicketAssignment.cs
+D	Models/TicketStatus.cs
+M	Program.cs
+M	Properties/launchSettings.json
+M	README.md
+M	Services/EmailService.cs
+M	Services/IEmailService.cs
+M	Services/SeedService.cs
+M	UserRoles.csproj
+D	Views/Account/AwaitingApproval.cshtml
+A	Views/Account/ConfirmEmail.cshtml
+M	Views/Account/Login.cshtml
+D	Views/Account/PendingApproval.cshtml
+M	Views/Account/Register.cshtml
+A	Views/Account/RegistrationSuccessful.cshtml
+D	Views/Home/AdminLanding.cshtml
+M	Views/Shared/Error.cshtml
+M	Views/Shared/_AccountLayout.cshtml
+M	Views/Shared/_Layout.cshtml
+M	Views/Shared/_ValidationScriptsPartial.cshtml
+D	Views/TaskItems/Create.cshtml
+D	Views/TaskItems/Delete.cshtml
+D	Views/TaskItems/Details.cshtml
+D	Views/TaskItems/Edit.cshtml
+D	Views/TaskItems/Index.cshtml
+D	Views/Tickets1/Create.cshtml
+D	Views/Tickets1/Delete.cshtml
+D	Views/Tickets1/Details.cshtml
+D	Views/Tickets1/Edit.cshtml
+D	Views/Tickets1/Index.cshtml
+D	Views/User/Create.cshtml
+D	Views/User/Delete.cshtml
+D	Views/User/Details.cshtml
+D	Views/User/Edit.cshtml
+D	Views/User/Index.cshtml
+D	Views/User/Rejected.cshtml
+M	Views/User1/Authenticate.cshtml
+M	appsettings.json
+D	task.sql
+M	wwwroot/css/account.css
+M	wwwroot/css/site.css
+M	wwwroot/js/site.js

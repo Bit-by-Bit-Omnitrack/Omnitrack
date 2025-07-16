@@ -3,19 +3,22 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using UserRoles.Data;
 using UserRoles.Models;
-using UserRoles.Services;
+using UserRoles.Services; // for email + seeding
 
 var builder = WebApplication.CreateBuilder(args);
+builder.WebHost.UseKestrel();
 
-// Add services to the container.
+// This is for adding support for MVC + API controllers
 builder.Services.AddControllersWithViews();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
+
+// Swagger configuration
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Your API Name", Version = "v1" });
 
-    // Optional: Include XML comments for API documentation
+   
     var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
     var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
     if (File.Exists(xmlPath))
@@ -24,6 +27,10 @@ builder.Services.AddSwaggerGen(c =>
     }
 });
 
+
+// Add our EmailService so we can inject and send real emails
+builder.Services.AddScoped<IEmailService, EmailService>();  // use scoped for DB-safe access
+builder.Services.AddScoped<SeedService>(); //  Needed to make seeding work when called
 
 
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -43,6 +50,7 @@ builder.Services.AddIdentity<Users, IdentityRole>(options =>
 .AddDefaultTokenProviders();
 builder.Services.ConfigureApplicationCookie(options =>
 {
+    options.LoginPath = "/Account/Login"; // explicitly set login path
     options.AccessDeniedPath = "/Account/AccessDenied";
 });
 
@@ -51,11 +59,13 @@ var app = builder.Build();
 // ?? Auto-create database on first run
 using (var scope = app.Services.CreateScope())
 {
-    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    dbContext.Database.Migrate(); // Applies pending migrations and creates DB if needed
+    var services = scope.ServiceProvider;
+    var dbContext = services.GetRequiredService<AppDbContext>();
+    dbContext.Database.Migrate(); // Applies migrations
+    await SeedService.SeedDatabase(services); // Run seeding inside same scope
 }
 
-await SeedService.SeedDatabase(app.Services); // Optional: Seed data
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -77,16 +87,18 @@ else
 }
 
 app.UseHttpsRedirection();
+app.UseStaticFiles(); // added static files middleware
+
 app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapStaticAssets();
+
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Account}/{action=Login}/{id?}")
-    .WithStaticAssets();
+    pattern: "{controller=Account}/{action=Login}/{id?}");
+    
 
 app.Run();

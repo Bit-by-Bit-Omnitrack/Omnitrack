@@ -6,6 +6,7 @@
 
 <h2>Pending User Approvals</h2>
 
+<!-- Show a message if no pending users -->
 @if (!Model.Any(u => !u.IsActive))
 {
     <p class="text-muted">There are no users awaiting approval.</p>
@@ -29,12 +30,28 @@ else
                     <td>@user.FullName</td>
                     <td>@user.Email</td>
                     <td>
-                        <form asp-action="Approve" method="post">
-                            <input type="hidden" name="id" value="@user.Id" />
-                            <button type="submit" class="btn btn-success btn-sm">
-                                <i class="fa fa-check"></i> Approve
-                            </button>
-                        </form>
+                        <div class="d-flex gap-2">
+                            <!-- Accept -->
+                            <form asp-action="Approve" method="post">
+                                <input type="hidden" name="id" value="@user.Id" />
+                                <button type="submit" class="btn btn-success btn-sm">
+                                    Accept
+                                </button>
+                            </form>
+
+                            <!-- View (goes to User/Details/id) -->
+                            <a asp-controller="User" asp-action="Details" asp-route-id="@user.Id" class="btn btn-warning btn-sm">
+                                View
+                            </a>
+
+                            <!-- Reject -->
+                            <form asp-action="Reject" method="post">
+                                <input type="hidden" name="id" value="@user.Id" />
+                                <button type="submit" class="btn btn-danger btn-sm">
+                                    Reject
+                                </button>
+                            </form>
+                        </div>
                     </td>
                     <td>
                         <form asp-action="Reject" method="post" style="display:inline-block; margin-left: 5px;">

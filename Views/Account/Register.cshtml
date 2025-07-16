@@ -1,4 +1,4 @@
-﻿﻿@using UserRoles.ViewModels;
+﻿@using UserRoles.ViewModels;
 @model RegisterViewModel;
 
 @{
@@ -6,96 +6,99 @@
     Layout = "~/Views/Shared/_AccountLayout.cshtml";
 }
 
-<div class="account-container">
-    <div class="account-box">
-        <h2 class="text-center mb-4">Register</h2>
-        <form asp-action="Register" method="post">
-            @Html.AntiForgeryToken()
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="mb-3">
-                <label asp-for="Name" class="form-label"></label>
-                <input asp-for="Name" class="form-control" />
-                <span asp-validation-for="Name" class="text-danger"></span>
-            </div>
-            <div class="mb-3">
-                <label asp-for="Email" class="form-label"></label>
-                <input asp-for="Email" class="form-control" />
-                <span asp-validation-for="Email" class="text-danger"></span>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4">
+                    <h2 class="text-center mb-4 text-primary">Create an Account</h2>
+
+                    <form asp-action="Register" method="post">
+                        @Html.AntiForgeryToken()
+                        <div asp-validation-summary="ModelOnly" class="text-danger text-center mb-3"></div>
+
+                        <div class="mb-3">
+                            <label asp-for="Name" class="form-label"></label>
+                            <input asp-for="Name" class="form-control" />
+                            <span asp-validation-for="Name" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Email" class="form-label"></label>
+                            <input asp-for="Email" class="form-control" />
+                            <span asp-validation-for="Email" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Role" class="form-label"></label>
+                            <select asp-for="Role" class="form-select" asp-items="new SelectList(ViewBag.Roles)">
+                                <option value="">-- Select Role --</option>
+                            </select>
+                            <span asp-validation-for="Role" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Password" class="form-label"></label>
+                            <div class="input-group">
+                                <input asp-for="Password" class="form-control" id="regPassword" />
+                                <button type="button" class="btn btn-outline-secondary" id="toggleRegPassword" tabindex="-1">
+                                    <i class="bi bi-eye-slash" id="regPasswordIcon"></i>
+                                </button>
+                            </div>
+                            <span asp-validation-for="Password" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="ConfirmPassword" class="form-label"></label>
+                            <div class="input-group">
+                                <input asp-for="ConfirmPassword" class="form-control" id="confirmRegPassword" />
+                                <button type="button" class="btn btn-outline-secondary" id="toggleConfirmPassword" tabindex="-1">
+                                    <i class="bi bi-eye-slash" id="confirmPasswordIcon"></i>
+                                </button>
+                            </div>
+                            <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+                        </div>
+
+                        <button type="submit" class="btn btn-success w-100 py-2">Register</button>
+
+                        <p class="text-center mt-3">
+                            Already have an account?
+                            <a asp-action="Login" class="text-decoration-none">Login here</a>
+                        </p>
+                    </form>
+                </div>
             </div>
 
-            <div class="form-group">
-                <label asp-for="Role"></label>
-                <select asp-for="Role" class="form-control" asp-items="new SelectList(ViewBag.Roles)">
-                    <option value="">-- Select Role --</option>
-                </select>
-                <span asp-validation-for="Role" class="text-danger"></span>
+            <div class="text-center mt-3">
+                <a asp-action="Login" class="text-muted text-decoration-none">← Back to Login</a>
             </div>
-
-            <!--  Password input with toggle -->
-            <div class="mb-3">
-                <label asp-for="Password" class="form-label"></label>
-                <div class="input-group">
-                    
-                    <input asp-for="Password" class="form-control" id="passwordInput" /> 
-                    <button type="button" class="btn btn-outline-secondary" id="togglePassword" tabindex="-1">
-                        <i class="bi bi-eye-slash" id="togglePasswordIcon"></i> 
-                    </button> 
-                </div> 
-                <span asp-validation-for="Password" class="text-danger"></span>
-            </div>
-
-            <!-- ConfirmPassword input with toggle -->
-            <div class="mb-3">
-                <label asp-for="ConfirmPassword" class="form-label"></label>
-                <div class="input-group">
-                    
-                    <input asp-for="ConfirmPassword" class="form-control" id="confirmPasswordInput" />
-                    <button type="button" class="btn btn-outline-secondary" id="toggleConfirmPassword" tabindex="-1">
-                        <i class="bi bi-eye-slash" id="toggleConfirmPasswordIcon"></i> 
-                    </button> 
-                </div> 
-                <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
-            </div>
-
-            <input type="submit" value="Register" class="btn btn-success w-100 p-2" />
-            <p class="text-center mt-2">
-                Already have an account? <a asp-controller="Account" asp-action="Login" class="text-decoration-none">Login</a>
-            </p>
-            <div class="text-center">
-                <a asp-controller="Account" asp-action="Login" class="text-decoration-none mt-3">Back</a>
-            </div>
-        </form>
+        </div>
     </div>
 </div>
 
 @section Scripts {
-    <!-- Script for toggling password visibility -->
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const togglePassword = document.getElementById("togglePassword");
-            const togglePasswordIcon = document.getElementById("togglePasswordIcon");
-            const passwordInput = document.getElementById("passwordInput");
+        const toggleRegBtn = document.getElementById("toggleRegPassword");
+        const regInput = document.getElementById("regPassword");
+        const regIcon = document.getElementById("regPasswordIcon");
 
-            const toggleConfirmPassword = document.getElementById("toggleConfirmPassword");
-            const toggleConfirmPasswordIcon = document.getElementById("toggleConfirmPasswordIcon");
-            const confirmPasswordInput = document.getElementById("confirmPasswordInput");
-
-            togglePassword.addEventListener("click", function () {
-                const visible = passwordInput.type === "text";
-                passwordInput.type = visible ? "password" : "text";
-                togglePasswordIcon.classList.toggle("bi-eye", visible);
-                togglePasswordIcon.classList.toggle("bi-eye-slash", !visible);
-            });
-
-            toggleConfirmPassword.addEventListener("click", function () {
-                const visible = confirmPasswordInput.type === "text";
-                confirmPasswordInput.type = visible ? "password" : "text";
-                toggleConfirmPasswordIcon.classList.toggle("bi-eye", visible);
-                toggleConfirmPasswordIcon.classList.toggle("bi-eye-slash", !visible);
-            });
+        toggleRegBtn.addEventListener("click", function () {
+            const isPassword = regInput.type === "password";
+            regInput.type = isPassword ? "text" : "password";
+            regIcon.classList.toggle("bi-eye");
+            regIcon.classList.toggle("bi-eye-slash");
         });
-    </script> 
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial.cshtml");
-    }
+
+        const toggleConfirmBtn = document.getElementById("toggleConfirmPassword");
+        const confirmInput = document.getElementById("confirmRegPassword");
+        const confirmIcon = document.getElementById("confirmPasswordIcon");
+
+        toggleConfirmBtn.addEventListener("click", function () {
+            const isPassword = confirmInput.type === "password";
+            confirmInput.type = isPassword ? "text" : "password";
+            confirmIcon.classList.toggle("bi-eye");
+            confirmIcon.classList.toggle("bi-eye-slash");
+        });
+    </script>
+    @await Html.PartialAsync("_ValidationScriptsPartial")
 }

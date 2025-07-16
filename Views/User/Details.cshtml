@@ -1,0 +1,28 @@
+﻿@model UserRoles.Models.Users
+
+@{
+    ViewData["Title"] = "User Details";
+}
+
+<h1>User Details</h1>
+
+<hr />
+<dl class="row">
+    <dt class="col-sm-3">Full Name</dt>
+    <dd class="col-sm-9">@Model.FullName</dd>
+
+    <dt class="col-sm-3">Email</dt>
+    <dd class="col-sm-9">@Model.Email</dd>
+
+    <dt class="col-sm-3">Username</dt>
+    <dd class="col-sm-9">@Model.UserName</dd>
+
+    <dt class="col-sm-3">Phone Number</dt>
+    <dd class="col-sm-9">@Model.PhoneNumber</dd>
+
+    <dt class="col-sm-3">Active?</dt>
+    <dd class="col-sm-9">@Model.IsActive</dd>
+</dl>
+
+<a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Edit</a>
+<a asp-action="Index" class="btn btn-link">Back to List</a>
