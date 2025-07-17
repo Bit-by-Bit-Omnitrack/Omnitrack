@@ -6,11 +6,11 @@ namespace UserRoles.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class AuthorizationController : Controller
+    public class AuthenticationController : Controller
     {
             private readonly JwtTokenService _jwtService;
 
-            public AuthorizationController(JwtTokenService jwtService)
+            public AuthenticationController(JwtTokenService jwtService)
             {
                 _jwtService = jwtService;
             }
