@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using UserRoles.Controllers.Api;
@@ -11,8 +12,9 @@ using UserRoles.Data;
 
 namespace UserRoles.Controllers.Api
 {
-    [Route("api/[controller]")]
+    [Authorize]
     [ApiController]
+    [Route("api/[controller]")]
     public class TicketAssignmentsController : ControllerBase
     {
         private readonly AppDbContext _context;

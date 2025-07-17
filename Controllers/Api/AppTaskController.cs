@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using UserRoles.Data;
 using UserRoles.Models;
 
 namespace UserRoles.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class AppTaskController : ControllerBase

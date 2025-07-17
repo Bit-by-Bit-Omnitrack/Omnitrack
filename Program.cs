@@ -1,24 +1,71 @@
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using UserRoles.Data;
 using UserRoles.Models;
-using UserRoles.Services; // for email + seeding
+using UserRoles.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.WebHost.UseKestrel();
 
-// This is for adding support for MVC + API controllers
+// MVC + API controllers
 builder.Services.AddControllersWithViews();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
-// Swagger configuration
+// JWT Authentication
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        var jwtSettings = builder.Configuration.GetSection("JwtSettings");
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = jwtSettings["Issuer"],
+            ValidAudience = jwtSettings["Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(jwtSettings["SecretKey"]))
+        };
+    });
+
+builder.Services.AddAuthorization();
+
+// ✅ Swagger Configuration
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Your API Name", Version = "v1" });
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "OmniTrack", Version = "v1" });
 
-   
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Enter 'Bearer' followed by your JWT token.\nExample: \"Bearer abcdef12345\""
+    });
+
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new List<string>()
+        }
+    });
+
     var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
     var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
     if (File.Exists(xmlPath))
@@ -27,15 +74,15 @@ builder.Services.AddSwaggerGen(c =>
     }
 });
 
+// Scoped services
+builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<SeedService>();
 
-// Add our EmailService so we can inject and send real emails
-builder.Services.AddScoped<IEmailService, EmailService>();  // use scoped for DB-safe access
-builder.Services.AddScoped<SeedService>(); //  Needed to make seeding work when called
-
-
+// DB Context
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
 
+// Identity
 builder.Services.AddIdentity<Users, IdentityRole>(options =>
 {
     options.Password.RequireDigit = true;
@@ -48,57 +95,49 @@ builder.Services.AddIdentity<Users, IdentityRole>(options =>
 })
 .AddEntityFrameworkStores<AppDbContext>()
 .AddDefaultTokenProviders();
+
 builder.Services.ConfigureApplicationCookie(options =>
 {
-    options.LoginPath = "/Account/Login"; // explicitly set login path
+    options.LoginPath = "/Account/Login";
     options.AccessDeniedPath = "/Account/AccessDenied";
 });
 
 var app = builder.Build();
 
-// ?? Auto-create database on first run
+// Auto-create DB and seed
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     var dbContext = services.GetRequiredService<AppDbContext>();
-    dbContext.Database.Migrate(); // Applies migrations
-    await SeedService.SeedDatabase(services); // Run seeding inside same scope
+    dbContext.Database.Migrate();
+    await SeedService.SeedDatabase(services);
 }
 
-
-
-// Configure the HTTP request pipeline.
+// Middleware pipeline
 if (app.Environment.IsDevelopment())
 {
-    app.UseDeveloperExceptionPage(); // Good for development
-    app.UseSwagger(); // Enable Swagger middleware
+    app.UseDeveloperExceptionPage();
+    app.UseSwagger();
     app.UseSwaggerUI(c =>
     {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "OmniTrack V1");
-
-        // c.RoutePrefix = string.Empty;
     });
 }
 else
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
 app.UseHttpsRedirection();
-app.UseStaticFiles(); // added static files middleware
-
+app.UseStaticFiles();
 app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
 
-
-
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Account}/{action=Login}/{id?}");
-    
 
 app.Run();
