@@ -49,6 +49,7 @@ namespace UserRoles.Controllers
                 .Include(t => t.CreatedByUser) // Include CreatedByUser for details
                 .Include(t => t.Status)
                 .Include(t => t.Priority)// If you add a navigation property for status
+                .Include(t => t.Tasks) //  This line includes the tasks
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (ticket == null)
             {
