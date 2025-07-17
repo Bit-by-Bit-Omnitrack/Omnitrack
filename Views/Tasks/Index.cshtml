@@ -1,0 +1,36 @@
+@model IEnumerable<UserRoles.Models.Tasks>
+
+@{
+    ViewData["Title"] = "Tasks List";
+}
+
+<h2>Tasks</h2>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Task Name</th>
+            <th>Details</th>
+            <th>Assigned To</th>
+            <th>Created By</th>
+            <th>Ticket</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var task in Model)
+        {
+            <tr>
+                <td>@task.Name</td>
+                <td>@task.Details</td>
+                <td>@task.AssignedTo?</td>
+                <td>@task.CreatedBy?</td>
+                <td>@task.Ticket?.Title</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@task.Id" class="btn btn-sm btn-warning">Edit</a>
+                    <a asp-action="Delete" asp-route-id="@task.Id" class="btn btn-sm btn-danger">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
