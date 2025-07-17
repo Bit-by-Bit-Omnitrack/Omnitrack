@@ -3,74 +3,68 @@
 
 @{
     ViewData["Title"] = "Register";
+    ViewData["BodyClass"] = "account-container";
     Layout = "~/Views/Shared/_AccountLayout.cshtml";
 }
+<div class="account-container">
+    <div class="account-box">
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-4">
+                <h2 class="text-center mb-4 text-primary">Create an Account</h2>
 
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card shadow-sm border-0">
-                <div class="card-body p-4">
-                    <h2 class="text-center mb-4 text-primary">Create an Account</h2>
+                <form asp-action="Register" method="post">
+                    @Html.AntiForgeryToken()
+                    <div asp-validation-summary="ModelOnly" class="text-danger text-center mb-3"></div>
 
-                    <form asp-action="Register" method="post">
-                        @Html.AntiForgeryToken()
-                        <div asp-validation-summary="ModelOnly" class="text-danger text-center mb-3"></div>
+                    <div class="mb-3">
+                        <label asp-for="Name" class="form-label"></label>
+                        <input asp-for="Name" class="form-control" />
+                        <span asp-validation-for="Name" class="text-danger small"></span>
+                    </div>
 
-                        <div class="mb-3">
-                            <label asp-for="Name" class="form-label"></label>
-                            <input asp-for="Name" class="form-control" />
-                            <span asp-validation-for="Name" class="text-danger small"></span>
+                    <div class="mb-3">
+                        <label asp-for="Email" class="form-label"></label>
+                        <input asp-for="Email" class="form-control" />
+                        <span asp-validation-for="Email" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Role" class="form-label"></label>
+                        <select asp-for="Role" class="form-select" asp-items="new SelectList(ViewBag.Roles)">
+                            <option value="">-- Select Role --</option>
+                        </select>
+                        <span asp-validation-for="Role" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Password" class="form-label"></label>
+                        <div class="input-group">
+                            <input asp-for="Password" class="form-control" id="regPassword" />
+                            <button type="button" class="btn btn-outline-secondary" id="toggleRegPassword" tabindex="-1">
+                                <i class="bi bi-eye-slash" id="regPasswordIcon"></i>
+                            </button>
                         </div>
+                        <span asp-validation-for="Password" class="text-danger small"></span>
+                    </div>
 
-                        <div class="mb-3">
-                            <label asp-for="Email" class="form-label"></label>
-                            <input asp-for="Email" class="form-control" />
-                            <span asp-validation-for="Email" class="text-danger small"></span>
+                    <div class="mb-3">
+                        <label asp-for="ConfirmPassword" class="form-label"></label>
+                        <div class="input-group">
+                            <input asp-for="ConfirmPassword" class="form-control" id="confirmRegPassword" />
+                            <button type="button" class="btn btn-outline-secondary" id="toggleConfirmPassword" tabindex="-1">
+                                <i class="bi bi-eye-slash" id="confirmPasswordIcon"></i>
+                            </button>
                         </div>
+                        <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+                    </div>
 
-                        <div class="mb-3">
-                            <label asp-for="Role" class="form-label"></label>
-                            <select asp-for="Role" class="form-select" asp-items="new SelectList(ViewBag.Roles)">
-                                <option value="">-- Select Role --</option>
-                            </select>
-                            <span asp-validation-for="Role" class="text-danger small"></span>
-                        </div>
+                    <button type="submit" class="btn btn-success w-100 py-2">Register</button>
 
-                        <div class="mb-3">
-                            <label asp-for="Password" class="form-label"></label>
-                            <div class="input-group">
-                                <input asp-for="Password" class="form-control" id="regPassword" />
-                                <button type="button" class="btn btn-outline-secondary" id="toggleRegPassword" tabindex="-1">
-                                    <i class="bi bi-eye-slash" id="regPasswordIcon"></i>
-                                </button>
-                            </div>
-                            <span asp-validation-for="Password" class="text-danger small"></span>
-                        </div>
-
-                        <div class="mb-3">
-                            <label asp-for="ConfirmPassword" class="form-label"></label>
-                            <div class="input-group">
-                                <input asp-for="ConfirmPassword" class="form-control" id="confirmRegPassword" />
-                                <button type="button" class="btn btn-outline-secondary" id="toggleConfirmPassword" tabindex="-1">
-                                    <i class="bi bi-eye-slash" id="confirmPasswordIcon"></i>
-                                </button>
-                            </div>
-                            <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
-                        </div>
-
-                        <button type="submit" class="btn btn-success w-100 py-2">Register</button>
-
-                        <p class="text-center mt-3">
-                            Already have an account?
-                            <a asp-action="Login" class="text-decoration-none">Login here</a>
-                        </p>
-                    </form>
-                </div>
-            </div>
-
-            <div class="text-center mt-3">
-                <a asp-action="Login" class="text-muted text-decoration-none">← Back to Login</a>
+                    <p class="text-center mt-3">
+                        Already have an account?
+                        <a asp-action="Login" class="text-decoration-none">Login here</a>
+                    </p>
+                </form>
             </div>
         </div>
     </div>

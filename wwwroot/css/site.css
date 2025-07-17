@@ -1,50 +1,126 @@
-html {
-  font-size: 14px;
+/* Global layout fixes for full background coverage */
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font-size: 14px;
+    position: relative;
+    min-height: 100%;
 }
 
 @media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
+    html {
+        font-size: 16px;
+    }
 }
 
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+/* Remove box shadows on focus */
+.btn:focus,
+.btn:active:focus,
+.btn-link.nav-link:focus,
+.form-control:focus,
+.form-check-input:focus {
     outline: none;
-    box-shadow: none
+    box-shadow: none;
 }
 
-html {
-  position: relative;
-  min-height: 100%;
+/* Override margin-bottom only on pages like login/register */
+body.login-page,
+body.register-page {
+    margin-bottom: 0;
 }
 
+/* Default margin for pages with footer */
 body {
-  margin-bottom: 60px;
+    margin-bottom: 60px;
 }
 
-.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
-  color: var(--bs-secondary-color);
-  text-align: end;
+/* Centering placeholder text */
+.form-floating > .form-control-plaintext::placeholder,
+.form-floating > .form-control::placeholder {
+    color: var(--bs-secondary-color);
+    text-align: end;
 }
 
-.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
-  text-align: start;
+.form-floating > .form-control-plaintext:focus::placeholder,
+.form-floating > .form-control:focus::placeholder {
+    text-align: start;
 }
 
-/* Improve spacing inside forms globally */
+/* Form padding */
 .form-control {
     padding: 0.75rem;
-    
 }
 
- /* Make links like 'Back' or 'Register' stand out slightly */
+/* Link hover effect */
 .text-decoration-none:hover {
     text-decoration: underline;
-    
 }
 
- /* Subtle transition for interactive items */
+/* Transitions */
 a, .btn {
     transition: all 0.2s ease-in-out;
-    
+}
+
+/* ===================== */
+/* Account background CSS */
+/* ===================== */
+
+.account-container {
+    background-image: url('/Images/account-bg-new.jpg'); /* Adjust path if needed */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    min-height: 100vh;
+    width: 100%;
+    padding: 2rem;
+}
+
+/* Account box (login/register form) */
+.account-box {
+    background-color: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.3);
+    max-width: 500px;
+    width: 100%;
+    opacity: .9;
+    margin-left: 180px;
+    transition: box-shadow 0.3s ease;
+}
+
+/* Responsive center on mobile */
+@media (max-width: 768px) {
+    .account-container {
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    .account-box {
+        margin-left: 0;
+    }
+}
+
+/* Password toggle button styles */
+#togglePassword,
+#toggleLoginPassword,
+#toggleRegPassword,
+#toggleConfirmPassword {
+    user-select: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.375rem 0.75rem;
+    height: 100%;
+}
+
+#toggleIcon,
+#loginPasswordIcon,
+#regPasswordIcon,
+#confirmPasswordIcon {
+    font-size: 1rem;
+    color: #555;
 }
