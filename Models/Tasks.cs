@@ -27,6 +27,18 @@ namespace UserRoles.Models
         [Required]
         [Display(Name = "Status")]
         public TaskStatus Status { get; set; } // Enum to track task phase
+
+        // Foreign key to Ticket
+        public int TicketId { get; set; }
+        public Ticket Ticket { get; set; }
+
+        // Foreign Key to AspNetUsers table
+        public string? UserId { get; set; }
+        public Users? User { get; set; }    // Navigation property
+
+        // Foreign Key
+        public string? CreatedById { get; set; } // Foreign key
+
     }
 
     public enum TaskStatus
