@@ -47,6 +47,7 @@ public class AppDbContext : IdentityDbContext<Users>
     public DbSet<ChecklistItem> ChecklistItems { get; set; } = default!;
     public DbSet<Chats> Chats { get; set; } = default!;
     public DbSet<EmailLog> EmailLogs { get; set; } = default!;
+    public DbSet<Tasks> Tasks { get; set; } = default!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -83,6 +84,12 @@ public class AppDbContext : IdentityDbContext<Users>
             .WithMany()
             .HasForeignKey(t => t.StatusID)
             .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<Tasks>()
+            .HasOne(t => t.Ticket)
+            .WithMany(t => t.Tasks)
+            .HasForeignKey(t => t.TicketId)
+            .OnDelete(DeleteBehavior.Cascade); // optional
     }
 }
 
