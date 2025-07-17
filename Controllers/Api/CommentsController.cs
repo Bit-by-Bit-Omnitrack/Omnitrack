@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using UserRoles.Models;
 using UserRoles.Data;
@@ -6,8 +7,9 @@ using UserRoles.Data;
 
 namespace UserRoles.Controllers.Api
 {
-    [Route("api/[controller]")]
+    [Authorize]
     [ApiController]
+    [Route("api/[controller]")]
     public class CommentsController : ControllerBase
     {
         private readonly AppDbContext _context;
