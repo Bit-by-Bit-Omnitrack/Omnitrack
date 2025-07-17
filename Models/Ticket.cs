@@ -39,6 +39,8 @@ namespace UserRoles.Models
         public TicketStatus? Status { get; set; }
         public int PriorityId { get; set; } // Foreign key reference
         public Priority Priority { get; set; } // Navigation property
+        
+        public ICollection<Tasks> Tasks { get; set; } = new List<Tasks>();
 
     }
 
