@@ -40,7 +40,7 @@ public class AppDbContext : IdentityDbContext<Users>
     public DbSet<Comments> Comments { get; set; } = default!;
     public DbSet<Users> UsersTable { get; set; } = default!;
     public DbSet<Role> Roles { get; set; } = default!;
-    public DbSet<AppTask> AppTask { get; set; } = default!;
+ //   public DbSet<AppTask> AppTask { get; set; } = default!;
     public DbSet<Ticket> Tickets { get; set; } = default!;
     public DbSet<TicketAssignment> TicketAssignments { get; set; } = default!;
     public DbSet<TicketStatus> TicketStatuses { get; set; } = default!;
@@ -84,5 +84,7 @@ public class AppDbContext : IdentityDbContext<Users>
             .HasForeignKey(t => t.StatusID)
             .OnDelete(DeleteBehavior.Restrict);
     }
+
+public DbSet<UserRoles.Models.Tasks> Tasks { get; set; } = default!;
 }
 

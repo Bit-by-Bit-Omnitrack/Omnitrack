@@ -4,6 +4,9 @@ using Microsoft.OpenApi.Models;
 using UserRoles.Data;
 using UserRoles.Models;
 using UserRoles.Services; // for email + seeding
+using Microsoft.AspNetCore.Authentication.JwtBearer; // Required for JWT Bearer
+using Microsoft.IdentityModel.Tokens; // Required for SecurityKey and TokenValidationParameters
+using System.Text; // Required for Encoding.UTF8
 
 var builder = WebApplication.CreateBuilder(args);
 builder.WebHost.UseKestrel();
@@ -13,12 +16,68 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
+// --- JWT Configuration START ---
+// You should store these values securely, e.g., in appsettings.json or environment variables
+var jwtIssuer = builder.Configuration["Jwt:Issuer"];
+var jwtAudience = builder.Configuration["Jwt:Audience"];
+var jwtKey = builder.Configuration["Jwt:Key"]; // This should be a strong, secret key
+
+// Add Authentication services
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = jwtIssuer,
+        ValidAudience = jwtAudience,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
+    };
+});
+// --- JWT Configuration END ---
+
 // Swagger configuration
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Your API Name", Version = "v1" });
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "OmniTrack", Version = "v1" });
 
-   
+    // --- Swagger JWT Security Definition START ---
+    c.AddSecurityDefinition("OmniTrack", new OpenApiSecurityScheme
+    {
+        Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: OmniTrack {token}\"",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "OmniTrack"
+    });
+
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "OmniTrack"
+                },
+                Scheme = "oauth2",
+                Name = "OmniTrack",
+                In = ParameterLocation.Header,
+            },
+            new List<string>()
+        }
+    });
+    // --- Swagger JWT Security Definition END ---
+
     var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
     var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
     if (File.Exists(xmlPath))
@@ -29,8 +88,8 @@ builder.Services.AddSwaggerGen(c =>
 
 
 // Add our EmailService so we can inject and send real emails
-builder.Services.AddScoped<IEmailService, EmailService>();  // use scoped for DB-safe access
-builder.Services.AddScoped<SeedService>(); //  Needed to make seeding work when called
+builder.Services.AddScoped<IEmailService, EmailService>(); // use scoped for DB-safe access
+builder.Services.AddScoped<SeedService>(); // Needed to make seeding work when called
 
 
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -48,6 +107,8 @@ builder.Services.AddIdentity<Users, IdentityRole>(options =>
 })
 .AddEntityFrameworkStores<AppDbContext>()
 .AddDefaultTokenProviders();
+
+// Configure Application Cookie (still relevant for MVC views if you use them)
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.LoginPath = "/Account/Login"; // explicitly set login path
@@ -91,14 +152,15 @@ app.UseStaticFiles(); // added static files middleware
 
 app.UseRouting();
 
+// --- IMPORTANT: UseAuthentication and UseAuthorization must be after UseRouting and before MapControllerRoute ---
 app.UseAuthentication();
 app.UseAuthorization();
-
 
 
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Account}/{action=Login}/{id?}");
-    
+
 
 app.Run();
+

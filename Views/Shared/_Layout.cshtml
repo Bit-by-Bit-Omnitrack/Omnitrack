@@ -114,15 +114,23 @@
                     <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
                         <!-- Dashboard -->
                         <li class="nav-item menu-open">
-                            <a asp-controller="Tickets1" asp-action="Index" class="nav-link active">
+                            <a asp-controller="Tickets" asp-action="Index" class="nav-link active">
                                 <i class="nav-icon fas fa-tachometer-alt"></i>
                                 <p>Dashboard</p>
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a asp-controller="Tasks" asp-action="Index" class="nav-link">
 
+                                <i class="fa-solid fa-users"></i>
+                                <p>
+                                    Tasks
+                                </p>
+                            </a>
+                        </li>
                         <!-- Authenticate Users -->
                         <li class="nav-item">
-                            <a asp-controller="User1" asp-action="Authenticate" class="nav-link">
+                            <a asp-controller="User" asp-action="Authenticate" class="nav-link">
                                 <i class="fa-solid fa-check"></i>
                                 <p>
                                     Authenticate Users
@@ -132,7 +140,7 @@
 
                         <!-- Authenticated Users -->
                         <li class="nav-item">
-                            <a asp-controller="User1" asp-action="Index" class="nav-link">
+                            <a asp-controller="User" asp-action="Index" class="nav-link">
                             
                           <i class="fa-solid fa-users"></i>
                                 <p>

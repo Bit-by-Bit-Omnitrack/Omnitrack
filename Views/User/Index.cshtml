@@ -1,58 +1,47 @@
-﻿@model List<UserRoles.Models.Users>
-
-@{
-    ViewData["Title"] = "Users List";
-}
-
-<h2 class="mb-3">All Users</h2>
-
-<a asp-action="Create" class="btn btn-success mb-3">Add New User</a>
-
-<table class="table table-bordered table-striped datatable">
-    <thead class="thead-dark">
-        <tr>
-            <th>Full Name</th>
-            <th>Email</th>
-            <th>Username</th>
-            <th>Phone</th>
-            <th>Status</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var user in Model)
-        {
-            <tr>
-                <td>@user.FullName</td>
-                <td>@user.Email</td>
-                <td>@user.UserName</td>
-                <td>@user.PhoneNumber</td>
-                <td>
-                    @if (user.IsActive)
-                    {
-                        <span class="badge bg-success">Approved</span>
-                    }
-                    else
-                    {
-                        <span class="badge bg-secondary">Pending</span>
-                    }
-                </td>
-                <td>
-                    <a asp-action="Edit" asp-route-id="@user.Id" class="btn btn-sm btn-primary">Edit</a>
-                    <a asp-action="Details" asp-route-id="@user.Id" class="btn btn-sm btn-info">Details</a>
-                    <a asp-action="Delete" asp-route-id="@user.Id" class="btn btn-sm btn-danger">Delete</a>
-
-                    @if (!user.IsActive)
-                    {
-                        <form asp-action="Approve" asp-route-id="@user.Id" method="post" class="d-inline">
-                            <button type="submit" class="btn btn-sm btn-success">Approve</button>
-                        </form>
-                        <form asp-action="Reject" asp-route-id="@user.Id" method="post" class="d-inline">
-                            <button type="submit" class="btn btn-sm btn-warning">Reject</button>
-                        </form>
-                    }
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+﻿
+@model IEnumerable<UserRoles.ViewModels.UserWithRolesViewModel>
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Omnitrack Users List</h3>
+    </div>
+    <div class="card-body">
+        <table id="example1" class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>Email</th>
+                    <th>Username</th>
+                    <th>Status</th>
+                    <th>Roles</th>
+                    <th>Edit</th>
+                    <th>View</th>
+                    <th>Delete</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.User.Email</td>
+                        <td>@item.User.UserName</td>
+                        <td>@(item.User.IsActive ? "Active" : "Inactive")</td>
+                        <td>
+                            @foreach (var role in item.Roles)
+                            {
+                                <span class="badge badge-info">@role</span>
+                            }
+                        </td>
+                        <td>
+                            <a asp-action="Edit" asp-route-id="@item.User.Id" class="btn btn-primary">Edit</a>
+                        </td>
+                        <td>
+                            <a asp-action="Details" asp-route-id="@item.User.Id" class="btn btn-warning">View</a>
+                        </td>
+                        <td>
+                            <a asp-action="Delete" asp-route-id="@item.User.Id" class="btn btn-danger">Delete</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

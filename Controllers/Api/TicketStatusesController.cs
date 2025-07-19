@@ -3,10 +3,13 @@ using Microsoft.EntityFrameworkCore;
 using UserRoles.Data;
 using UserRoles.Models;
 using UserRoles.Data;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 
 
 namespace UserRoles.Controllers.Api
 {
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Route("api/[controller]")]
     [ApiController]
     public class TicketStatusesController : ControllerBase

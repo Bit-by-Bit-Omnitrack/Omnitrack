@@ -2,9 +2,15 @@
 using Microsoft.EntityFrameworkCore;
 using UserRoles.Data;
 using UserRoles.Models;
+using Microsoft.AspNetCore.Authorization; // Required for [Authorize]
+using Microsoft.AspNetCore.Authentication.JwtBearer; // Required if specifying scheme explicitly
 
 namespace UserRoles.Controllers
 {
+    // Apply [Authorize] to the entire controller to protect all its endpoints.
+    // This means any request to these endpoints will require a valid JWT.
+    // We explicitly specify the JwtBearerDefaults.AuthenticationScheme to ensure it uses JWT authentication.
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [ApiController]
     [Route("api/[controller]")]
     public class RolesController : ControllerBase
@@ -41,6 +47,7 @@ namespace UserRoles.Controllers
         /// <summary>
         /// Create a new role.
         /// </summary>
+        // You might want to restrict this to specific roles, e.g., [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<ActionResult<Role>> CreateRole(Role role)
         {
@@ -53,6 +60,7 @@ namespace UserRoles.Controllers
         /// <summary>
         /// Update an existing role.
         /// </summary>
+        // You might want to restrict this to specific roles, e.g., [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateRole(int id, Role role)
         {
@@ -79,6 +87,7 @@ namespace UserRoles.Controllers
         /// <summary>
         /// Delete a role by ID.
         /// </summary>
+        // You might want to restrict this to specific roles, e.g., [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteRole(int id)
         {
