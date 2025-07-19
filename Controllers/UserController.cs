@@ -1,172 +1,154 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
-using UserRoles.Data;
 using UserRoles.Models;
-
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using UserRoles.ViewModels;
 
 namespace UserRoles.Controllers
 {
     public class UserController : Controller
     {
-        private readonly AppDbContext _context;
+        private readonly UserManager<Users> _userManager;
 
-        // injecting the DB context here so I can access the UsersTable
-        public UserController(AppDbContext context)
+        public UserController(UserManager<Users> userManager)
         {
-            _context = context;
+            _userManager = userManager;
         }
-
-        // this shows a list of all users in the system
         public async Task<IActionResult> Index()
         {
-            var users = await _context.Users.ToListAsync(); // changed from UsersTable to Users (DbSet<Users>)
-            return View(users);
-        }
+            var users = await _userManager.Users.Where(u => u.IsActive).ToListAsync();
+            var userRoles = new List<UserWithRolesViewModel>();
 
-        // this loads the form to create a new user manually
-        public IActionResult Create()
-        {
-            return View();
-        }
-
-        // this saves the new user to the database
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Users user) //  renamed method to Create and corrected model name
-
-        {
-            if (ModelState.IsValid)
+            foreach (var user in users)
             {
-                user.CreatedOn = DateTime.Now; // tracking when user was created
-                _context.Add(user);
-                await _context.SaveChangesAsync();
-
-                return RedirectToAction(nameof(Index));
+                var roles = await _userManager.GetRolesAsync(user);
+                userRoles.Add(new UserWithRolesViewModel
+                {
+                    User = user,
+                    Roles = roles
+                });
             }
 
-            // if something is wrong with the form input
-            return View(user);
+            return View(userRoles);
         }
 
-        // loads the edit page for a selected user
+        public IActionResult Authenticate()
+        {
+            var pendingUsers = _userManager.Users.Where(u => !u.IsActive).ToList();
+            return View(pendingUsers); // Will be used by Authenticate.cshtml
+        }
+
+        [HttpGet("Users/Edit/{id}")]
         public async Task<IActionResult> Edit(string id)
         {
-            var user = await _context.Users.FindAsync(id);
-            if (user == null)
-                return NotFound();
+            if (id == null) return NotFound();
+
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null) return NotFound();
 
             return View(user);
         }
-
-        // updates the user's info after editing
-        [HttpPost]
+        [HttpPost("Users/Edit/{id}")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(string id, Users user)
-
+        public async Task<IActionResult> Edit(string id, Users model)
         {
-            if (id != user.Id)
-                    return NotFound();
+            if (id != model.Id) return NotFound();
 
-            if (ModelState.IsValid)
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null) return NotFound();
+
+            user.UserName = model.UserName;
+            user.Email = model.Email;
+            user.PhoneNumber = model.PhoneNumber;
+
+            var result = await _userManager.UpdateAsync(user);
+            if (result.Succeeded)
             {
-                try
-                {
-                    user.ModifiedOn = DateTime.Now; // record edit timestamp
-                    _context.Update(user);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    // make sure the user wasn't deleted in the meantime
-                    if (!_context.Users.Any(e => e.Id == id))
-                        return NotFound();
-                    else
-                        throw;
-                }
-
                 return RedirectToAction(nameof(Index));
+            }
+
+            foreach (var error in result.Errors)
+            {
+                ModelState.AddModelError("", error.Description);
             }
 
             return View(user);
         }
 
-        // shows full info about a specific user
-        public async Task<IActionResult> Details(string id)
-        {
-            var user = await _context.UsersTable.FirstOrDefaultAsync(m => m.Id == id);
-            if (user == null)
-                return NotFound();
-
-            return View(user);
-        }
-
-        // loads the confirmation page before deleting a user
         public async Task<IActionResult> Delete(string id)
         {
-            var user = await _context.UsersTable.FirstOrDefaultAsync(m => m.Id == id);
-            if (user == null)
-                return NotFound();
+            if (id == null) return NotFound();
+
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null) return NotFound();
 
             return View(user);
         }
 
-        // deletes the user after confirmation
+        // POST: Users/Delete/5
+
+        [HttpGet("Users/Details/{id}")]
+        public async Task<IActionResult> Details(string id)
+        {
+            if (string.IsNullOrEmpty(id)) return NotFound();
+
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null || !user.IsActive) return NotFound();
+
+            return View(user);
+        }
+
+
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
-            var user = await _context.Users.FindAsync(id); // changed from UsersTable
-            if (user != null)
-            {
-                _context.Users.Remove(user); // changed from UsersTable
-                await _context.SaveChangesAsync();
-            }
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null) return NotFound();
+
+            user.IsActive = false; // soft delete
+            await _userManager.UpdateAsync(user);
 
             return RedirectToAction(nameof(Index));
         }
-
-        // this activates a user after admin approval
         [HttpPost]
         public async Task<IActionResult> Approve(string id)
         {
-            var user = await _context.Users.FindAsync(id); // changed from UsersTable
-            if (user != null)
-            {
-                user.IsActive = true; // approving user by setting them active
-                await _context.SaveChangesAsync(); // save changes immediately
-            }
+            if (string.IsNullOrEmpty(id)) return NotFound();
 
-            return RedirectToAction(nameof(Index));
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null) return NotFound();
+
+            user.IsActive = true;
+            await _userManager.UpdateAsync(user);
+
+            TempData["Message"] = "User approved successfully.";
+
+            return RedirectToAction(nameof(Authenticate));
         }
-
-        // this deactivates a user (used for rejecting them)
         [HttpPost]
-        public async Task<IActionResult> Reject(string id) // changed Guid to string
+      
+        public async Task<IActionResult> Reject(string id)
         {
-            var user = await _context.Users.FindAsync(id); // changed from UsersTable
-            if (user != null)
+            if (string.IsNullOrEmpty(id)) return NotFound();
+
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null) return NotFound();
+
+            var result = await _userManager.DeleteAsync(user);
+
+            if (result.Succeeded)
             {
-                user.IsActive = false; // rejecting user by making them inactive
-                await _context.SaveChangesAsync();
+                TempData["RejectMessage"] = "User has been rejected";
+            }
+            else
+            {
+                TempData["RejectMessage"] = "Failed to reject user.";
             }
 
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(Authenticate));
         }
 
-        // this displays all users who have been rejected or are inactive
-        [Authorize(Roles = "Admin")] // making sure only admin can see this
-        public async Task<IActionResult> Rejected()
-        {
-            // grabbing all users that are not active (i.e., rejected or pending)
-            var rejectedUsers = await _context.UsersTable
-                .Where(u => u.IsActive == false)
-                .ToListAsync();
-
-            return View(rejectedUsers); // pass them to the view
-        }
     }
 }

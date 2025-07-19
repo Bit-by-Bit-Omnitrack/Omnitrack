@@ -12,12 +12,12 @@ using UserRoles.Data; // Gives access to AppDbContext and other data-related cla
 
 namespace UserRoles.Controllers
 {
-    public class Tickets1Controller : Controller
+    public class TicketsController : Controller
     {
         private readonly AppDbContext _context;
         private readonly UserManager<Users> _userManager;
 
-        public Tickets1Controller(AppDbContext context, UserManager<Users> userManager)
+        public TicketsController(AppDbContext context, UserManager<Users> userManager)
         {
             _context = context;
             _userManager = userManager;

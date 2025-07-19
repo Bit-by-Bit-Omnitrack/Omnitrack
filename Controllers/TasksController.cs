@@ -6,27 +6,25 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using UserRoles.Models;
-using UserRoles.Data; // Gives access to AppDbContext and other data-related classes
 
 namespace UserRoles.Controllers
 {
-    public class TaskItemsController : Controller
+    public class TasksController : Controller
     {
         private readonly AppDbContext _context;
 
-        public TaskItemsController(AppDbContext context)
+        public TasksController(AppDbContext context)
         {
             _context = context;
         }
 
-        // GET: TaskItems
+        // GET: Tasks
         public async Task<IActionResult> Index()
         {
-            var appDbContext = _context.TaskItems.Include(t => t.Priority);
-            return View(await appDbContext.ToListAsync());
+            return View(await _context.Tasks.ToListAsync());
         }
 
-        // GET: TaskItems/Details/5
+        // GET: Tasks/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -34,42 +32,39 @@ namespace UserRoles.Controllers
                 return NotFound();
             }
 
-            var taskItem = await _context.TaskItems
-                .Include(t => t.Priority)
+            var tasks = await _context.Tasks
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (taskItem == null)
+            if (tasks == null)
             {
                 return NotFound();
             }
 
-            return View(taskItem);
+            return View(tasks);
         }
 
-        // GET: TaskItems/Create
+        // GET: Tasks/Create
         public IActionResult Create()
         {
-            ViewData["PriorityId"] = new SelectList(_context.Priorities, "Id", "Id");
             return View();
         }
 
-        // POST: TaskItems/Create
+        // POST: Tasks/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Title,Description,PriorityId")] TaskItem taskItem)
+        public async Task<IActionResult> Create([Bind("Id,Name,AssignedTo,CreatedBy,Details,DueDate")] Tasks tasks)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(taskItem);
+                _context.Add(tasks);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["PriorityId"] = new SelectList(_context.Priorities, "Id", "Id", taskItem.PriorityId);
-            return View(taskItem);
+            return View(tasks);
         }
 
-        // GET: TaskItems/Edit/5
+        // GET: Tasks/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -77,23 +72,22 @@ namespace UserRoles.Controllers
                 return NotFound();
             }
 
-            var taskItem = await _context.TaskItems.FindAsync(id);
-            if (taskItem == null)
+            var tasks = await _context.Tasks.FindAsync(id);
+            if (tasks == null)
             {
                 return NotFound();
             }
-            ViewData["PriorityId"] = new SelectList(_context.Priorities, "Id", "Id", taskItem.PriorityId);
-            return View(taskItem);
+            return View(tasks);
         }
 
-        // POST: TaskItems/Edit/5
+        // POST: Tasks/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Description,PriorityId")] TaskItem taskItem)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,AssignedTo,CreatedBy,Details,DueDate")] Tasks tasks)
         {
-            if (id != taskItem.Id)
+            if (id != tasks.Id)
             {
                 return NotFound();
             }
@@ -102,12 +96,12 @@ namespace UserRoles.Controllers
             {
                 try
                 {
-                    _context.Update(taskItem);
+                    _context.Update(tasks);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!TaskItemExists(taskItem.Id))
+                    if (!TasksExists(tasks.Id))
                     {
                         return NotFound();
                     }
@@ -118,11 +112,10 @@ namespace UserRoles.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["PriorityId"] = new SelectList(_context.Priorities, "Id", "Id", taskItem.PriorityId);
-            return View(taskItem);
+            return View(tasks);
         }
 
-        // GET: TaskItems/Delete/5
+        // GET: Tasks/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -130,37 +123,34 @@ namespace UserRoles.Controllers
                 return NotFound();
             }
 
-            var taskItem = await _context.TaskItems
-                .Include(t => t.Priority)
+            var tasks = await _context.Tasks
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (taskItem == null)
+            if (tasks == null)
             {
                 return NotFound();
             }
 
-            return View(taskItem);
+            return View(tasks);
         }
 
-        // POST: TaskItems/Delete/5
+        // POST: Tasks/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var taskItem = await _context.TaskItems.FindAsync(id);
-            if (taskItem != null)
+            var tasks = await _context.Tasks.FindAsync(id);
+            if (tasks != null)
             {
-                _context.TaskItems.Remove(taskItem);
+                _context.Tasks.Remove(tasks);
             }
 
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool TaskItemExists(int id)
+        private bool TasksExists(int id)
         {
-            return _context.TaskItems.Any(e => e.Id == id);
+            return _context.Tasks.Any(e => e.Id == id);
         }
     }
-
-   // ViewBag.PriorityId = new SelectList(_context.Priorities, "Id", "Level");
 }

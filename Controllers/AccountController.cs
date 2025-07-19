@@ -57,7 +57,7 @@ namespace UserRoles.Controllers
 
             if (result.Succeeded)
             {
-                return RedirectToAction("Index", "Tickets1");
+                return RedirectToAction("Index", "Tickets");
             }
 
             ModelState.AddModelError(string.Empty, "Invalid login attempt.");
