@@ -18,6 +18,7 @@ else
             <tr>
                 <th>Full Name</th>
                 <th>Email</th>
+                <th>View</th>
                 <th>Approve</th>
                 <th>Reject</th>
             </tr>
@@ -30,12 +31,17 @@ else
                     <td>@user.FullName</td>
                     <td>@user.Email</td>
                     <td>
+                        <a asp-action="Details" asp-controller="User" asp-route-id="@user.Id" class="btn btn-info btn-sm">
+                            View
+                        </a>
+                    </td>
+                    <td>
                         <div class="d-flex gap-2">
-                            <!-- Accept -->
+                            <!-- Approve -->
                             <form asp-action="Approve" method="post">
                                 <input type="hidden" name="id" value="@user.Id" />
                                 <button type="submit" class="btn btn-success btn-sm">
-                                    Accept
+                                    Approve
                                 </button>
                             </form>
 
