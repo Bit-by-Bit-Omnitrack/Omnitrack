@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using UserRoles.Models;
 using UserRoles.ViewModels;
-using UserRoles.Services; // Added to recognize IEmailService
+using UserRoles.Services;
 
 namespace UserRoles.Controllers
 {
@@ -36,34 +36,38 @@ namespace UserRoles.Controllers
 
             var user = await userManager.FindByEmailAsync(model.Email);
 
-            if (user != null)
-            {
-               // if (!await userManager.IsEmailConfirmedAsync(user))
-               // {
-                 //   ModelState.AddModelError(string.Empty, "Email is not confirmed.");
-                //    return View(model);
-                //}
-
-                if (!user.IsActive)
-                {
-                    ModelState.AddModelError(string.Empty, "Your account is not approved yet.");
-                    return View(model);
-                }
-            }
-            else
+            if (user == null)
             {
                 ModelState.AddModelError(string.Empty, "Invalid login attempt.");
                 return View(model);
             }
 
+            if (!user.IsActive)
+            {
+                ModelState.AddModelError(string.Empty, "Your account is not approved yet.");
+                return View(model);
+            }
+
             var result = await signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
+
 
             if (result.Succeeded)
             {
                 return RedirectToAction("Index", "Tickets");
             }
+            else if (result.IsLockedOut)
+            {
+                ModelState.AddModelError(string.Empty, "Account locked due to multiple failed attempts.");
+            }
+            else if (result.IsNotAllowed)
+            {
+                ModelState.AddModelError(string.Empty, "Login is not allowed for this user.");
+            }
+            else
+            {
+                ModelState.AddModelError(string.Empty, "Invalid email or password.");
+            }
 
-            ModelState.AddModelError(string.Empty, "Invalid login attempt.");
             return View(model);
         }
 
@@ -179,6 +183,29 @@ namespace UserRoles.Controllers
             }
 
             return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ApproveUser(string userId)
+        {
+            var user = await userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            user.IsActive = true;
+            await userManager.UpdateAsync(user);
+
+            await emailService.SendEmailAsync(
+                user.Email,
+                "Account Approved",
+                $@"<p>Hello {user.FullName},</p><p>Your account on <strong>OmniTrack</strong> has been approved.</p><p>You can now log in and access the system.</p><p>Regards,<br/>OmniTrack Team</p>"
+            );
+
+            TempData["Message"] = "User approved successfully.";
+            return RedirectToAction("PendingApproval");
         }
 
         [HttpGet]
