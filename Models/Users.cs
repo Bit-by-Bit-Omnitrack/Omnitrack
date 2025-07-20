@@ -20,5 +20,9 @@ namespace UserRoles.Models
         public DateTime? ModifiedOn { get; set; }
         public UserApprovalStatus ApprovalStatus { get; set; } = UserApprovalStatus.Pending;
         public string? RejectionReason { get; set; }
+        
+
+        // New: Navigation property for projects this user is part of
+        public ICollection<ProjectUser> ProjectUsers { get; set; }
     }
 }

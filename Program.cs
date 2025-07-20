@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer; // Required for JWT Bearer
 using Microsoft.IdentityModel.Tokens; // Required for SecurityKey and TokenValidationParameters
 using System.Text; // Required for Encoding.UTF8
 
+
 var builder = WebApplication.CreateBuilder(args);
 builder.WebHost.UseKestrel();
 
@@ -125,7 +126,6 @@ using (var scope = app.Services.CreateScope())
     dbContext.Database.Migrate(); // Applies migrations
     await SeedService.SeedDatabase(services); // Run seeding inside same scope
 }
-
 
 
 // Configure the HTTP request pipeline.

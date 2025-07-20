@@ -1,7 +1,9 @@
- 
+
+using System.Configuration;
 using System.Data;
 
 using System.Net.Sockets;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using UserRoles.Models;
@@ -34,23 +36,49 @@ public class AppDbContext : IdentityDbContext<Users>
     {
     }
 
+
     public DbSet<Priority> Priorities { get; set; } = default!;
-    public DbSet<TaskItem> TaskItems { get; set; } = default!;
+    public DbSet<Tasks> Tasks { get; set; } = default!;
     public DbSet<Checklists> Checklists { get; set; } = default!;
     public DbSet<Comments> Comments { get; set; } = default!;
     public DbSet<Users> UsersTable { get; set; } = default!;
     public DbSet<Role> Roles { get; set; } = default!;
- //   public DbSet<AppTask> AppTask { get; set; } = default!;
+    //   public DbSet<AppTask> AppTask { get; set; } = default!;
     public DbSet<Ticket> Tickets { get; set; } = default!;
     public DbSet<TicketAssignment> TicketAssignments { get; set; } = default!;
     public DbSet<TicketStatus> TicketStatuses { get; set; } = default!;
     public DbSet<ChecklistItem> ChecklistItems { get; set; } = default!;
     public DbSet<Chats> Chats { get; set; } = default!;
     public DbSet<EmailLog> EmailLogs { get; set; } = default!;
+    public DbSet<Project> Projects { get; set; }
+    public DbSet<ProjectUser> ProjectUsers { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<ProjectUser>()
+               .HasKey(pu => new { pu.ProjectId, pu.UserId }); // Composite key
+
+        modelBuilder.Entity<ProjectUser>()
+            .HasOne(pu => pu.Project)
+            .WithMany(p => p.ProjectUsers)
+            .HasForeignKey(pu => pu.ProjectId);
+
+        modelBuilder.Entity<ProjectUser>()
+            .HasOne(pu => pu.User)
+            .WithMany(u => u.ProjectUsers)
+            .HasForeignKey(pu => pu.UserId);
+
+        // Optional: Seed initial roles if you don't have them
+        // You can also add more roles as needed
+        // builder.Entity<IdentityRole>().HasData(
+        //     new IdentityRole { Name = "Admin", NormalizedName = "ADMIN" },
+        //     new IdentityRole { Name = "ProjectManager", NormalizedName = "PROJECTMANAGER" },
+        //     new IdentityRole { Name = "Developer", NormalizedName = "DEVELOPER" },
+        //     new IdentityRole { Name = "QA", NormalizedName = "QA" },
+        //     new IdentityRole { Name = "User", NormalizedName = "USER" }
+        // );
 
         modelBuilder.Entity<Priority>().HasData(
             new Priority { Id = 1, Name = "Low", Color = "#28a745" },      // Green
@@ -84,7 +112,5 @@ public class AppDbContext : IdentityDbContext<Users>
             .HasForeignKey(t => t.StatusID)
             .OnDelete(DeleteBehavior.Restrict);
     }
-
-public DbSet<UserRoles.Models.Tasks> Tasks { get; set; } = default!;
 }
 

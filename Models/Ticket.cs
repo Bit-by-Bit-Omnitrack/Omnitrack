@@ -38,7 +38,10 @@ namespace UserRoles.Models
         [ForeignKey("StatusID")]
         public TicketStatus? Status { get; set; }
         public int PriorityId { get; set; } // Foreign key reference
-        public Priority Priority { get; set; } // Navigation property
+        public Priority Priority { get; set; }
+        [ForeignKey("TasksId")]
+        public int? TasksId { get; set; } // Foreign key reference to the Tasks table (now nullable)
+        public Tasks? Tasks { get; set; } // property
 
     }
 

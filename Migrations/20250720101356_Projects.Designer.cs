@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace UserRoles.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250720101356_Projects")]
+    partial class Projects
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -513,9 +516,6 @@ namespace UserRoles.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("TasksId")
-                        .HasColumnType("int");
-
                     b.Property<string>("TicketID")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -542,8 +542,6 @@ namespace UserRoles.Migrations
                     b.HasIndex("PriorityId");
 
                     b.HasIndex("StatusID");
-
-                    b.HasIndex("TasksId");
 
                     b.HasIndex("TicketStatusId");
 
@@ -817,10 +815,6 @@ namespace UserRoles.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("UserRoles.Models.Tasks", "Tasks")
-                        .WithMany()
-                        .HasForeignKey("TasksId");
-
                     b.HasOne("UserRoles.Models.TicketStatus", null)
                         .WithMany("Tickets")
                         .HasForeignKey("TicketStatusId");
@@ -832,8 +826,6 @@ namespace UserRoles.Migrations
                     b.Navigation("Priority");
 
                     b.Navigation("Status");
-
-                    b.Navigation("Tasks");
                 });
 
             modelBuilder.Entity("UserRoles.Models.TicketAssignment", b =>

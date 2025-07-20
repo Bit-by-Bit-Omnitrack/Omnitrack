@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace UserRoles.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250719102052_SWAGGER")]
+    partial class SWAGGER
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -152,6 +155,36 @@ namespace UserRoles.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
+                });
+
+            modelBuilder.Entity("UserRoles.Models.AppTask", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CreatedByID")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("TaskID")
+                        .HasColumnType("int");
+
+                    b.Property<string>("TaskName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("AppTask");
                 });
 
             modelBuilder.Entity("UserRoles.Models.Chats", b =>
@@ -345,61 +378,6 @@ namespace UserRoles.Migrations
                         });
                 });
 
-            modelBuilder.Entity("UserRoles.Models.Project", b =>
-                {
-                    b.Property<int>("ProjectId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ProjectId"));
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<DateTime?>("EndDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("ProjectName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<DateTime>("StartDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("ProjectId");
-
-                    b.ToTable("Projects");
-                });
-
-            modelBuilder.Entity("UserRoles.Models.ProjectUser", b =>
-                {
-                    b.Property<int>("ProjectId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("ProjectRole")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<int>("ProjectUserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("ProjectId", "UserId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("ProjectUsers");
-                });
-
             modelBuilder.Entity("UserRoles.Models.Role", b =>
                 {
                     b.Property<int>("Id")
@@ -443,39 +421,7 @@ namespace UserRoles.Migrations
 
                     b.HasIndex("PriorityId");
 
-                    b.ToTable("TaskItem");
-                });
-
-            modelBuilder.Entity("UserRoles.Models.Tasks", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("AssignedTo")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("CreatedBy")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Details")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("DueDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Tasks");
+                    b.ToTable("TaskItems");
                 });
 
             modelBuilder.Entity("UserRoles.Models.Ticket", b =>
@@ -513,9 +459,6 @@ namespace UserRoles.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("TasksId")
-                        .HasColumnType("int");
-
                     b.Property<string>("TicketID")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -542,8 +485,6 @@ namespace UserRoles.Migrations
                     b.HasIndex("PriorityId");
 
                     b.HasIndex("StatusID");
-
-                    b.HasIndex("TasksId");
 
                     b.HasIndex("TicketStatusId");
 
@@ -762,25 +703,6 @@ namespace UserRoles.Migrations
                     b.Navigation("Checklists");
                 });
 
-            modelBuilder.Entity("UserRoles.Models.ProjectUser", b =>
-                {
-                    b.HasOne("UserRoles.Models.Project", "Project")
-                        .WithMany("ProjectUsers")
-                        .HasForeignKey("ProjectId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("UserRoles.Models.Users", "User")
-                        .WithMany("ProjectUsers")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Project");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("UserRoles.Models.TaskItem", b =>
                 {
                     b.HasOne("UserRoles.Models.Priority", "Priority")
@@ -817,10 +739,6 @@ namespace UserRoles.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("UserRoles.Models.Tasks", "Tasks")
-                        .WithMany()
-                        .HasForeignKey("TasksId");
-
                     b.HasOne("UserRoles.Models.TicketStatus", null)
                         .WithMany("Tickets")
                         .HasForeignKey("TicketStatusId");
@@ -832,8 +750,6 @@ namespace UserRoles.Migrations
                     b.Navigation("Priority");
 
                     b.Navigation("Status");
-
-                    b.Navigation("Tasks");
                 });
 
             modelBuilder.Entity("UserRoles.Models.TicketAssignment", b =>
@@ -858,19 +774,9 @@ namespace UserRoles.Migrations
                     b.Navigation("TaskItems");
                 });
 
-            modelBuilder.Entity("UserRoles.Models.Project", b =>
-                {
-                    b.Navigation("ProjectUsers");
-                });
-
             modelBuilder.Entity("UserRoles.Models.TicketStatus", b =>
                 {
                     b.Navigation("Tickets");
-                });
-
-            modelBuilder.Entity("UserRoles.Models.Users", b =>
-                {
-                    b.Navigation("ProjectUsers");
                 });
 #pragma warning restore 612, 618
         }

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace UserRoles.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250720104849_Assigning taskss")]
+    partial class Assigningtaskss
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -513,7 +516,11 @@ namespace UserRoles.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("TasksId")
+                    b.Property<string>("TasksId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("TasksId1")
                         .HasColumnType("int");
 
                     b.Property<string>("TicketID")
@@ -543,7 +550,7 @@ namespace UserRoles.Migrations
 
                     b.HasIndex("StatusID");
 
-                    b.HasIndex("TasksId");
+                    b.HasIndex("TasksId1");
 
                     b.HasIndex("TicketStatusId");
 
@@ -819,7 +826,7 @@ namespace UserRoles.Migrations
 
                     b.HasOne("UserRoles.Models.Tasks", "Tasks")
                         .WithMany()
-                        .HasForeignKey("TasksId");
+                        .HasForeignKey("TasksId1");
 
                     b.HasOne("UserRoles.Models.TicketStatus", null)
                         .WithMany("Tickets")
