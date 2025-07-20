@@ -40,7 +40,10 @@ namespace UserRoles.Controllers
 
         public IActionResult Authenticate()
         {
-            var pendingUsers = _userManager.Users.Where(u => !u.IsActive).ToList();
+            var pendingUsers = _userManager.Users
+            .Where(u => !u.IsActive && u.ApprovalStatus != UserApprovalStatus.Rejected)
+            .ToList();
+
             return View(pendingUsers); // Will be used by Authenticate.cshtml
         }
 
