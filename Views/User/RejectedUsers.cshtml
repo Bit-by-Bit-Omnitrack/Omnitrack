@@ -1,0 +1,34 @@
+﻿@model IEnumerable<UserRoles.Models.Users>
+
+@{
+    ViewData["Title"] = "Rejected Users";
+}
+
+<h2>Rejected Users</h2>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Full Name</th>
+            <th>Email</th>
+            <th>Rejection Reason</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Model)
+        {
+            <tr>
+                <td>@user.FullName</td>
+                <td>@user.Email</td>
+                <td>@user.RejectionReason</td>
+                <td>
+                    <form asp-action="Approve" method="post" asp-controller="User">
+                        <input type="hidden" name="id" value="@user.Id" />
+                        <button type="submit" class="btn btn-success btn-sm">Approve</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
