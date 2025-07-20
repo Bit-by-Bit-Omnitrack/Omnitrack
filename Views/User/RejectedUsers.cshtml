@@ -6,29 +6,45 @@
 
 <h2>Rejected Users</h2>
 
-<table class="table table-bordered">
-    <thead>
-        <tr>
-            <th>Full Name</th>
-            <th>Email</th>
-            <th>Rejection Reason</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var user in Model)
-        {
+@if (!Model.Any())
+{
+    <p class="text-muted">There are no rejected users at this time.</p>
+}
+else
+{
+    <table class="table table-bordered table-striped">
+        <thead>
             <tr>
-                <td>@user.FullName</td>
-                <td>@user.Email</td>
-                <td>@user.RejectionReason</td>
-                <td>
-                    <form asp-action="Approve" method="post" asp-controller="User">
-                        <input type="hidden" name="id" value="@user.Id" />
-                        <button type="submit" class="btn btn-success btn-sm">Approve</button>
-                    </form>
-                </td>
+                <th>Full Name</th>
+                <th>Email</th>
+                <th>Rejection Reason</th>
+                <th>Actions</th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @foreach (var user in Model)
+            {
+                <tr>
+                    <td>@user.FullName</td>
+                    <td>@user.Email</td>
+                    <td>
+                        @if (!string.IsNullOrEmpty(user.RejectionReason))
+                        {
+                            @user.RejectionReason
+                        }
+                        else
+                        {
+                            <span class="text-muted">No reason provided</span>
+                        }
+                    </td>
+                    <td>
+                        <form asp-action="Approve" method="post" asp-controller="User">
+                            <input type="hidden" name="id" value="@user.Id" />
+                            <button type="submit" class="btn btn-success btn-sm">Approve</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

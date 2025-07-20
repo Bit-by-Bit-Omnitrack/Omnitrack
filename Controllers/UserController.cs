@@ -148,23 +148,35 @@ namespace UserRoles.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Reject(string id)
+        public async Task<IActionResult> Reject(string id, string reason)
         {
             if (string.IsNullOrEmpty(id)) return NotFound();
 
             var user = await _userManager.FindByIdAsync(id);
             if (user == null) return NotFound();
 
-            // Soft delete: Mark as inactive and rejected
+            // Set rejection data
             user.IsActive = false;
             user.ApprovalStatus = UserApprovalStatus.Rejected;
-            user.RejectionReason = "Rejected by admin"; // you can change this or add a text box later
+            user.RejectionReason = reason ?? "Rejected by admin"; // fallback if reason is null
 
             await _userManager.UpdateAsync(user);
+
+            // Email user the rejection reason
+            var subject = "OmniTrack Account Rejected";
+            var body = $@"
+        <p>Hi {user.FullName},</p>
+        <p>Unfortunately, your account registration has been rejected.</p>
+        <p><strong>Reason:</strong> {user.RejectionReason}</p>
+        <p>If you believe this was in error, please contact the OmniTrack team.</p>
+        <p>Kind regards,<br/>OmniTrack Team</p>";
+
+            await _emailService.SendEmailAsync(user.Email, subject, body);
 
             TempData["RejectMessage"] = "User has been rejected.";
             return RedirectToAction(nameof(Authenticate));
         }
+
 
         // NEW METHOD: View rejected users
         public IActionResult RejectedUsers()
