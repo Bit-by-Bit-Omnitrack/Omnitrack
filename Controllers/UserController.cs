@@ -96,13 +96,13 @@ namespace UserRoles.Controllers
 
         // POST: Users/Delete/5
 
-        [HttpGet("Users/Details/{id}")]
+        [HttpGet("User/Details/{id}")]
         public async Task<IActionResult> Details(string id)
         {
             if (string.IsNullOrEmpty(id)) return NotFound();
 
             var user = await _userManager.FindByIdAsync(id);
-            if (user == null || !user.IsActive) return NotFound();
+            if (user == null) return NotFound();
 
             return View(user);
         }

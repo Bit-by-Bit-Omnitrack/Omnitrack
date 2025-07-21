@@ -18,6 +18,7 @@ else
             <tr>
                 <th>Full Name</th>
                 <th>Email</th>
+                <th>View</th>
                 <th>Approve</th>
                 <th>Reject (with Reason)</th> <!--  COMBINED COLUMN HEADER -->
             </tr>
@@ -29,13 +30,20 @@ else
                     <td>@user.FullName</td>
                     <td>@user.Email</td>
                     <td>
-                        <!--  Approve -->
-                        <form asp-action="Approve" method="post">
-                            <input type="hidden" name="id" value="@user.Id" />
-                            <button type="submit" class="btn btn-success btn-sm">
-                                Accept
-                            </button>
-                        </form>
+                        <a asp-action="Details" asp-controller="User" asp-route-id="@user.Id" class="btn btn-info btn-sm">
+                            View
+                        </a>
+                    </td>
+                    <td>
+                        <div class="d-flex gap-2">
+                            <!-- Approve -->
+                            <form asp-action="Approve" method="post">
+                                <input type="hidden" name="id" value="@user.Id" />
+                                <button type="submit" class="btn btn-success btn-sm">
+                                    Approve
+                                </button>
+                            </form>
+                        </div>
                     </td>
 
                     <td>
