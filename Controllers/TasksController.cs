@@ -24,6 +24,25 @@ namespace UserRoles.Controllers
             return View(await _context.Tasks.ToListAsync());
         }
 
+        // GET: Tasks/MyTasks
+        [HttpGet]
+        public async Task<IActionResult> MyTasks()
+        {
+            // Optional: Check if the user is authenticated
+            if (!User.Identity.IsAuthenticated)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            // Filter tasks by the current user's username or ID
+            var myTasks = await _context.Tasks
+                .Where(t => t.CreatedBy == User.Identity.Name) // Or use user ID if applicable
+                .ToListAsync();
+
+            return View(myTasks);
+        }
+
+
         // GET: Tasks/Details/5
         public async Task<IActionResult> Details(int? id)
         {
@@ -48,21 +67,22 @@ namespace UserRoles.Controllers
             return View();
         }
 
-        // POST: Tasks/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,AssignedTo,CreatedBy,Details,DueDate")] Tasks tasks)
+        public async Task<IActionResult> Create([Bind("Id,Name,AssignedTo,Details,DueDate")] Tasks tasks)
         {
             if (ModelState.IsValid)
             {
+                // Set the creator to the logged-in user's username
+                tasks.CreatedBy = User.Identity.Name;
+
                 _context.Add(tasks);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
             return View(tasks);
         }
+
 
         // GET: Tasks/Edit/5
         public async Task<IActionResult> Edit(int? id)
