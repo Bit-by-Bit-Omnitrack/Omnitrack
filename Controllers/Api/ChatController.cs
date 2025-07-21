@@ -11,11 +11,11 @@ namespace UserRoles.Controllers
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Route("api/[controller]")]
     [ApiController]
-    public class ChatsController : ControllerBase
+    public class ChatController : ControllerBase
     {
         private readonly AppDbContext _context;
 
-        public ChatsController(AppDbContext context)
+        public ChatController(AppDbContext context)
         {
             _context = context;
         }
