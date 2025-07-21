@@ -20,13 +20,12 @@ else
                 <th>Email</th>
                 <th>View</th>
                 <th>Approve</th>
-                <th>Reject</th>
+                <th>Reject (with Reason)</th> <!--  COMBINED COLUMN HEADER -->
             </tr>
         </thead>
         <tbody>
             @foreach (var user in Model.Where(u => !u.IsActive))
             {
-               
                 <tr>
                     <td>@user.FullName</td>
                     <td>@user.Email</td>
@@ -44,31 +43,42 @@ else
                                     Approve
                                 </button>
                             </form>
-
-
                         </div>
                     </td>
+
                     <td>
-                        <!-- Reject -->
-                        <form asp-action="Reject" method="post">
+                        <!--  Reject with Reason -->
+                        <form asp-action="Reject" method="post" class="d-flex">
                             <input type="hidden" name="id" value="@user.Id" />
+                            <input name="reason" class="form-control form-control-sm me-2"
+                                   placeholder="Enter reason..." style="width: 200px;" />
                             <button type="submit" class="btn btn-danger btn-sm">
                                 Reject
                             </button>
                         </form>
                     </td>
                 </tr>
+
+                <!-- TempData Messages -->
                 @if (TempData["Message"] != null)
                 {
-                    <div class="alert alert-success">
-                        @TempData["Message"]
-                    </div>
+                    <tr>
+                        <td colspan="4">
+                            <div class="alert alert-success">
+                                @TempData["Message"]
+                            </div>
+                        </td>
+                    </tr>
                 }
                 @if (TempData["RejectMessage"] != null)
                 {
-                    <div class="alert alert-danger">
-                        @TempData["RejectMessage"]
-                    </div>
+                    <tr>
+                        <td colspan="4">
+                            <div class="alert alert-danger">
+                                @TempData["RejectMessage"]
+                            </div>
+                        </td>
+                    </tr>
                 }
             }
         </tbody>

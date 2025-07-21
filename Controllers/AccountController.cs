@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using UserRoles.Models;
 using UserRoles.ViewModels;
-using UserRoles.Services; // Added to recognize IEmailService
+using UserRoles.Services;
 
 namespace UserRoles.Controllers
 {
@@ -11,23 +11,22 @@ namespace UserRoles.Controllers
         private readonly SignInManager<Users> signInManager;
         private readonly UserManager<Users> userManager;
         private readonly RoleManager<IdentityRole> roleManager;
-        private readonly IEmailService emailService; //  Added this line to declare email service
+        private readonly IEmailService emailService;
 
-        // Injecting identity services into this controller
-        public AccountController(SignInManager<Users> signInManager, UserManager<Users> userManager, RoleManager<IdentityRole> roleManager, IEmailService emailService) // Injected email service
+        public AccountController(SignInManager<Users> signInManager, UserManager<Users> userManager, RoleManager<IdentityRole> roleManager, IEmailService emailService)
         {
             this.signInManager = signInManager;
             this.userManager = userManager;
             this.roleManager = roleManager;
-            this.emailService = emailService; // Assigned injected email service
+            this.emailService = emailService;
         }
 
-        // Load the login form
         [HttpGet]
         public IActionResult Login()
         {
             return View();
         }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginViewModel model)
@@ -35,43 +34,49 @@ namespace UserRoles.Controllers
             if (!ModelState.IsValid)
                 return View(model);
 
-            // Find user by email to check if email is confirmed and active
             var user = await userManager.FindByEmailAsync(model.Email);
 
-            if (user != null)
+            if (user == null)
             {
-                if (!await userManager.IsEmailConfirmedAsync(user))
-                {
-                    ModelState.AddModelError(string.Empty, "Email is not confirmed.");
-                    return View(model);
-                }
+                ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                return View(model);
+            }
 
-                if (!user.IsActive)
-                {
-                    ModelState.AddModelError(string.Empty, "Your account is not approved yet.");
-                    return View(model);
-                }
+            if (!user.IsActive)
+            {
+                ModelState.AddModelError(string.Empty, "Your account is not approved yet.");
+                return View(model);
             }
 
             var result = await signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
+
 
             if (result.Succeeded)
             {
                 return RedirectToAction("Index", "Tickets");
             }
+            else if (result.IsLockedOut)
+            {
+                ModelState.AddModelError(string.Empty, "Account locked due to multiple failed attempts.");
+            }
+            else if (result.IsNotAllowed)
+            {
+                ModelState.AddModelError(string.Empty, "Login is not allowed for this user.");
+            }
+            else
+            {
+                ModelState.AddModelError(string.Empty, "Invalid email or password.");
+            }
 
-            ModelState.AddModelError(string.Empty, "Invalid login attempt.");
             return View(model);
         }
 
-        // Just showing a message while waiting for admin to approve registration
         [HttpGet]
         public IActionResult PendingApproval()
         {
             return View();
         }
 
-        // Load registration form
         [HttpGet]
         public IActionResult Register()
         {
@@ -79,7 +84,6 @@ namespace UserRoles.Controllers
             return View();
         }
 
-        // Handle registration submission
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(RegisterViewModel model)
@@ -96,68 +100,120 @@ namespace UserRoles.Controllers
                 Email = model.Email,
                 NormalizedUserName = model.Email.ToUpper(),
                 NormalizedEmail = model.Email.ToUpper(),
-                
-                IsActive = false // User cannot log in until approved
+                IsActive = false
             };
 
-               var result = await userManager.CreateAsync(user, model.Password);
+            var result = await userManager.CreateAsync(user, model.Password);
 
             if (result.Succeeded)
             {
-                // Create role if it doesn't exist
-                var roleExists = await roleManager.RoleExistsAsync(model.Role);
-                if (!roleExists)
+                var systemAdminEmails = new List<string>
                 {
-                    await roleManager.CreateAsync(new IdentityRole(model.Role));
+                    "millicent9710@gmail.com",
+                    "emkhabela2@gmail.com",
+                    "jokweniazola@gmail.com",
+                    "tlotlomolefem@gmail.com"
+                };
+
+                string roleToAssign = systemAdminEmails.Contains(model.Email.ToLower())
+                    ? "System Administrator"
+                    : model.Role;
+
+                if (!await roleManager.RoleExistsAsync(roleToAssign))
+                {
+                    await roleManager.CreateAsync(new IdentityRole(roleToAssign));
                 }
 
-                // Add user to role
-                await userManager.AddToRoleAsync(user, model.Role);
+                var roleResult = await userManager.AddToRoleAsync(user, roleToAssign);
 
-                // Send welcome email (no confirmation token/link required)
+                if (!roleResult.Succeeded)
+                {
+                    foreach (var error in roleResult.Errors)
+                    {
+                        ModelState.AddModelError("", error.Description);
+                    }
+                    return View(model);
+                }
+
+                if (roleToAssign == "System Administrator")
+                {
+                    Console.WriteLine($"{user.Email} registered as System Administrator.");
+                    user.IsActive = true;
+
+                    var updateResult = await userManager.UpdateAsync(user);
+                    if (!updateResult.Succeeded)
+                    {
+                        foreach (var error in updateResult.Errors)
+                        {
+                            ModelState.AddModelError("", $"Failed to auto-approve system admin: {error.Description}");
+                        }
+                        return View(model);
+                    }
+                }
+
                 try
                 {
                     await emailService.SendEmailAsync(
-    user.Email,
-    "Welcome to OmniTrack!",
-    $@"
-    <div style='text-align:center;'>
-        <img src='https://i.imgur.com/J9Z3ce5.jpeg' alt='OmniTrack Logo' style='max-width:200px; margin-bottom:20px;'/>
-    </div>
-    <p>Welcome {user.FullName},</p>
-    <p>Thank you for registering with <strong>OmniTrack</strong>.</p>
-    <p>You have been registered successfully as a <strong>{model.Role}</strong>.</p>
-    <p>You will be notified once your account is approved.</p>
-    <p>Kind regards,<br/>OmniTrack Team</p>");
-
+                        user.Email,
+                        "Welcome to OmniTrack!",
+                        $@"
+<div style='text-align:center;'>
+    <img src='https://i.imgur.com/J9Z3ce5.jpeg' alt='OmniTrack Logo' style='max-width:200px; margin-bottom:20px;'/>
+</div>
+<p>Welcome {user.FullName},</p>
+<p>Thank you for registering with <strong>OmniTrack</strong>.</p>
+<p>You have been registered successfully as a <strong>{roleToAssign}</strong>.</p>
+<p>You will be notified once your account is approved.</p>
+<p>Kind regards,<br/>OmniTrack Team</p>"
+                    );
                 }
                 catch (Exception ex)
                 {
                     TempData["Message"] = "User registered but welcome email failed to send.";
+                    Console.WriteLine(ex.Message);
                 }
 
-                // Redirect user to Pending Approval screen
-                return RedirectToAction("PendingApproval", "Account");
+                TempData["Message"] = "Registration successful. Awaiting approval.";
+                return RedirectToAction("Login", "Account");
             }
 
-            // If we get here, registration failed – show errors
             foreach (var error in result.Errors)
             {
-                ModelState.AddModelError(string.Empty, error.Description);
+                ModelState.AddModelError("", error.Description);
             }
 
             return View(model);
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ApproveUser(string userId)
+        {
+            var user = await userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return NotFound();
+            }
 
-        // Show a 403 screen if a user isn't allowed to do something
+            user.IsActive = true;
+            await userManager.UpdateAsync(user);
+
+            await emailService.SendEmailAsync(
+                user.Email,
+                "Account Approved",
+                $@"<p>Hello {user.FullName},</p><p>Your account on <strong>OmniTrack</strong> has been approved.</p><p>You can now log in and access the system.</p><p>Regards,<br/>OmniTrack Team</p>"
+            );
+
+            TempData["Message"] = "User approved successfully.";
+            return RedirectToAction("PendingApproval");
+        }
+
         [HttpGet]
         public IActionResult AccessDenied()
         {
             return View();
         }
 
-        // Step 1: Check if the user email exists
         [HttpGet]
         public IActionResult VerifyEmail()
         {
@@ -181,7 +237,6 @@ namespace UserRoles.Controllers
             return RedirectToAction("ChangePassword", "Account", new { username = user.UserName });
         }
 
-        // Step 2: Let user change password
         [HttpGet]
         public IActionResult ChangePassword(string username)
         {
@@ -222,7 +277,6 @@ namespace UserRoles.Controllers
             return View(model);
         }
 
-        // Ends user session
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
@@ -230,8 +284,5 @@ namespace UserRoles.Controllers
             await signInManager.SignOutAsync();
             return RedirectToAction("Login", "Account");
         }
-
     }
-
-    }
-
+}

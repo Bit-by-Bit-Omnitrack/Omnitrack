@@ -32,6 +32,7 @@ namespace UserRoles.Controllers
                 .Include(t => t.AssignedToUser)
                 .Include(t => t.Status)
                 .Include(t => t.Priority)
+                .Include(t => t.Tasks)
                 .ToListAsync();
             return View(tickets);
         }
@@ -49,6 +50,7 @@ namespace UserRoles.Controllers
                 .Include(t => t.CreatedByUser) // Include CreatedByUser for details
                 .Include(t => t.Status)
                 .Include(t => t.Priority)// If you add a navigation property for status
+                .Include(t => t.Tasks)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (ticket == null)
             {
@@ -64,6 +66,7 @@ namespace UserRoles.Controllers
             // Populate ViewBag.Users for the dropdown in the Create view
             ViewBag.Users = new SelectList(await _userManager.Users.Where(u => u.IsActive).ToListAsync(), "Id", "UserName");
             ViewBag.Priorities = new SelectList(await _context.Priorities.ToListAsync(), "Id", "Name");
+            ViewBag.Tasks = new SelectList(await _context.Tasks.ToListAsync(), "Id", "Name");
             return View();
         }
 
@@ -73,7 +76,7 @@ namespace UserRoles.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
 
-        public async Task<IActionResult> Create([Bind("Title, Description, AssignedToUserId, DueDate, PriorityId")] Ticket ticket)
+        public async Task<IActionResult> Create([Bind("Title, Description, AssignedToUserId, DueDate, PriorityId, TasksId")] Ticket ticket)
         {
             // --- Set auto-generated and default values BEFORE ModelState.IsValid check ---
 
@@ -106,6 +109,7 @@ namespace UserRoles.Controllers
             ViewBag.Users = new SelectList(await _userManager.Users.Where(u => u.IsActive).ToListAsync(), "Id", "UserName", ticket.AssignedToUserId);
             ViewBag.Statuses = new SelectList(await _context.TicketStatuses.ToListAsync(), "Id", "Name");
             ViewBag.Priorities = new SelectList(await _context.Priorities.ToListAsync(), "Id", "Name", ticket.PriorityId);
+            ViewBag.Tasks = new SelectList(await _context.Tasks.ToListAsync(), "Id", "Name", ticket.TasksId);
             _context.Add(ticket);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
@@ -132,13 +136,15 @@ namespace UserRoles.Controllers
             ViewBag.Statuses = new SelectList(await _context.TicketStatuses
                 .ToListAsync(), "Id", "StatusName", ticket.StatusID);
             ViewBag.Priorities = new SelectList(await _context.Priorities.ToListAsync(), "Id", "Name", ticket.PriorityId);
+            ViewBag.Tasks = new SelectList(await _context.Tasks.ToListAsync(), "Id", "Name", ticket.TasksId);
+
             return View(ticket);
         }
 
         // POST: Tickets1/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Description,AssignedToUserId,DueDate,StatusID,PriorityId")] Ticket ticket)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Description,AssignedToUserId,DueDate,StatusID,PriorityId,TasksId")] Ticket ticket)
         {
             if (id != ticket.Id)
                 return NotFound();
@@ -148,6 +154,7 @@ namespace UserRoles.Controllers
                 ViewBag.Users = new SelectList(await _userManager.Users.Where(u => u.IsActive).ToListAsync(), "Id", "UserName", ticket.AssignedToUserId);
                 ViewBag.Statuses = new SelectList(await _context.TicketStatuses.ToListAsync(), "Id", "StatusName", ticket.StatusID);
                 ViewBag.Priorities = new SelectList(await _context.Priorities.ToListAsync(), "Id", "Name", ticket.PriorityId);
+                ViewBag.Tasks = new SelectList(await _context.Tasks.ToListAsync(), "Id", "Name", ticket.TasksId); // Re-populate with selected TaskId
                 //return View(ticket);
             }
 

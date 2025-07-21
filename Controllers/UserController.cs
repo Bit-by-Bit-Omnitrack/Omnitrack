@@ -4,17 +4,22 @@ using UserRoles.Models;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using UserRoles.ViewModels;
+using UserRoles.Services; // added for IEmailService
 
 namespace UserRoles.Controllers
 {
     public class UserController : Controller
     {
         private readonly UserManager<Users> _userManager;
+        private readonly IEmailService _emailService; // added email service
 
-        public UserController(UserManager<Users> userManager)
+        // updated constructor to inject IEmailService
+        public UserController(UserManager<Users> userManager, IEmailService emailService)
         {
             _userManager = userManager;
+            _emailService = emailService;
         }
+
         public async Task<IActionResult> Index()
         {
             var users = await _userManager.Users.Where(u => u.IsActive).ToListAsync();
@@ -35,7 +40,10 @@ namespace UserRoles.Controllers
 
         public IActionResult Authenticate()
         {
-            var pendingUsers = _userManager.Users.Where(u => !u.IsActive).ToList();
+            var pendingUsers = _userManager.Users
+            .Where(u => !u.IsActive && u.ApprovalStatus != UserApprovalStatus.Rejected)
+            .ToList();
+
             return View(pendingUsers); // Will be used by Authenticate.cshtml
         }
 
@@ -120,34 +128,67 @@ namespace UserRoles.Controllers
             var user = await _userManager.FindByIdAsync(id);
             if (user == null) return NotFound();
 
-            user.IsActive = true;
-            await _userManager.UpdateAsync(user);
+            if (!user.IsApproved)
+            {
+                user.IsApproved = true;
+                user.IsActive = true;
+                user.EmailConfirmed = true;
+
+                await _userManager.UpdateAsync(user);
+
+                var subject = "Your OmniTrack Account Has Been Approved";
+                var body = $@"
+            <p>Hi {user.FullName},</p>
+            <p>Your account has been approved by an administrator.</p>
+            <p>You may now log in to the system using your email and password.</p>
+            <p>Kind regards,<br/>OmniTrack Team</p>";
+
+                await _emailService.SendEmailAsync(user.Email, subject, body);
+            }
 
             TempData["Message"] = "User approved successfully.";
-
             return RedirectToAction(nameof(Authenticate));
         }
+
         [HttpPost]
-      
-        public async Task<IActionResult> Reject(string id)
+        public async Task<IActionResult> Reject(string id, string reason)
         {
             if (string.IsNullOrEmpty(id)) return NotFound();
 
             var user = await _userManager.FindByIdAsync(id);
             if (user == null) return NotFound();
 
-            var result = await _userManager.DeleteAsync(user);
+            // Set rejection data
+            user.IsActive = false;
+            user.ApprovalStatus = UserApprovalStatus.Rejected;
+            user.RejectionReason = reason ?? "Rejected by admin"; // fallback if reason is null
 
-            if (result.Succeeded)
-            {
-                TempData["RejectMessage"] = "User has been rejected";
-            }
-            else
-            {
-                TempData["RejectMessage"] = "Failed to reject user.";
-            }
+            await _userManager.UpdateAsync(user);
 
+            // Email user the rejection reason
+            var subject = "OmniTrack Account Rejected";
+            var body = $@"
+        <p>Hi {user.FullName},</p>
+        <p>Unfortunately, your account registration has been rejected.</p>
+        <p><strong>Reason:</strong> {user.RejectionReason}</p>
+        <p>If you believe this was in error, please contact the OmniTrack team.</p>
+        <p>Kind regards,<br/>OmniTrack Team</p>";
+
+            await _emailService.SendEmailAsync(user.Email, subject, body);
+
+            TempData["RejectMessage"] = "User has been rejected.";
             return RedirectToAction(nameof(Authenticate));
+        }
+
+
+        // NEW METHOD: View rejected users
+        public IActionResult RejectedUsers()
+        {
+            var rejectedUsers = _userManager.Users
+                .Where(u => u.ApprovalStatus == UserApprovalStatus.Rejected)
+                .ToList();
+
+            return View(rejectedUsers); // You’ll create RejectedUsers.cshtml for this
         }
 
     }
