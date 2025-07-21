@@ -18,8 +18,10 @@
                 <span asp-validation-for="Name" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="AssignedTo" class="control-label"></label>
-                <input asp-for="AssignedTo" class="form-control" />
+                <label for="AssignedTo">Assign To</label>
+                <select asp-for="AssignedTo" class="form-control" asp-items="ViewBag.Users">
+                    <option value="">-- Select User --</option>
+                </select>
                 <span asp-validation-for="AssignedTo" class="text-danger"></span>
             </div>
             <div class="form-group">

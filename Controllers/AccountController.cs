@@ -310,5 +310,7 @@ namespace UserRoles.Controllers
             await signInManager.SignOutAsync();
             return RedirectToAction("Login", "Account");
         }
+
+
     }
 }

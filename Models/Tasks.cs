@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace UserRoles.Models
 {
@@ -9,10 +10,11 @@ namespace UserRoles.Models
 
         public string Name { get; set; }
 
-        public string AssignedTo { get; set; }
+        public string? AssignedTo { get; set; }
 
-
-        public string CreatedBy { get; set; }
+        [ForeignKey("AssignedToUserId")]
+        public Users? AssignedToUser { get; set; }
+        public string? CreatedBy { get; set; }
 
 
         public string Details { get; set; }
