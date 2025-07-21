@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -12,15 +13,18 @@ namespace UserRoles.Controllers
     public class TasksController : Controller
     {
         private readonly AppDbContext _context;
+        private readonly UserManager<Users> _userManager;
 
-        public TasksController(AppDbContext context)
+        public TasksController(AppDbContext context, UserManager<Users> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         // GET: Tasks
         public async Task<IActionResult> Index()
         {
+            
             return View(await _context.Tasks.ToListAsync());
         }
 
@@ -43,8 +47,9 @@ namespace UserRoles.Controllers
         }
 
         // GET: Tasks/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
+            ViewBag.Users = new SelectList(await _userManager.Users.Where(u => u.IsActive).ToListAsync(), "Id", "UserName");
             return View();
         }
 
@@ -57,6 +62,7 @@ namespace UserRoles.Controllers
         {
             if (ModelState.IsValid)
             {
+                ViewBag.Users = new SelectList(await _userManager.Users.Where(u => u.IsActive).ToListAsync(), "Id", "UserName", tasks.AssignedTo);
                 _context.Add(tasks);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
@@ -96,6 +102,7 @@ namespace UserRoles.Controllers
             {
                 try
                 {
+                    ViewBag.Users = new SelectList(await _userManager.Users.Where(u => u.IsActive).ToListAsync(), "Id", "UserName", tasks.AssignedTo);
                     _context.Update(tasks);
                     await _context.SaveChangesAsync();
                 }
