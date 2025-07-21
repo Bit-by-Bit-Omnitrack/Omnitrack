@@ -52,6 +52,9 @@ public class AppDbContext : IdentityDbContext<Users>
     public DbSet<EmailLog> EmailLogs { get; set; } = default!;
     public DbSet<Project> Projects { get; set; }
     public DbSet<ProjectUser> ProjectUsers { get; set; }
+    public DbSet<SystemAdmin> SystemAdmins { get; set; } = default!;
+
+
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
