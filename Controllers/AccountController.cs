@@ -108,7 +108,9 @@ namespace UserRoles.Controllers
                 Email = model.Email,
                 NormalizedUserName = model.Email.ToUpper(),
                 NormalizedEmail = model.Email.ToUpper(),
-                IsActive =  false,
+
+                IsActive = false,
+
             };
 
             var result = await userManager.CreateAsync(user, model.Password);
