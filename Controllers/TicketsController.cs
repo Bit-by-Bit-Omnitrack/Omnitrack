@@ -44,7 +44,7 @@ namespace UserRoles.Controllers
             var tickets = await ticketsQuery.ToListAsync();
 
             ViewBag.Statuses = await _context.TicketStatuses.OrderBy(s => s.Id).ToListAsync();
-            
+
             // Populate ViewBag for tasks dropdown in the filter
             ViewBag.TasksFilter = new SelectList(await _context.Tasks.ToListAsync(), "Id", "Name", filterTaskId);
 
@@ -210,7 +210,7 @@ namespace UserRoles.Controllers
                 ViewBag.Statuses = new SelectList(await _context.TicketStatuses.ToListAsync(), "Id", "StatusName", ticket.StatusID);
                 ViewBag.Priorities = new SelectList(await _context.Priorities.ToListAsync(), "Id", "Name", ticket.PriorityId);
                 ViewBag.Tasks = new SelectList(await _context.Tasks.ToListAsync(), "Id", "Name", ticket.TasksId); // Re-populate with selected TaskId
-                                                                                                                   //return View(ticket);
+                                                                                                                  //return View(ticket);
             }
 
             var existingTicket = await _context.Tickets.FirstOrDefaultAsync(t => t.Id == id);
