@@ -2,12 +2,8 @@
 
 @{
     ViewData["Title"] = "Tickets Dashboard";
-    var statuses = new[] {
-        new { Id = 1, Name = "To Do", Color = "bg-info" },
-        new { Id = 2, Name = "In Progress", Color = "bg-warning" },
-        new { Id = 3, Name = "Blocker", Color = "bg-danger" },
-        new { Id = 4, Name = "Completed", Color = "bg-success" }
-    };
+    var statuses = (List<UserRoles.Models.TicketStatus>)ViewBag.Statuses;
+    var tasksFilter = (SelectList)ViewBag.TasksFilter; // Get the tasks filter SelectList
 }
 
 <br />
@@ -17,31 +13,150 @@
 <br />
 <br />
 
-<div class="row">
+<p>
+    <a asp-action="Create" class="btn btn-success">Create New Task</a>
+</p>
+
+@* Task Filter Section *@
+<div class="mb-3">
+    <form asp-action="Index" method="get" class="form-inline">
+        <label for="filterTaskId" class="mr-2">Filter by Task:</label>
+        <select name="filterTaskId" id="filterTaskId" class="form-control mr-2">
+            <option value="">All Tasks</option> @* Option to show all tasks *@
+            @foreach (var taskOption in tasksFilter)
+            {
+                <option value="@taskOption.Value" selected="@(taskOption.Selected)">@taskOption.Text</option>
+            }
+        </select>
+        <button type="submit" class="btn btn-primary">Apply Filter</button>
+    </form>
+</div>
+
+
+<div class="kanban-board">
     @foreach (var status in statuses)
     {
-        <div class="col-lg-3 col-6">
-            <h4>@status.Name</h4>
-            @foreach (var ticket in Model.Where(t => t.StatusID == status.Id))
-            {
-                <div class="small-box @status.Color">
-                    <div class="inner">
-                        <h5>@ticket.Title</h5>
-                        <strong>Description:</strong> @ticket.Description <br />
-                        <strong>Task of:</strong> @ticket.Tasks?.Name <br />
-                        <strong>Assigned To:</strong> @ticket.AssignedToUser?.UserName <br />
-                        <strong>Priority:</strong> <span class="badge" style="background-color:@ticket.Priority.Color">@ticket.Priority.Name</span><br />
-                        <strong>Created:</strong> @ticket.CreatedDate.ToString("yyyy-MM-dd") <br />
-                        <strong>Due:</strong> @(ticket.DueDate?.ToString("yyyy-MM-dd") ?? "N/A") <br />
-                        <strong>Updated:</strong> @(ticket.UpdatedDate?.ToString("yyyy-MM-dd") ?? "N/A") <br />
-
+        <div class="kanban-column" id="status-@status.Id" data-status-id="@status.Id">
+            <h2>@status.StatusName</h2>
+            <div class="kanban-cards">
+                @foreach (var item in Model.Where(t => t.StatusID == status.Id))
+                {
+                    <div class="kanban-card draggable" draggable="true" data-ticket-id="@item.Id">
+                        <h4>@Html.DisplayFor(modelItem => item.Title)</h4>
+                        <p>Assigned To: @(item.AssignedToUser?.UserName ?? "N/A")</p>
+                        <p>Priority: @(item.Priority?.Name ?? "N/A")</p>
+                        <p>Task: @(item.Tasks?.Name ?? "N/A")</p> @* Display the task name *@
+                        <p>Due Date: @(item.DueDate.HasValue ? item.DueDate.Value.ToShortDateString() : "N/A")</p>
+                        <div class="card-actions">
+                            <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                            <a asp-action="Edit" asp-route-id="@item.Id">Edit</a>|
+                            <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                        </div>
                     </div>
-                    <a asp-action="Details" asp-route-id="@ticket.Id" class="small-box-footer">
-
-                        More Info <i class="fas fa-arrow-circle-right"></i>
-                    </a>
-                </div>
-            }
+                }
+            </div>
         </div>
     }
 </div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            let draggedItem = null;
+
+            // Make cards draggable
+            document.querySelectorAll('.draggable').forEach(item => {
+                item.addEventListener('dragstart', (e) => {
+                    draggedItem = item;
+                    e.dataTransfer.setData('text/plain', item.dataset.ticketId); // Store ticket ID
+                    setTimeout(() => {
+                        item.classList.add('dragging'); // Add a class for styling while dragging
+                    }, 0);
+                });
+
+                item.addEventListener('dragend', () => {
+                    draggedItem.classList.remove('dragging');
+                    draggedItem = null;
+                });
+            });
+
+            // Make columns droppable
+            document.querySelectorAll('.kanban-column').forEach(column => {
+                column.addEventListener('dragover', (e) => {
+                    e.preventDefault(); // Allow drop
+                    const kanbanCards = column.querySelector('.kanban-cards');
+                    if (kanbanCards && draggedItem) {
+                        const afterElement = getDragAfterElement(kanbanCards, e.clientY);
+                        if (afterElement == null) {
+                            kanbanCards.appendChild(draggedItem);
+                        } else {
+                            kanbanCards.insertBefore(draggedItem, afterElement);
+                        }
+                    }
+                });
+
+                column.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    if (draggedItem) {
+                        const ticketId = parseInt(e.dataTransfer.getData('text/plain'));
+                        const newStatusId = parseInt(column.dataset.statusId);
+
+                        // Update the UI immediately
+                        const kanbanCards = column.querySelector('.kanban-cards');
+                        kanbanCards.appendChild(draggedItem); // Already moved in dragover, but confirm placement
+
+                        // Send update to the server
+                        updateTicketStatusOnServer(ticketId, newStatusId);
+                    }
+                });
+            });
+
+            function getDragAfterElement(container, y) {
+                const draggableElements = [...container.querySelectorAll('.draggable:not(.dragging)')];
+
+                return draggableElements.reduce((closest, child) => {
+                    const box = child.getBoundingClientRect();
+                    const offset = y - box.top - box.height / 2;
+                    if (offset < 0 && offset > closest.offset) {
+                        return { offset: offset, element: child };
+                    } else {
+                        return closest;
+                    }
+                }, { offset: Number.NEGATIVE_INFINITY }).element;
+            }
+
+            function updateTicketStatusOnServer(ticketId, newStatusId) {
+                // Using jQuery AJAX
+                $.ajax({
+                    url: '@Url.Action("UpdateTicketStatus", "Tickets")', // Correctly generate the URL
+                    type: 'POST',
+                    data: {
+                        ticketId: ticketId,
+                        newStatusId: newStatusId
+                    },
+                    headers: {
+                        'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val() // Send Anti-forgery token
+                    },
+                    success: function (response) {
+                        if (response.success) {
+                            console.log(response.message);
+                            // You might want to refresh only the specific ticket or column
+                            // For now, a full refresh or a more sophisticated UI update can be considered.
+                            // location.reload(); // Uncomment if you want to refresh the page after successful update
+                        } else {
+                            console.error("Error updating ticket status: " + response.message);
+                            alert("Failed to update ticket status: " + response.message);
+                            // Optionally, revert the UI change if the server update fails
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("AJAX Error:", status, error, xhr.responseText);
+                        alert("An error occurred while communicating with the server.");
+                        // Optionally, revert the UI change if the server update fails
+                    }
+                });
+            }
+        });
+    </script>
+}
