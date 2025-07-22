@@ -471,9 +471,6 @@ namespace UserRoles.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("AssignedTo")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("AssignedToUserId")
                         .HasColumnType("nvarchar(450)");
 

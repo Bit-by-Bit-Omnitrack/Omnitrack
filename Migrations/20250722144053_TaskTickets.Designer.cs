@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace UserRoles.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250722090005_task")]
-    partial class task
+    [Migration("20250722144053_TaskTickets")]
+    partial class TaskTickets
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -473,9 +473,6 @@ namespace UserRoles.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("AssignedTo")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("AssignedToUserId")
                         .HasColumnType("nvarchar(450)");
