@@ -3,6 +3,10 @@ using Microsoft.AspNetCore.Mvc;
 using UserRoles.Models;
 using UserRoles.ViewModels;
 using UserRoles.Services;
+using UserRoles.Data;
+using Microsoft.EntityFrameworkCore;
+
+
 
 namespace UserRoles.Controllers
 {
@@ -12,13 +16,17 @@ namespace UserRoles.Controllers
         private readonly UserManager<Users> userManager;
         private readonly RoleManager<IdentityRole> roleManager;
         private readonly IEmailService emailService;
+        private readonly AppDbContext _context;
 
-        public AccountController(SignInManager<Users> signInManager, UserManager<Users> userManager, RoleManager<IdentityRole> roleManager, IEmailService emailService)
+
+
+        public AccountController(SignInManager<Users> signInManager, UserManager<Users> userManager, RoleManager<IdentityRole> roleManager, IEmailService emailService, AppDbContext context)
         {
             this.signInManager = signInManager;
             this.userManager = userManager;
             this.roleManager = roleManager;
             this.emailService = emailService;
+            this._context = context;
         }
 
         [HttpGet]
@@ -100,32 +108,51 @@ namespace UserRoles.Controllers
                 Email = model.Email,
                 NormalizedUserName = model.Email.ToUpper(),
                 NormalizedEmail = model.Email.ToUpper(),
-                IsActive = false
+
+                IsActive = false,
+
             };
 
             var result = await userManager.CreateAsync(user, model.Password);
 
             if (result.Succeeded)
             {
-                var systemAdminEmails = new List<string>
-                {
-                    "millicent9710@gmail.com",
-                    "emkhabela2@gmail.com",
-                    "jokweniazola@gmail.com",
-                    "tlotlomolefem@gmail.com"
-                };
+                var isSystemAdmin = await _context.SystemAdmins
+                    .AnyAsync(sa => sa.Email.ToLower() == model.Email.ToLower());
 
-                string roleToAssign = systemAdminEmails.Contains(model.Email.ToLower())
-                    ? "System Administrator"
-                    : model.Role;
+                string roleToAssign = isSystemAdmin ? "System Administrator" : model.Role;
 
-                if (!await roleManager.RoleExistsAsync(roleToAssign))
+                IdentityResult roleResult;
+
+                if (isSystemAdmin)
                 {
-                    await roleManager.CreateAsync(new IdentityRole(roleToAssign));
+                    user.IsActive = true; // Automatically activate System Admins
+
+                    // Ensure role exists
+                    if (!await roleManager.RoleExistsAsync("System Administrator"))
+                    {
+                        await roleManager.CreateAsync(new IdentityRole("System Administrator"));
+                    }
+
+                    // Assign role
+                    roleResult = await userManager.AddToRoleAsync(user, "System Administrator");
+
+                    // Save updated IsActive value
+                    await userManager.UpdateAsync(user);
+                }
+                else
+                {
+                    // For regular users, ensure selected role exists
+                    if (!await roleManager.RoleExistsAsync(model.Role))
+                    {
+                        await roleManager.CreateAsync(new IdentityRole(model.Role));
+                    }
+
+                    // Assign role
+                    roleResult = await userManager.AddToRoleAsync(user, model.Role);
                 }
 
-                var roleResult = await userManager.AddToRoleAsync(user, roleToAssign);
-
+                // Check if role assignment succeeded
                 if (!roleResult.Succeeded)
                 {
                     foreach (var error in roleResult.Errors)
@@ -134,6 +161,7 @@ namespace UserRoles.Controllers
                     }
                     return View(model);
                 }
+
 
                 if (roleToAssign == "System Administrator")
                 {
@@ -284,5 +312,7 @@ namespace UserRoles.Controllers
             await signInManager.SignOutAsync();
             return RedirectToAction("Login", "Account");
         }
+
+
     }
 }

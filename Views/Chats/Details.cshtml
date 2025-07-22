@@ -1,0 +1,36 @@
+﻿@model UserRoles.Models.Chats
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h1 class="mb-4">Chat Message Details</h1>
+
+<div class="card border-info">
+    <div class="card-header bg-info text-white">
+        Ticket #@Model.TicketId
+    </div>
+    <div class="card-body">
+        <dl class="row">
+            <dt class="col-sm-3">Sender</dt>
+            <dd class="col-sm-9">@Html.DisplayFor(model => model.Sender)</dd>
+
+            <dt class="col-sm-3">Message</dt>
+            <dd class="col-sm-9">@Html.DisplayFor(model => model.Message)</dd>
+
+            <dt class="col-sm-3">Sent At</dt>
+            <dd class="col-sm-9">@Html.DisplayFor(model => model.SentAt)</dd>
+        </dl>
+    </div>
+</div>
+
+<div class="mt-4">
+    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-secondary">Edit</a>
+    <a asp-action="Index" class="btn btn-link ml-2">← Back to Chats</a>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

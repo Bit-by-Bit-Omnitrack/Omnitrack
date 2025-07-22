@@ -8,28 +8,11 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace UserRoles.Migrations
 {
     /// <inheritdoc />
-    public partial class ggss : Migration
+    public partial class TaskTickets : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.CreateTable(
-                name: "AppTask",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    TaskID = table.Column<int>(type: "int", nullable: false),
-                    TaskName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CreatedByID = table.Column<int>(type: "int", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AppTask", x => x.Id);
-                });
-
             migrationBuilder.CreateTable(
                 name: "AspNetRoles",
                 columns: table => new
@@ -51,11 +34,11 @@ namespace UserRoles.Migrations
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     FullName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
+                    IsApproved = table.Column<bool>(type: "bit", nullable: false),
                     CreatedOn = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ModifiedOn = table.Column<DateTime>(type: "datetime2", nullable: true),
                     ApprovalStatus = table.Column<int>(type: "int", nullable: false),
                     RejectionReason = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    UsersTable = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -156,6 +139,23 @@ namespace UserRoles.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Projects",
+                columns: table => new
+                {
+                    ProjectId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ProjectName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
+                    StartDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    EndDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Projects", x => x.ProjectId);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Roles",
                 columns: table => new
                 {
@@ -167,6 +167,19 @@ namespace UserRoles.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Roles", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "SystemAdmins",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Email = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SystemAdmins", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -289,6 +302,28 @@ namespace UserRoles.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Tasks",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    AssignedToUserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Details = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    DueDate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Tasks", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Tasks_AspNetUsers_AssignedToUserId",
+                        column: x => x.AssignedToUserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ChecklistItems",
                 columns: table => new
                 {
@@ -312,7 +347,7 @@ namespace UserRoles.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "TaskItems",
+                name: "TaskItem",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -323,12 +358,38 @@ namespace UserRoles.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_TaskItems", x => x.Id);
+                    table.PrimaryKey("PK_TaskItem", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_TaskItems_Priorities_PriorityId",
+                        name: "FK_TaskItem_Priorities_PriorityId",
                         column: x => x.PriorityId,
                         principalTable: "Priorities",
                         principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ProjectUsers",
+                columns: table => new
+                {
+                    ProjectId = table.Column<int>(type: "int", nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    ProjectUserId = table.Column<int>(type: "int", nullable: false),
+                    ProjectRole = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProjectUsers", x => new { x.ProjectId, x.UserId });
+                    table.ForeignKey(
+                        name: "FK_ProjectUsers_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ProjectUsers_Projects_ProjectId",
+                        column: x => x.ProjectId,
+                        principalTable: "Projects",
+                        principalColumn: "ProjectId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -350,6 +411,7 @@ namespace UserRoles.Migrations
                     UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     AssignedToUserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     PriorityId = table.Column<int>(type: "int", nullable: false),
+                    TasksId = table.Column<int>(type: "int", nullable: true),
                     TicketStatusId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
@@ -373,6 +435,11 @@ namespace UserRoles.Migrations
                         principalTable: "Priorities",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Tickets_Tasks_TasksId",
+                        column: x => x.TasksId,
+                        principalTable: "Tasks",
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Tickets_TicketStatuses_StatusID",
                         column: x => x.StatusID,
@@ -479,9 +546,19 @@ namespace UserRoles.Migrations
                 column: "ChecklistsId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_TaskItems_PriorityId",
-                table: "TaskItems",
+                name: "IX_ProjectUsers_UserId",
+                table: "ProjectUsers",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TaskItem_PriorityId",
+                table: "TaskItem",
                 column: "PriorityId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Tasks_AssignedToUserId",
+                table: "Tasks",
+                column: "AssignedToUserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_TicketAssignments_TicketID",
@@ -514,6 +591,11 @@ namespace UserRoles.Migrations
                 column: "StatusID");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Tickets_TasksId",
+                table: "Tickets",
+                column: "TasksId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Tickets_TicketStatusId",
                 table: "Tickets",
                 column: "TicketStatusId");
@@ -522,9 +604,6 @@ namespace UserRoles.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "AppTask");
-
             migrationBuilder.DropTable(
                 name: "AspNetRoleClaims");
 
@@ -553,10 +632,16 @@ namespace UserRoles.Migrations
                 name: "EmailLogs");
 
             migrationBuilder.DropTable(
+                name: "ProjectUsers");
+
+            migrationBuilder.DropTable(
                 name: "Roles");
 
             migrationBuilder.DropTable(
-                name: "TaskItems");
+                name: "SystemAdmins");
+
+            migrationBuilder.DropTable(
+                name: "TaskItem");
 
             migrationBuilder.DropTable(
                 name: "TicketAssignments");
@@ -568,16 +653,22 @@ namespace UserRoles.Migrations
                 name: "Checklists");
 
             migrationBuilder.DropTable(
-                name: "Tickets");
+                name: "Projects");
 
             migrationBuilder.DropTable(
-                name: "AspNetUsers");
+                name: "Tickets");
 
             migrationBuilder.DropTable(
                 name: "Priorities");
 
             migrationBuilder.DropTable(
+                name: "Tasks");
+
+            migrationBuilder.DropTable(
                 name: "TicketStatuses");
+
+            migrationBuilder.DropTable(
+                name: "AspNetUsers");
         }
     }
 }
