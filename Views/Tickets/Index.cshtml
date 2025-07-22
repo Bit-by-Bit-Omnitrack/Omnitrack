@@ -1,4 +1,4 @@
-﻿@model IEnumerable<UserRoles.Models.Ticket>
+@model IEnumerable<UserRoles.Models.Ticket>
 
 @{
     ViewData["Title"] = "Tickets Dashboard";
@@ -6,12 +6,7 @@
     var tasksFilter = (SelectList)ViewBag.TasksFilter; // Get the tasks filter SelectList
 }
 
-<br />
-<a asp-action="Create" class="btn btn-sm btn-primary">
-    <i class="fa fa-plus"></i> Add New Ticket
-</a>
-<br />
-<br />
+<h1>Tickets Dashboard</h1>
 
 <p>
     <a asp-action="Create" class="btn btn-success">Create New Task</a>

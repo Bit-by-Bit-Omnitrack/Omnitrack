@@ -44,7 +44,7 @@ namespace UserRoles.Controllers
             var tickets = await ticketsQuery.ToListAsync();
 
             ViewBag.Statuses = await _context.TicketStatuses.OrderBy(s => s.Id).ToListAsync();
-
+            
             // Populate ViewBag for tasks dropdown in the filter
             ViewBag.TasksFilter = new SelectList(await _context.Tasks.ToListAsync(), "Id", "Name", filterTaskId);
 
@@ -130,6 +130,46 @@ namespace UserRoles.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        [HttpPost]
+        public async Task<IActionResult> UpdateTicketStatus(int ticketId, int newStatusId)
+        {
+            var ticket = await _context.Tickets.FindAsync(ticketId);
+            if (ticket == null)
+            {
+                return NotFound();
+            }
+
+            // Check if the newStatusId is valid (exists in your TicketStatuses table)
+            var newStatus = await _context.TicketStatuses.FindAsync(newStatusId);
+            if (newStatus == null)
+            {
+                return BadRequest("Invalid Status ID.");
+            }
+
+            ticket.StatusID = newStatusId;
+
+            // Optional: Update metadata
+            var currentUser = await _userManager.GetUserAsync(User);
+            ticket.UpdatedBy = currentUser?.Id ?? "System";
+            ticket.UpdatedDate = DateTime.UtcNow;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+                return Json(new { success = true, message = "Ticket status updated successfully." });
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                return BadRequest("Failed to update ticket status due to a concurrency issue.");
+            }
+            catch (Exception ex)
+            {
+                // Log the exception (e.g., using ILogger)
+                Console.WriteLine($"Error updating ticket status: {ex.Message}");
+                return StatusCode(500, "An error occurred while updating the ticket status.");
+            }
+        }
+
         // GET: Tickets1/Edit/5
         [HttpGet]
         public async Task<IActionResult> Edit(int? id)
@@ -170,7 +210,7 @@ namespace UserRoles.Controllers
                 ViewBag.Statuses = new SelectList(await _context.TicketStatuses.ToListAsync(), "Id", "StatusName", ticket.StatusID);
                 ViewBag.Priorities = new SelectList(await _context.Priorities.ToListAsync(), "Id", "Name", ticket.PriorityId);
                 ViewBag.Tasks = new SelectList(await _context.Tasks.ToListAsync(), "Id", "Name", ticket.TasksId); // Re-populate with selected TaskId
-                                                                                                                  //return View(ticket);
+                                                                                                                   //return View(ticket);
             }
 
             var existingTicket = await _context.Tickets.FirstOrDefaultAsync(t => t.Id == id);
