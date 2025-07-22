@@ -34,6 +34,9 @@ namespace UserRoles.Controllers
                 .Include(t => t.Priority)
                 .Include(t => t.Tasks)
                 .ToListAsync();
+
+            ViewBag.Statuses = await _context.TicketStatuses.OrderBy(s => s.Id).ToListAsync();
+
             return View(tickets);
         }
 
@@ -113,6 +116,46 @@ namespace UserRoles.Controllers
             _context.Add(ticket);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateTicketStatus(int ticketId, int newStatusId)
+        {
+            var ticket = await _context.Tickets.FindAsync(ticketId);
+            if (ticket == null)
+            {
+                return NotFound();
+            }
+
+            // Check if the newStatusId is valid (exists in your TicketStatuses table)
+            var newStatus = await _context.TicketStatuses.FindAsync(newStatusId);
+            if (newStatus == null)
+            {
+                return BadRequest("Invalid Status ID.");
+            }
+
+            ticket.StatusID = newStatusId;
+
+            // Optional: Update metadata
+            var currentUser = await _userManager.GetUserAsync(User);
+            ticket.UpdatedBy = currentUser?.Id ?? "System";
+            ticket.UpdatedDate = DateTime.UtcNow;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+                return Json(new { success = true, message = "Ticket status updated successfully." });
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                return BadRequest("Failed to update ticket status due to a concurrency issue.");
+            }
+            catch (Exception ex)
+            {
+                // Log the exception (e.g., using ILogger)
+                Console.WriteLine($"Error updating ticket status: {ex.Message}");
+                return StatusCode(500, "An error occurred while updating the ticket status.");
+            }
         }
 
         // GET: Tickets1/Edit/5

@@ -12,6 +12,8 @@ namespace UserRoles.Models
 
         public string? AssignedTo { get; set; }
 
+        public string? AssignedToUserId { get; set; } // Make nullable
+
         [ForeignKey("AssignedToUserId")]
         public Users? AssignedToUser { get; set; }
         public string? CreatedBy { get; set; }
