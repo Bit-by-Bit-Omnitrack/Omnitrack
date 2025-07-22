@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using UserRoles.Models;
+using UserRoles.Data; // Assuming AppDbContext is here
 
 namespace UserRoles.Controllers
 {
@@ -24,8 +25,10 @@ namespace UserRoles.Controllers
         // GET: Tasks
         public async Task<IActionResult> Index()
         {
-            
-            return View(await _context.Tasks.ToListAsync());
+            // Eager load AssignedToUser to display username
+            return View(await _context.Tasks
+                .Include(t => t.AssignedToUser) // Include the AssignedToUser
+                .ToListAsync());
         }
 
         // GET: Tasks/Details/5
@@ -37,6 +40,7 @@ namespace UserRoles.Controllers
             }
 
             var tasks = await _context.Tasks
+                .Include(t => t.AssignedToUser) // Include the AssignedToUser
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (tasks == null)
             {
@@ -54,19 +58,28 @@ namespace UserRoles.Controllers
         }
 
         // POST: Tasks/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Name,AssignedToUserId,CreatedBy,Details,DueDate")] Tasks tasks)
         {
             if (ModelState.IsValid)
             {
-                ViewBag.Users = new SelectList(await _userManager.Users.Where(u => u.IsActive).ToListAsync(), "Id", "UserName", tasks.AssignedToUserId);
+                // Assign the CreatedBy user's ID
+                var currentUser = await _userManager.GetUserAsync(User);
+                if (currentUser != null)
+                {
+                    tasks.CreatedBy = currentUser.Id;
+                }
+                else
+                {
+                    tasks.CreatedBy = "System"; // Fallback
+                }
+
                 _context.Add(tasks);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
+            ViewBag.Users = new SelectList(await _userManager.Users.Where(u => u.IsActive).ToListAsync(), "Id", "UserName", tasks.AssignedToUserId);
             return View(tasks);
         }
 
@@ -83,15 +96,14 @@ namespace UserRoles.Controllers
             {
                 return NotFound();
             }
+            ViewBag.Users = new SelectList(await _userManager.Users.Where(u => u.IsActive).ToListAsync(), "Id", "UserName", tasks.AssignedToUserId);
             return View(tasks);
         }
 
         // POST: Tasks/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,AssignedToUserId,CreatedBy,Details,DueDate")] Tasks tasks)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,AssignedTo,CreatedBy,Details,DueDate")] Tasks tasks)
         {
             if (id != tasks.Id)
             {
@@ -102,7 +114,15 @@ namespace UserRoles.Controllers
             {
                 try
                 {
-                    ViewBag.Users = new SelectList(await _userManager.Users.Where(u => u.IsActive).ToListAsync(), "Id", "UserName", tasks.AssignedToUserId);
+                    // For the 'Edit' action, you should fetch the existing entity first
+                    // to ensure you're not overwriting CreatedBy if it's not being updated via the form.
+                    var existingTask = await _context.Tasks.AsNoTracking().FirstOrDefaultAsync(t => t.Id == id);
+                    if (existingTask == null)
+                    {
+                        return NotFound();
+                    }
+
+
                     _context.Update(tasks);
                     await _context.SaveChangesAsync();
                 }
@@ -119,6 +139,7 @@ namespace UserRoles.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
+            ViewBag.Users = new SelectList(await _userManager.Users.Where(u => u.IsActive).ToListAsync(), "Id", "UserName", tasks.AssignedToUserId);
             return View(tasks);
         }
 
@@ -131,6 +152,7 @@ namespace UserRoles.Controllers
             }
 
             var tasks = await _context.Tasks
+                .Include(t => t.AssignedToUser) // Include the AssignedToUser for details on delete confirmation
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (tasks == null)
             {
