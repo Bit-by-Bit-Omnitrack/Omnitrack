@@ -24,18 +24,30 @@ namespace UserRoles.Controllers
         }
 
         // GET: Tickets1
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int? filterTaskId) // Added filterTaskId parameter
         {
-            // Eager load related data for display in the dashboard
-            var tickets = await _context.Tickets
+            // Start with all tickets, eager load related data
+            var ticketsQuery = _context.Tickets
                 .Include(t => t.CreatedByUser)
                 .Include(t => t.AssignedToUser)
                 .Include(t => t.Status)
                 .Include(t => t.Priority)
                 .Include(t => t.Tasks)
-                .ToListAsync();
+                .AsQueryable(); // Use AsQueryable to allow further filtering
+
+            // Apply task filter if filterTaskId is provided
+            if (filterTaskId.HasValue && filterTaskId.Value > 0)
+            {
+                ticketsQuery = ticketsQuery.Where(t => t.TasksId == filterTaskId.Value);
+            }
+
+            var tickets = await ticketsQuery.ToListAsync();
 
             ViewBag.Statuses = await _context.TicketStatuses.OrderBy(s => s.Id).ToListAsync();
+
+            // Populate ViewBag for tasks dropdown in the filter
+            ViewBag.TasksFilter = new SelectList(await _context.Tasks.ToListAsync(), "Id", "Name", filterTaskId);
+
 
             return View(tickets);
         }
@@ -105,10 +117,10 @@ namespace UserRoles.Controllers
             // Set CreatedDate to now
             ticket.CreatedDate = DateTime.UtcNow;
 
-          /*  _context.Add(ticket);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-          */
+            /* _context.Add(ticket);
+             await _context.SaveChangesAsync();
+             return RedirectToAction(nameof(Index));
+            */
             ViewBag.Users = new SelectList(await _userManager.Users.Where(u => u.IsActive).ToListAsync(), "Id", "UserName", ticket.AssignedToUserId);
             ViewBag.Statuses = new SelectList(await _context.TicketStatuses.ToListAsync(), "Id", "Name");
             ViewBag.Priorities = new SelectList(await _context.Priorities.ToListAsync(), "Id", "Name", ticket.PriorityId);
@@ -198,7 +210,7 @@ namespace UserRoles.Controllers
                 ViewBag.Statuses = new SelectList(await _context.TicketStatuses.ToListAsync(), "Id", "StatusName", ticket.StatusID);
                 ViewBag.Priorities = new SelectList(await _context.Priorities.ToListAsync(), "Id", "Name", ticket.PriorityId);
                 ViewBag.Tasks = new SelectList(await _context.Tasks.ToListAsync(), "Id", "Name", ticket.TasksId); // Re-populate with selected TaskId
-                //return View(ticket);
+                                                                                                                  //return View(ticket);
             }
 
             var existingTicket = await _context.Tickets.FirstOrDefaultAsync(t => t.Id == id);
@@ -213,6 +225,8 @@ namespace UserRoles.Controllers
                 existingTicket.AssignedToUserId = ticket.AssignedToUserId;
                 existingTicket.DueDate = ticket.DueDate;
                 existingTicket.StatusID = ticket.StatusID;
+                existingTicket.PriorityId = ticket.PriorityId; // Added this line to update priority
+                existingTicket.TasksId = ticket.TasksId; // Added this line to update tasks
 
                 // Update metadata
                 var currentUser = await _userManager.GetUserAsync(User);
