@@ -1,4 +1,4 @@
-﻿@model IEnumerable<UserRoles.Models.Tasks>
+@model IEnumerable<UserRoles.Models.Tasks>
 
 @{
     ViewData["Title"] = "Index";
@@ -22,7 +22,7 @@
                         @Html.DisplayNameFor(model => model.Name)
                     </th>
                     <th>
-                        @Html.DisplayNameFor(model => model.AssignedTo)
+                        @Html.DisplayNameFor(model => model.AssignedToUser.UserName) 
                     </th>
                     <th>
                         @Html.DisplayNameFor(model => model.CreatedBy)
@@ -33,7 +33,7 @@
                     <th>
                         @Html.DisplayNameFor(model => model.DueDate)
                     </th>
-                   
+
                     <th>Actions</th> @* Unified column for actions *@
                 </tr>
             </thead>
@@ -45,13 +45,11 @@
                             @Html.DisplayFor(modelItem => item.Name)
                         </td>
                         <td>
-                            @Html.DisplayFor(modelItem => item.AssignedToUser)
-
+                            @Html.DisplayFor(modelItem => item.AssignedToUser.FullName) 
                         </td>
 
                         <td>
-
-                            @Html.DisplayFor(modelItem => item.CreatedBy) @* Display the Created By User's UserName *@
+                            @Html.DisplayFor(modelItem => item.CreatedBy) 
                         </td>
                         <td>
                             @Html.DisplayFor(modelItem => item.Details)
@@ -59,8 +57,8 @@
                         <td>
                             @Html.DisplayFor(modelItem => item.DueDate)
                         </td>
-                       
-                       
+
+
                         <td>
                             <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-primary btn-sm">Edit</a>
                             <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-info btn-sm">Details</a>
