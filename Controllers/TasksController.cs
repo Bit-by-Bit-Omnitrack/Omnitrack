@@ -58,11 +58,11 @@ namespace UserRoles.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,AssignedTo,CreatedBy,Details,DueDate")] Tasks tasks)
+        public async Task<IActionResult> Create([Bind("Id,Name,AssignedToUserId,CreatedBy,Details,DueDate")] Tasks tasks)
         {
             if (ModelState.IsValid)
             {
-                ViewBag.Users = new SelectList(await _userManager.Users.Where(u => u.IsActive).ToListAsync(), "Id", "UserName", tasks.AssignedTo);
+                ViewBag.Users = new SelectList(await _userManager.Users.Where(u => u.IsActive).ToListAsync(), "Id", "UserName", tasks.AssignedToUserId);
                 _context.Add(tasks);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
@@ -91,7 +91,7 @@ namespace UserRoles.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,AssignedTo,CreatedBy,Details,DueDate")] Tasks tasks)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,AssignedToUserId,CreatedBy,Details,DueDate")] Tasks tasks)
         {
             if (id != tasks.Id)
             {
@@ -102,7 +102,7 @@ namespace UserRoles.Controllers
             {
                 try
                 {
-                    ViewBag.Users = new SelectList(await _userManager.Users.Where(u => u.IsActive).ToListAsync(), "Id", "UserName", tasks.AssignedTo);
+                    ViewBag.Users = new SelectList(await _userManager.Users.Where(u => u.IsActive).ToListAsync(), "Id", "UserName", tasks.AssignedToUserId);
                     _context.Update(tasks);
                     await _context.SaveChangesAsync();
                 }
