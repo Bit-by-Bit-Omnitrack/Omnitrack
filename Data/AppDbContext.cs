@@ -50,8 +50,8 @@ public class AppDbContext : IdentityDbContext<Users>
     public DbSet<ChecklistItem> ChecklistItems { get; set; } = default!;
     public DbSet<Chats> Chats { get; set; } = default!;
     public DbSet<EmailLog> EmailLogs { get; set; } = default!;
-    public DbSet<Project> Projects { get; set; }
-    public DbSet<ProjectUser> ProjectUsers { get; set; }
+    public DbSet<Project> Projects { get; set; } = default!;
+    public DbSet<ProjectUser> ProjectUsers { get; set; } = default!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
