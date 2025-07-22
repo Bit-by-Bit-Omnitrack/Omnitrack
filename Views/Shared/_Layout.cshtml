@@ -53,8 +53,19 @@
                     <a href="#" class="nav-link">Contact</a>
                 </li>
             </ul>
+            
+             
 
             <!-- Right navbar links -->
+            <!-- Chats -->
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item d-flex align-items-center">
+                    <a asp-controller="Chats" asp-action="Index" class="nav-link d-flex align-items-center">
+                        <i class="fas fa-comments mr-2"></i>
+                        <span>Chats</span>
+                    </a>
+                </li>
+                <!-- Search -->
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item">
                     <a class="nav-link" data-widget="navbar-search" href="#" role="button">
@@ -129,13 +140,7 @@
                                 </p>
                             </a>
                         </li>
-                        <!-- Chats -->
-                        <li class="nav-item">
-    <a asp-controller="Chats" asp-action="Index" class="nav-link">
-        <i class="fas fa-comments"></i>
-        <p>Chats</p>
-    </a>
-</li>
+                       
                         <!-- Authenticate Users -->
                         <li class="nav-item">
                             <a asp-controller="User" asp-action="Authenticate" class="nav-link">
