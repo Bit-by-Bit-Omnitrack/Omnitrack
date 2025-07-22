@@ -1,4 +1,4 @@
-﻿@model UserRoles.Models.Tasks
+@model UserRoles.Models.Tasks
 
 @{
     ViewData["Title"] = "Create";
@@ -18,15 +18,13 @@
                 <span asp-validation-for="Name" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="AssignedTo" class="control-label"></label>
-                <input asp-for="AssignedTo" class="form-control" />
-                <span asp-validation-for="AssignedTo" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="CreatedBy" class="control-label"></label>
-                <input asp-for="CreatedBy" class="form-control" />
-                <span asp-validation-for="CreatedBy" class="text-danger"></span>
-            </div>
+                <label for="AssignedToUserId">Assign To</label>
+                <select asp-for="AssignedToUserId" class="form-control" asp-items="ViewBag.Users">
+                    <option value="">-- Select User --</option>
+                </select>
+                <span asp-validation-for="AssignedToUserId" class="text-danger"></span>
+
+           
             <div class="form-group">
                 <label asp-for="Details" class="control-label"></label>
                 <input asp-for="Details" class="form-control" />

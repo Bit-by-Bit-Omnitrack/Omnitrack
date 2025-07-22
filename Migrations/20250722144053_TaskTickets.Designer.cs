@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace UserRoles.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250721174330_Omni")]
-    partial class Omni
+    [Migration("20250722144053_TaskTickets")]
+    partial class TaskTickets
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -474,12 +474,10 @@ namespace UserRoles.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("AssignedTo")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<string>("AssignedToUserId")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("CreatedBy")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Details")
@@ -494,6 +492,8 @@ namespace UserRoles.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("AssignedToUserId");
 
                     b.ToTable("Tasks");
                 });
@@ -813,6 +813,15 @@ namespace UserRoles.Migrations
                         .IsRequired();
 
                     b.Navigation("Priority");
+                });
+
+            modelBuilder.Entity("UserRoles.Models.Tasks", b =>
+                {
+                    b.HasOne("UserRoles.Models.Users", "AssignedToUser")
+                        .WithMany()
+                        .HasForeignKey("AssignedToUserId");
+
+                    b.Navigation("AssignedToUser");
                 });
 
             modelBuilder.Entity("UserRoles.Models.Ticket", b =>

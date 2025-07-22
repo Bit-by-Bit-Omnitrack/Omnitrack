@@ -4,22 +4,25 @@ using UserRoles.Models;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using UserRoles.ViewModels;
-using UserRoles.Services; // added for IEmailService
+using UserRoles.Services;
+using Microsoft.AspNetCore.Authorization; // added for IEmailService
 
 namespace UserRoles.Controllers
 {
+     // Ensure only authorized users can access this controller
     public class UserController : Controller
     {
         private readonly UserManager<Users> _userManager;
         private readonly IEmailService _emailService; // added email service
 
         // updated constructor to inject IEmailService
+        
         public UserController(UserManager<Users> userManager, IEmailService emailService)
         {
             _userManager = userManager;
             _emailService = emailService;
         }
-
+        
         public async Task<IActionResult> Index()
         {
             var users = await _userManager.Users.Where(u => u.IsActive).ToListAsync();
@@ -38,6 +41,7 @@ namespace UserRoles.Controllers
             return View(userRoles);
         }
 
+        [Authorize(Roles = "System Administrator")]
         public IActionResult Authenticate()
         {
             var pendingUsers = _userManager.Users
@@ -182,6 +186,7 @@ namespace UserRoles.Controllers
 
 
         // NEW METHOD: View rejected users
+        [Authorize(Roles = "System Administrator")]
         public IActionResult RejectedUsers()
         {
             var rejectedUsers = _userManager.Users
