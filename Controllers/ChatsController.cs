@@ -27,13 +27,7 @@ namespace UserRoles.Controllers
                 {
                     new Chats {
                         TicketId = 101,
-                        Sender = "SupportBot",
-                        Message = "Hi there! How can I assist you today?",
-                        SentAt = DateTime.Now
-                    },
-                    new Chats {
-                        TicketId = 101,
-                        Sender = "UserEN",
+                        Sender = "Sam",
                         Message = "Hey, just trying to test my view.",
                         SentAt = DateTime.Now.AddMinutes(-2)
                     }

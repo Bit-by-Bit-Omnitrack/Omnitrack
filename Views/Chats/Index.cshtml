@@ -59,8 +59,8 @@
                 </div>
 
                 <!-- Inline reply form -->
-                <form asp-action="Create" method="post" class="mt-2">
-                    <input type="hidden" name="TicketId" value="@item.TicketId" />
+                <form class="reply-form" data-ticket="@item.TicketId">
+                    @Html.AntiForgeryToken()
                     <div class="form-group mb-2">
                         <textarea name="Message" class="form-control" placeholder="Reply to this message..." required></textarea>
                     </div>
@@ -82,3 +82,38 @@
         </div>
     }
 </div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            $('.reply-form').on('submit', function (e) {
+                e.preventDefault();
+
+                const form = $(this);
+                const ticketId = form.data('ticket');
+                const message = form.find('textarea[name="Message"]').val();
+                const token = $('input[name="__RequestVerificationToken"]', form).val();
+
+                $.ajax({
+                    url: '/Chats/Create',
+                    method: 'POST',
+                    data: {
+                        TicketId: ticketId,
+                        Message: message,
+                        __RequestVerificationToken: token
+                    },
+                    success: function () {
+                        form.find('textarea[name="Message"]').val('');
+                        location.reload(); // Or dynamically append message for smoother UX
+                    },
+                    error: function (xhr) {
+                        alert('There was a problem submitting your reply.');
+                        console.error(xhr.responseText);
+                    }
+                });
+            });
+        });
+    </script>
+}
