@@ -50,13 +50,21 @@ namespace UserRoles.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("ProjectId,ProjectName,Description,StartDate,EndDate,IsActive")] Project project)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                _context.Add(project);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                foreach (var value in ModelState.Values)
+                {
+                    foreach (var error in value.Errors)
+                    {
+                        Console.WriteLine("MODEL ERROR: " + error.ErrorMessage);
+                    }
+                }
+                return View(project);
             }
-            return View(project);
+
+            _context.Add(project);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: Projects/Edit/5
