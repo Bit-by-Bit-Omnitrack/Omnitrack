@@ -1,53 +1,84 @@
 ﻿@model IEnumerable<UserRoles.Models.Chats>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Chats";
 }
 
-<h1>Index</h1>
+<style>
+    .chat-container {
+        max-width: 700px;
+        margin: auto;
+    }
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.TicketId)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Sender)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Message)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.SentAt)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.TicketId)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Sender)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Message)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.SentAt)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+    .chat-message {
+        margin-bottom: 1rem;
+        padding: 1rem;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+        .chat-message:hover {
+            background-color: #f9f9f9;
+            transition: background-color 0.3s ease;
+        }
+
+    .empty-message {
+        text-align: center;
+        color: #888;
+        margin-top: 2rem;
+    }
+
+    .badge {
+        font-size: 0.75rem;
+    }
+</style>
+
+<h2 class="mb-4 text-center">Chats</h2>
+
+<div class="text-center mb-4">
+    <a asp-action="Create" class="btn btn-primary">+ Create New Message</a>
+</div>
+
+<div class="chat-container">
+    @if (Model != null && Model.Any())
+    {
+        foreach (var item in Model)
+        {
+            <div class="chat-message">
+                <div class="d-flex justify-content-between mb-1">
+                    <div>
+                        <strong class="text-primary">@item.Sender</strong>
+                        <span class="ml-2 badge badge-secondary">Ticket #@item.TicketId</span>
+                    </div>
+                    <small class="text-muted">@item.SentAt.ToString("g")</small>
+                </div>
+
+                <div class="text-dark mb-2">
+                    @item.Message
+                </div>
+
+                <!-- Inline reply form -->
+                <form asp-action="Create" method="post" class="mt-2">
+                    <input type="hidden" name="TicketId" value="@item.TicketId" />
+                    <div class="form-group mb-2">
+                        <textarea name="Message" class="form-control" placeholder="Reply to this message..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-sm btn-outline-success">Reply</button>
+                </form>
+
+                <div class="mt-2 text-right">
+                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary mr-2">Edit</a>
+                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-info mr-2">Details</a>
+                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger">Delete</a>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="empty-message">
+            <p>No chat messages to display.</p>
+        </div>
+    }
+</div>
