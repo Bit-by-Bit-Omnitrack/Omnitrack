@@ -1,0 +1,24 @@
+@model UserRoles.Models.Project
+
+<div class="col">
+    <div class="card shadow-sm border-0 h-100">
+        <div class="card-body">
+            <h5 class="card-title">@Model.ProjectName</h5>
+            <p class="card-text text-muted">
+                @Model.Description
+            </p>
+            <ul class="list-unstyled small">
+                <li><strong>Start:</strong> @Model.StartDate.ToString("yyyy-MM-dd")</li>
+                @if (Model.EndDate.HasValue)
+                {
+                    <li><strong>End:</strong> @Model.EndDate.Value.ToString("yyyy-MM-dd")</li>
+                }
+            </ul>
+        </div>
+        <div class="card-footer bg-white border-top-0 d-flex justify-content-between">
+            <a asp-action="Details" asp-route-id="@Model.ProjectId" class="btn btn-outline-primary btn-sm">View</a>
+            <a asp-action="Edit" asp-route-id="@Model.ProjectId" class="btn btn-outline-secondary btn-sm">Edit</a>
+            <a asp-action="Delete" asp-route-id="@Model.ProjectId" class="btn btn-outline-danger btn-sm">Delete</a>
+        </div>
+    </div>
+</div>
