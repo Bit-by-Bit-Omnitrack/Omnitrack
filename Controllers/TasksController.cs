@@ -31,6 +31,25 @@ namespace UserRoles.Controllers
                 .ToListAsync());
         }
 
+        // GET: Tasks/MyTasks
+        [HttpGet]
+        public async Task<IActionResult> MyTasks()
+        {
+            // Optional: Check if the user is authenticated
+            if (!User.Identity.IsAuthenticated)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            // Filter tasks by the current user's username or ID
+            var myTasks = await _context.Tasks
+                .Where(t => t.CreatedBy == User.Identity.Name) // Or use user ID if applicable
+                .ToListAsync();
+
+            return View(myTasks);
+        }
+
+
         // GET: Tasks/Details/5
         public async Task<IActionResult> Details(int? id)
         {
@@ -57,6 +76,7 @@ namespace UserRoles.Controllers
             return View();
         }
 
+
         // POST: Tasks/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -82,6 +102,7 @@ namespace UserRoles.Controllers
             ViewBag.Users = new SelectList(await _userManager.Users.Where(u => u.IsActive).ToListAsync(), "Id", "UserName", tasks.AssignedToUserId);
             return View(tasks);
         }
+
 
         // GET: Tasks/Edit/5
         public async Task<IActionResult> Edit(int? id)
