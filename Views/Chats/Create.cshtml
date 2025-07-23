@@ -39,7 +39,7 @@
 
             <div class="form-group">
                 <label>Role</label>
-                <input class="form-control" value="@User?.Identity?.Name (@(User?.IsInRole("Admin") ? "Admin" : User?.IsInRole("Support") ? "Support" : "User"))" readonly />
+                <input class="form-control" value="@User?.Identity?.Name (@((User?.IsInRole("Admin") ?? false) ? "Admin" : (User?.IsInRole("Support") ?? false) ? "Support" : "User"))" readonly />
             </div>
 
             <div class="form-group text-right">
