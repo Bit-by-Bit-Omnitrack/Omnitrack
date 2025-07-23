@@ -25,5 +25,6 @@ namespace UserRoles.Models
 
 
         public DateTime DueDate { get; set; }
+        public string AssignedTo { get; internal set; }
     }
 }
