@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace UserRoles.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250723094714_project")]
+    partial class project
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -855,7 +858,7 @@ namespace UserRoles.Migrations
                         .IsRequired();
 
                     b.HasOne("UserRoles.Models.Tasks", "Tasks")
-                        .WithMany("Tickets")
+                        .WithMany()
                         .HasForeignKey("TasksId");
 
                     b.HasOne("UserRoles.Models.TicketStatus", null)
@@ -898,11 +901,6 @@ namespace UserRoles.Migrations
             modelBuilder.Entity("UserRoles.Models.Project", b =>
                 {
                     b.Navigation("ProjectUsers");
-                });
-
-            modelBuilder.Entity("UserRoles.Models.Tasks", b =>
-                {
-                    b.Navigation("Tickets");
                 });
 
             modelBuilder.Entity("UserRoles.Models.TicketStatus", b =>
