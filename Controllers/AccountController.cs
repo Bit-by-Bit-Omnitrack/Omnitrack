@@ -58,11 +58,11 @@ namespace UserRoles.Controllers
 
             var result = await signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
 
+
             if (result.Succeeded)
             {
-                return RedirectToAction("Index", "Landing"); // NEW
+                return RedirectToAction("Index", "Tickets");
             }
-
             else if (result.IsLockedOut)
             {
                 ModelState.AddModelError(string.Empty, "Account locked due to multiple failed attempts.");

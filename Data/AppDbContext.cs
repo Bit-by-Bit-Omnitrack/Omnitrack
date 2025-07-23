@@ -9,8 +9,6 @@ using Microsoft.EntityFrameworkCore;
 using UserRoles.Models;
 using UserRoles.ViewModels;
 
-
-
 namespace UserRoles.Data
 {
 
@@ -61,6 +59,22 @@ public class AppDbContext : IdentityDbContext<Users>
     {
         base.OnModelCreating(modelBuilder);
 
+
+        // Configure the relationship for CreatedByUser
+        modelBuilder.Entity<Tasks>()
+            .HasOne(t => t.CreatedByUser)
+            .WithMany() // Or specify a navigation property in Users if you have one for "created tasks"
+            .HasForeignKey(t => t.CreatedById)
+            .IsRequired(false); // Set to false if a task can be created by 'System' or before a user is linked.
+                                // If every task *must* have a creator user, set to true.
+
+        // Configure the relationship for AssignedToUser (already there, but for completeness)
+        modelBuilder.Entity<Tasks>()
+            .HasOne(t => t.AssignedToUser)
+            .WithMany()
+            .HasForeignKey(t => t.AssignedToUserId)
+            .IsRequired(false); // Assuming assigned user can be null
+
         modelBuilder.Entity<ProjectUser>()
                .HasKey(pu => new { pu.ProjectId, pu.UserId }); // Composite key
 
@@ -73,6 +87,12 @@ public class AppDbContext : IdentityDbContext<Users>
             .HasOne(pu => pu.User)
             .WithMany(u => u.ProjectUsers)
             .HasForeignKey(pu => pu.UserId);
+
+        modelBuilder.Entity<Ticket>()
+             .HasOne(t => t.Tasks)         // A Ticket has one Task
+             .WithMany(t => t.Tickets)     // A Task has many Tickets
+             .HasForeignKey(t => t.TasksId)
+             .IsRequired(false);
 
         // Optional: Seed initial roles if you don't have them
         // You can also add more roles as needed
