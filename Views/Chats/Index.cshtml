@@ -6,8 +6,12 @@
 
 <style>
     .chat-container {
-        max-width: 700px;
+        max-width: 750px;
         margin: auto;
+    }
+
+    .chat-group {
+        margin-bottom: 2rem;
     }
 
     .chat-message {
@@ -18,60 +22,92 @@
         box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     }
 
-        .chat-message:hover {
-            background-color: #f9f9f9;
-            transition: background-color 0.3s ease;
-        }
+    .chat-message.right {
+        background-color: #eaf6ff;
+        text-align: right;
+    }
+
+    .chat-message.left {
+        background-color: #f9f9f9;
+        text-align: left;
+    }
+
+    .badge {
+        font-size: 0.75rem;
+    }
+
+    .initials-circle {
+        display: inline-block;
+        width: 28px;
+        height: 28px;
+        line-height: 28px;
+        border-radius: 50%;
+        background-color: #007bff;
+        color: white;
+        text-align: center;
+        font-weight: bold;
+        margin-right: 8px;
+        font-size: 0.9rem;
+    }
 
     .empty-message {
         text-align: center;
         color: #888;
         margin-top: 2rem;
     }
-
-    .badge {
-        font-size: 0.75rem;
-    }
 </style>
 
 <h2 class="mb-4 text-center">Chats</h2>
 
 <div class="text-center mb-4">
-    <a asp-action="Create" class="btn btn-primary">+ Create New Message</a>
+    <a asp-action="Create" class="btn btn-primary">+ New Message</a>
 </div>
 
 <div class="chat-container">
     @if (Model != null && Model.Any())
     {
-        foreach (var item in Model)
+        foreach (var ticketGroup in Model.GroupBy(c => c.TicketId))
         {
-            <div class="chat-message">
-                <div class="d-flex justify-content-between mb-1">
-                    <div>
-                        <strong class="text-primary">@item.Sender</strong>
-                        <span class="ml-2 badge badge-secondary">Ticket #@item.TicketId</span>
+            <div class="chat-group">
+                <h5 class="mb-3">Ticket #@ticketGroup.Key</h5>
+
+                @foreach (var item in ticketGroup.OrderBy(c => c.SentAt))
+                {
+                    var isCurrentUser = item.Sender == User.Identity.Name;
+                    var alignmentClass = isCurrentUser ? "right" : "left";
+                    var initials = !string.IsNullOrWhiteSpace(item.Sender) && item.Sender.Length >= 2
+                    ? item.Sender.Substring(0, 2).ToUpper()
+                    : "??";
+
+                    <div class="chat-message @alignmentClass">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <span class="initials-circle">@initials</span>
+                                <strong>@item.Sender</strong>
+                                <span class="badge badge-secondary ml-2">@item.Status</span>
+                                <span class="badge badge-info ml-2">@item.RoleTag</span>
+                            </div>
+                            <small class="text-muted">@item.SentAt.ToString("g")</small>
+                        </div>
+
+                        <div class="mt-2 text-dark">
+                            @item.Message
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(item.AttachmentPath))
+                        {
+                            <div class="mt-1">
+                                📎 <a href="@item.AttachmentPath" target="_blank">Download attachment</a>
+                            </div>
+                        }
+
+                        <div class="mt-2">
+                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary mr-2">Edit</a>
+                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-info mr-2">Details</a>
+                            <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger">Delete</a>
+                        </div>
                     </div>
-                    <small class="text-muted">@item.SentAt.ToString("g")</small>
-                </div>
-
-                <div class="text-dark mb-2">
-                    @item.Message
-                </div>
-
-                <!-- Inline reply form -->
-                <form class="reply-form" data-ticket="@item.TicketId">
-                    @Html.AntiForgeryToken()
-                    <div class="form-group mb-2">
-                        <textarea name="Message" class="form-control" placeholder="Reply to this message..." required></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-sm btn-outline-success">Reply</button>
-                </form>
-
-                <div class="mt-2 text-right">
-                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary mr-2">Edit</a>
-                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-info mr-2">Details</a>
-                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger">Delete</a>
-                </div>
+                }
             </div>
         }
     }
@@ -82,38 +118,3 @@
         </div>
     }
 </div>
-
-@section Scripts {
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-    <script>
-        $(document).ready(function () {
-            $('.reply-form').on('submit', function (e) {
-                e.preventDefault();
-
-                const form = $(this);
-                const ticketId = form.data('ticket');
-                const message = form.find('textarea[name="Message"]').val();
-                const token = $('input[name="__RequestVerificationToken"]', form).val();
-
-                $.ajax({
-                    url: '/Chats/Create',
-                    method: 'POST',
-                    data: {
-                        TicketId: ticketId,
-                        Message: message,
-                        __RequestVerificationToken: token
-                    },
-                    success: function () {
-                        form.find('textarea[name="Message"]').val('');
-                        location.reload(); // Or dynamically append message for smoother UX
-                    },
-                    error: function (xhr) {
-                        alert('There was a problem submitting your reply.');
-                        console.error(xhr.responseText);
-                    }
-                });
-            });
-        });
-    </script>
-}
