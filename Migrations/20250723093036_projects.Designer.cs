@@ -3,17 +3,19 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Microsoft.EntityFrameworkCore.SqlServer; 
 
 #nullable disable
 
 namespace UserRoles.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250723093036_projects")]
+    partial class projects
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -472,15 +474,11 @@ namespace UserRoles.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("AssignedTo")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("AssignedToUserId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("CreatedById")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Details")
                         .IsRequired()
@@ -496,8 +494,6 @@ namespace UserRoles.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("AssignedToUserId");
-
-                    b.HasIndex("CreatedById");
 
                     b.ToTable("Tasks");
                 });
@@ -825,13 +821,7 @@ namespace UserRoles.Migrations
                         .WithMany()
                         .HasForeignKey("AssignedToUserId");
 
-                    b.HasOne("UserRoles.Models.Users", "CreatedByUser")
-                        .WithMany()
-                        .HasForeignKey("CreatedById");
-
                     b.Navigation("AssignedToUser");
-
-                    b.Navigation("CreatedByUser");
                 });
 
             modelBuilder.Entity("UserRoles.Models.Ticket", b =>
@@ -860,7 +850,7 @@ namespace UserRoles.Migrations
                         .IsRequired();
 
                     b.HasOne("UserRoles.Models.Tasks", "Tasks")
-                        .WithMany("Tickets")
+                        .WithMany()
                         .HasForeignKey("TasksId");
 
                     b.HasOne("UserRoles.Models.TicketStatus", null)
@@ -903,11 +893,6 @@ namespace UserRoles.Migrations
             modelBuilder.Entity("UserRoles.Models.Project", b =>
                 {
                     b.Navigation("ProjectUsers");
-                });
-
-            modelBuilder.Entity("UserRoles.Models.Tasks", b =>
-                {
-                    b.Navigation("Tickets");
                 });
 
             modelBuilder.Entity("UserRoles.Models.TicketStatus", b =>
