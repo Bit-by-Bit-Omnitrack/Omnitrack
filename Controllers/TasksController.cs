@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using UserRoles.Models;
-using UserRoles.Data;
+using UserRoles.Data; // Assuming AppDbContext is here
 
 namespace UserRoles.Controllers
 {
@@ -25,31 +25,11 @@ namespace UserRoles.Controllers
         // GET: Tasks
         public async Task<IActionResult> Index()
         {
-            // Eager load AssignedToUser AND CreatedByUser
+            // Eager load AssignedToUser to display username
             return View(await _context.Tasks
-                .Include(t => t.AssignedToUser)
-                .Include(t => t.CreatedByUser) // Include the CreatedByUser
+                .Include(t => t.AssignedToUser) // Include the AssignedToUser
                 .ToListAsync());
         }
-
-        // GET: Tasks/MyTasks
-        [HttpGet]
-        public async Task<IActionResult> MyTasks()
-        {
-            // Optional: Check if the user is authenticated
-            if (!User.Identity.IsAuthenticated)
-            {
-                return RedirectToAction("Login", "Account");
-            }
-
-            // Filter tasks by the current user's username or ID
-            var myTasks = await _context.Tasks
-                .Where(t => t.CreatedBy == User.Identity.Name) // Or use user ID if applicable
-                .ToListAsync();
-
-            return View(myTasks);
-        }
-
 
         // GET: Tasks/Details/5
         public async Task<IActionResult> Details(int? id)
@@ -60,8 +40,7 @@ namespace UserRoles.Controllers
             }
 
             var tasks = await _context.Tasks
-                .Include(t => t.AssignedToUser)
-                .Include(t => t.CreatedByUser) // Include CreatedByUser for details view
+                .Include(t => t.AssignedToUser) // Include the AssignedToUser
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (tasks == null)
             {
@@ -78,26 +57,22 @@ namespace UserRoles.Controllers
             return View();
         }
 
-
         // POST: Tasks/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,AssignedToUserId,Details,DueDate")] Tasks tasks) // Removed CreatedBy from bind
+        public async Task<IActionResult> Create([Bind("Id,Name,AssignedToUserId,CreatedBy,Details,DueDate")] Tasks tasks)
         {
             if (ModelState.IsValid)
             {
+                // Assign the CreatedBy user's ID
                 var currentUser = await _userManager.GetUserAsync(User);
                 if (currentUser != null)
                 {
-                    tasks.CreatedById = currentUser.Id; // Assign the CreatedById
+                    tasks.CreatedBy = currentUser.Id;
                 }
                 else
                 {
-                    // Handle cases where there's no current user (e.g., if you have an admin seed task)
-                    // You might want to assign a specific "System" user ID here if you have one,
-                    // or make CreatedById non-nullable and enforce a user.
-                    // For now, let's keep it nullable as per your model.
-                    tasks.CreatedById = null; // Or a specific ID for "System" user if you have one
+                    tasks.CreatedBy = "System"; // Fallback
                 }
 
                 _context.Add(tasks);
@@ -107,7 +82,6 @@ namespace UserRoles.Controllers
             ViewBag.Users = new SelectList(await _userManager.Users.Where(u => u.IsActive).ToListAsync(), "Id", "UserName", tasks.AssignedToUserId);
             return View(tasks);
         }
-
 
         // GET: Tasks/Edit/5
         public async Task<IActionResult> Edit(int? id)
@@ -129,7 +103,7 @@ namespace UserRoles.Controllers
         // POST: Tasks/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,AssignedToUserId,Details,DueDate")] Tasks tasks) // Removed CreatedBy from bind
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,AssignedTo,CreatedBy,Details,DueDate")] Tasks tasks)
         {
             if (id != tasks.Id)
             {
@@ -140,15 +114,14 @@ namespace UserRoles.Controllers
             {
                 try
                 {
-                    // Fetch the original task to preserve CreatedById
+                    // For the 'Edit' action, you should fetch the existing entity first
+                    // to ensure you're not overwriting CreatedBy if it's not being updated via the form.
                     var existingTask = await _context.Tasks.AsNoTracking().FirstOrDefaultAsync(t => t.Id == id);
                     if (existingTask == null)
                     {
                         return NotFound();
                     }
 
-                    // Assign the existing CreatedById to the updated tasks object
-                    tasks.CreatedById = existingTask.CreatedById;
 
                     _context.Update(tasks);
                     await _context.SaveChangesAsync();
@@ -179,8 +152,7 @@ namespace UserRoles.Controllers
             }
 
             var tasks = await _context.Tasks
-                .Include(t => t.AssignedToUser)
-                .Include(t => t.CreatedByUser) // Include CreatedByUser for delete confirmation
+                .Include(t => t.AssignedToUser) // Include the AssignedToUser for details on delete confirmation
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (tasks == null)
             {

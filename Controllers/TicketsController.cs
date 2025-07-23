@@ -52,27 +52,6 @@ namespace UserRoles.Controllers
             return View(tickets);
         }
 
-        // GET: Tickets/MyTickets
-        [HttpGet]
-        public async Task<IActionResult> MyTickets()
-        {
-            var currentUser = await _userManager.GetUserAsync(User);
-            if (currentUser == null)
-            {
-                return RedirectToAction("Login", "Account");
-            }
-
-            var myTickets = await _context.Tickets
-                .Where(t => t.CreatedByID == currentUser.Id)
-                .Include(t => t.Status)
-                .Include(t => t.Priority)
-                .ToListAsync();
-
-            return View(myTickets);
-        }
-
-
-
         // GET: Tickets1/Details/5
         public async Task<IActionResult> Details(int? id)
         {

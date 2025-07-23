@@ -4,29 +4,20 @@
     ViewData["Title"] = "Tickets Dashboard";
     var statuses = (List<UserRoles.Models.TicketStatus>)ViewBag.Statuses;
     var tasksFilter = (SelectList)ViewBag.TasksFilter; // Get the tasks filter SelectList
-    var currentFilterTaskId = Context.Request.Query["filterTaskId"]; // Get the currently applied filter TaskId
-    var currentTaskName = "";
-    if (!string.IsNullOrEmpty(currentFilterTaskId) && tasksFilter != null)
-    {
-        var selectedTask = tasksFilter.FirstOrDefault(t => t.Value == currentFilterTaskId);
-        if (selectedTask != null)
-        {
-            currentTaskName = selectedTask.Text;
-        }
-    }
 }
 
-<h1>Tickets Dashboard @(!string.IsNullOrEmpty(currentTaskName) ? $"for Task: {currentTaskName}" : "")</h1>
+<h1>Tickets Dashboard</h1>
 
 <p>
-    <a asp-action="Create" class="btn btn-success">Create New Ticket</a> @* Changed text from "Task" to "Ticket" *@
+    <a asp-action="Create" class="btn btn-success">Create New Task</a>
 </p>
-@* Task Filter Section 
+
+@* Task Filter Section *@
 <div class="mb-3">
     <form asp-action="Index" method="get" class="form-inline">
         <label for="filterTaskId" class="mr-2">Filter by Task:</label>
         <select name="filterTaskId" id="filterTaskId" class="form-control mr-2">
-            <option value="">All Tasks</option> @* Option to show all tasks 
+            <option value="">All Tasks</option> @* Option to show all tasks *@
             @foreach (var taskOption in tasksFilter)
             {
                 <option value="@taskOption.Value" selected="@(taskOption.Selected)">@taskOption.Text</option>
@@ -35,7 +26,7 @@
         <button type="submit" class="btn btn-primary">Apply Filter</button>
     </form>
 </div>
-*@
+
 
 <div class="kanban-board">
     @foreach (var status in statuses)

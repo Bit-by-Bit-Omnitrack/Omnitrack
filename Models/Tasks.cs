@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic; // Add this using directive
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -11,19 +10,20 @@ namespace UserRoles.Models
 
         public string Name { get; set; }
 
-        [ForeignKey("AssignedToUser")]
-        public string? AssignedToUserId { get; set; }
-        public Users? AssignedToUser { get; set; }
+        [ForeignKey("AssignedToUser")] // This links to the navigation property name
+        public string? AssignedToUserId { get; set; } // This is the actual foreign key column
 
-        [ForeignKey("CreatedByUser")]
-        public string? CreatedById { get; set; }
-        public Users? CreatedByUser { get; set; }
+        public Users? AssignedToUser { get; set; } // Navigation property to the User
+
+        public string? CreatedBy { get; set; } // This currently stores the CreatedBy user's ID string
+
+        [NotMapped] // If you want to store the username directly when saving, consider this, but it's less ideal.
+        public string? CreatedByUserName { get; set; } // To hold the username for display in scenarios where CreatedBy is the ID.
+
 
         public string Details { get; set; }
 
-        public DateTime DueDate { get; set; }
 
-        // New: Navigation property for Tickets associated with this Task
-        public ICollection<Ticket>? Tickets { get; set; }
+        public DateTime DueDate { get; set; }
     }
 }

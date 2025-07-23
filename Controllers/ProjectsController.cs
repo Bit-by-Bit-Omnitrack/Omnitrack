@@ -19,25 +19,9 @@ namespace UserRoles.Controllers
         }
 
         // GET: Projects
-        public async Task<IActionResult> Index(string searchString, string statusFilter)
+        public async Task<IActionResult> Index()
         {
-            var projects = _context.Projects.AsQueryable();
-
-            if (!string.IsNullOrEmpty(searchString))
-            {
-                projects = projects.Where(p => p.ProjectName.Contains(searchString));
-            }
-
-            if (!string.IsNullOrEmpty(statusFilter))
-            {
-                if (statusFilter == "Active")
-                    projects = projects.Where(p => p.IsActive);
-                else if (statusFilter == "Inactive")
-                    projects = projects.Where(p => !p.IsActive);
-            }
-
-            var model = await projects.ToListAsync();
-            return View(model);
+            return View(await _context.Projects.ToListAsync());
         }
 
         // GET: Projects/Details/5

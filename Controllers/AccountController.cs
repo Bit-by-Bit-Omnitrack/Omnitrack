@@ -58,11 +58,11 @@ namespace UserRoles.Controllers
 
             var result = await signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
 
+
             if (result.Succeeded)
             {
-                return RedirectToAction("Index", "Landing"); // NEW
+                return RedirectToAction("Index", "Tickets");
             }
-
             else if (result.IsLockedOut)
             {
                 ModelState.AddModelError(string.Empty, "Account locked due to multiple failed attempts.");
@@ -185,14 +185,14 @@ namespace UserRoles.Controllers
                         user.Email,
                         "Welcome to OmniTrack!",
                         $@"
-                        <div style='text-align:center;'>
-                            <img src='https://i.imgur.com/J9Z3ce5.jpeg' alt='OmniTrack Logo' style='max-width:200px; margin-bottom:20px;'/>
-                        </div>
-                        <p>Welcome {user.FullName},</p>
-                        <p>Thank you for registering with <strong>OmniTrack</strong>.</p>
-                        <p>You have been registered successfully as a <strong>{roleToAssign}</strong>.</p>
-                        <p>You will be notified once your account is approved.</p>
-                        <p>Kind regards,<br/>OmniTrack Team</p>"
+<div style='text-align:center;'>
+    <img src='https://i.imgur.com/J9Z3ce5.jpeg' alt='OmniTrack Logo' style='max-width:200px; margin-bottom:20px;'/>
+</div>
+<p>Welcome {user.FullName},</p>
+<p>Thank you for registering with <strong>OmniTrack</strong>.</p>
+<p>You have been registered successfully as a <strong>{roleToAssign}</strong>.</p>
+<p>You will be notified once your account is approved.</p>
+<p>Kind regards,<br/>OmniTrack Team</p>"
                     );
                 }
                 catch (Exception ex)

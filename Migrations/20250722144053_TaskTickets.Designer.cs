@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace UserRoles.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250723100339_Task-Ticket Management")]
-    partial class TaskTicketManagement
+    [Migration("20250722144053_TaskTickets")]
+    partial class TaskTickets
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -477,8 +477,8 @@ namespace UserRoles.Migrations
                     b.Property<string>("AssignedToUserId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("CreatedById")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Details")
                         .IsRequired()
@@ -494,8 +494,6 @@ namespace UserRoles.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("AssignedToUserId");
-
-                    b.HasIndex("CreatedById");
 
                     b.ToTable("Tasks");
                 });
@@ -823,13 +821,7 @@ namespace UserRoles.Migrations
                         .WithMany()
                         .HasForeignKey("AssignedToUserId");
 
-                    b.HasOne("UserRoles.Models.Users", "CreatedByUser")
-                        .WithMany()
-                        .HasForeignKey("CreatedById");
-
                     b.Navigation("AssignedToUser");
-
-                    b.Navigation("CreatedByUser");
                 });
 
             modelBuilder.Entity("UserRoles.Models.Ticket", b =>
@@ -858,7 +850,7 @@ namespace UserRoles.Migrations
                         .IsRequired();
 
                     b.HasOne("UserRoles.Models.Tasks", "Tasks")
-                        .WithMany("Tickets")
+                        .WithMany()
                         .HasForeignKey("TasksId");
 
                     b.HasOne("UserRoles.Models.TicketStatus", null)
@@ -901,11 +893,6 @@ namespace UserRoles.Migrations
             modelBuilder.Entity("UserRoles.Models.Project", b =>
                 {
                     b.Navigation("ProjectUsers");
-                });
-
-            modelBuilder.Entity("UserRoles.Models.Tasks", b =>
-                {
-                    b.Navigation("Tickets");
                 });
 
             modelBuilder.Entity("UserRoles.Models.TicketStatus", b =>
