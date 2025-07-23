@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace UserRoles.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250720103923_Assigning tasks")]
-    partial class Assigningtasks
+    [Migration("20250722144053_TaskTickets")]
+    partial class TaskTickets
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -423,6 +423,23 @@ namespace UserRoles.Migrations
                     b.ToTable("Roles");
                 });
 
+            modelBuilder.Entity("UserRoles.Models.SystemAdmin", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("SystemAdmins");
+                });
+
             modelBuilder.Entity("UserRoles.Models.TaskItem", b =>
                 {
                     b.Property<int>("Id")
@@ -457,12 +474,10 @@ namespace UserRoles.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("AssignedTo")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<string>("AssignedToUserId")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("CreatedBy")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Details")
@@ -477,6 +492,8 @@ namespace UserRoles.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("AssignedToUserId");
 
                     b.ToTable("Tasks");
                 });
@@ -516,7 +533,7 @@ namespace UserRoles.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("TasksId")
+                    b.Property<int?>("TasksId")
                         .HasColumnType("int");
 
                     b.Property<string>("TicketID")
@@ -649,6 +666,9 @@ namespace UserRoles.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsApproved")
                         .HasColumnType("bit");
 
                     b.Property<bool>("LockoutEnabled")
@@ -795,6 +815,15 @@ namespace UserRoles.Migrations
                     b.Navigation("Priority");
                 });
 
+            modelBuilder.Entity("UserRoles.Models.Tasks", b =>
+                {
+                    b.HasOne("UserRoles.Models.Users", "AssignedToUser")
+                        .WithMany()
+                        .HasForeignKey("AssignedToUserId");
+
+                    b.Navigation("AssignedToUser");
+                });
+
             modelBuilder.Entity("UserRoles.Models.Ticket", b =>
                 {
                     b.HasOne("UserRoles.Models.Users", "AssignedToUser")
@@ -822,9 +851,7 @@ namespace UserRoles.Migrations
 
                     b.HasOne("UserRoles.Models.Tasks", "Tasks")
                         .WithMany()
-                        .HasForeignKey("TasksId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("TasksId");
 
                     b.HasOne("UserRoles.Models.TicketStatus", null)
                         .WithMany("Tickets")
