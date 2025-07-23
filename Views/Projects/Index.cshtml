@@ -1,59 +1,49 @@
 @model IEnumerable<UserRoles.Models.Project>
-
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Projects";
 }
 
-<h1>Index</h1>
+<h1 class="mb-4">Projects</h1>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.ProjectName)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Description)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.StartDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.EndDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.IsActive)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.ProjectName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Description)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.StartDate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.EndDate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.IsActive)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.ProjectId">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.ProjectId">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.ProjectId">Delete</a>
-            </td>
-        </tr>
+<form method="get" class="mb-4">
+    <div class="row g-2 align-items-center">
+        <div class="col-md-4">
+            <input type="text" name="searchString" value="@Context.Request.Query["searchString"]" class="form-control" placeholder="Search by project name..." />
+        </div>
+        <div class="col-md-3">
+            <select name="statusFilter" class="form-select">
+                <option value="">All Statuses</option>
+                <option value="Active" selected="@(Context.Request.Query["statusFilter"] == "Active" ? "selected" : null)">Active</option>
+                <option value="Inactive" selected="@(Context.Request.Query["statusFilter"] == "Inactive" ? "selected" : null)">Inactive</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-primary">Filter</button>
+        </div>
+        <div class="col-md-3 text-end">
+            <a asp-action="Create" class="btn btn-success">+ Create New Project</a>
+        </div>
+    </div>
+</form>
+
+@if (Model.Any(p => p.IsActive))
+{
+    <h3>Active Projects</h3>
+    <div class="row row-cols-1 row-cols-md-3 g-4 mb-5">
+        @foreach (var project in Model.Where(p => p.IsActive))
+        {
+            @Html.Partial("ProjectCard", project)
+        }
+    </div>
 }
-    </tbody>
-</table>
+
+@if (Model.Any(p => !p.IsActive))
+{
+    <h3 class="mt-5">Inactive Projects</h3>
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        @foreach (var project in Model.Where(p => !p.IsActive))
+        {
+            @Html.Partial("ProjectCard", project)
+        }
+    </div>
+}
