@@ -23,7 +23,10 @@ namespace UserRoles.Models
 
         public DateTime DueDate { get; set; }
 
+        public string AssignedTo { get; internal set; }
+
         // New: Navigation property for Tickets associated with this Task
         public ICollection<Ticket>? Tickets { get; set; }
+
     }
 }

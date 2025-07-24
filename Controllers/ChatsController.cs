@@ -1,13 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using UserRoles.Models;
 
 namespace UserRoles.Controllers
 {
+    [Authorize]
     public class ChatsController : Controller
     {
         private readonly AppDbContext _context;
@@ -21,47 +24,65 @@ namespace UserRoles.Controllers
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            if (!_context.Chats.Any())
-            {
-                _context.Chats.AddRange(new List<Chats>
-                {
-                    new Chats {
-                        TicketId = 101,
-                        Sender = "Sam",
-                        Message = "Hey, just trying to test my view.",
-                        SentAt = DateTime.Now.AddMinutes(-2)
-                    }
-                });
+            var chats = await _context.Chats
+                .OrderByDescending(c => c.SentAt)
+                .ToListAsync();
 
-                await _context.SaveChangesAsync();
-            }
-
-            var chats = await _context.Chats.ToListAsync();
             return View(chats);
         }
 
         // GET: Chats/Create
+        [Authorize(Roles = "Admin,Support")]
         public IActionResult Create()
         {
             return View();
         }
 
-        // POST: Chats/Create (Inline replies and full form)
+        // POST: Chats/Create
+        [Authorize(Roles = "Admin,Support")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("TicketId,Message")] Chats chats)
+        public async Task<IActionResult> Create([Bind("TicketId,Message")] Chats chats, IFormFile attachment)
         {
+            Console.WriteLine("Create POST triggered");
+
             if (ModelState.IsValid)
             {
-                chats.Sender = User.Identity.Name;
+                chats.Sender = User.Identity.Name ?? "Anonymous";
                 chats.SentAt = DateTime.Now;
+                chats.Status = "New";
+                chats.RoleTag = User.IsInRole("Admin") ? "Admin"
+                              : User.IsInRole("Support") ? "Support"
+                              : "User";
+
+                if (attachment != null && attachment.Length > 0)
+                {
+                    var uploadsDir = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads");
+                    Directory.CreateDirectory(uploadsDir);
+
+                    var fileName = Guid.NewGuid().ToString() + Path.GetExtension(attachment.FileName);
+                    var filePath = Path.Combine(uploadsDir, fileName);
+
+                    using var stream = new FileStream(filePath, FileMode.Create);
+                    await attachment.CopyToAsync(stream);
+
+                    chats.AttachmentPath = "/uploads/" + fileName;
+                }
 
                 _context.Add(chats);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+
+                try
+                {
+                    await _context.SaveChangesAsync();
+                    Console.WriteLine("Chat saved successfully.");
+                    return RedirectToAction(nameof(Index));
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error saving chat: {ex.Message}");
+                }
             }
 
-            // Log model validation errors (useful in development)
             foreach (var state in ModelState)
             {
                 foreach (var error in state.Value.Errors)
@@ -76,36 +97,32 @@ namespace UserRoles.Controllers
         // GET: Chats/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null)
-                return NotFound();
+            if (id == null) return NotFound();
 
-            var chats = await _context.Chats.FirstOrDefaultAsync(m => m.Id == id);
-            if (chats == null)
-                return NotFound();
+            var chat = await _context.Chats.FirstOrDefaultAsync(c => c.Id == id);
+            if (chat == null) return NotFound();
 
-            return View(chats);
+            return View(chat);
         }
 
         // GET: Chats/Edit/5
+        [Authorize(Roles = "Admin,Support")]
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null)
-                return NotFound();
+            if (id == null) return NotFound();
 
-            var chats = await _context.Chats.FindAsync(id);
-            if (chats == null)
-                return NotFound();
+            var chat = await _context.Chats.FindAsync(id);
+            if (chat == null) return NotFound();
 
-            return View(chats);
+            return View(chat);
         }
 
         // POST: Chats/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,TicketId,Sender,Message,SentAt")] Chats chats)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,TicketId,Sender,Message,SentAt,Status,AttachmentPath,RoleTag")] Chats chats)
         {
-            if (id != chats.Id)
-                return NotFound();
+            if (id != chats.Id) return NotFound();
 
             if (ModelState.IsValid)
             {
@@ -116,10 +133,8 @@ namespace UserRoles.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!ChatsExists(chats.Id))
-                        return NotFound();
-                    else
-                        throw;
+                    if (!ChatsExists(chats.Id)) return NotFound();
+                    else throw;
                 }
 
                 return RedirectToAction(nameof(Index));
@@ -129,16 +144,15 @@ namespace UserRoles.Controllers
         }
 
         // GET: Chats/Delete/5
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null)
-                return NotFound();
+            if (id == null) return NotFound();
 
-            var chats = await _context.Chats.FirstOrDefaultAsync(m => m.Id == id);
-            if (chats == null)
-                return NotFound();
+            var chat = await _context.Chats.FirstOrDefaultAsync(c => c.Id == id);
+            if (chat == null) return NotFound();
 
-            return View(chats);
+            return View(chat);
         }
 
         // POST: Chats/Delete/5
@@ -146,9 +160,8 @@ namespace UserRoles.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var chats = await _context.Chats.FindAsync(id);
-            if (chats != null)
-                _context.Chats.Remove(chats);
+            var chat = await _context.Chats.FindAsync(id);
+            if (chat != null) _context.Chats.Remove(chat);
 
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
@@ -156,7 +169,7 @@ namespace UserRoles.Controllers
 
         private bool ChatsExists(int id)
         {
-            return _context.Chats.Any(e => e.Id == id);
+            return _context.Chats.Any(c => c.Id == id);
         }
     }
 }
