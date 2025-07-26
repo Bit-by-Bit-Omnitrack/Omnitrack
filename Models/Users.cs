@@ -25,6 +25,6 @@ namespace UserRoles.Models
         
 
         // New: Navigation property for projects this user is part of
-        public ICollection<ProjectUser> ProjectUsers { get; set; }
+        public ICollection<ProjectMember> ProjectUsers { get; set; }
     }
 }

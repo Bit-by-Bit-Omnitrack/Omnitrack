@@ -3,9 +3,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace UserRoles.Models
 {
-    public class ProjectUser
+    public class ProjectMember
     {
-        public int ProjectUserId { get; set; }
+        public int Id { get; set; }
 
         [Required]
         public int ProjectId { get; set; }
