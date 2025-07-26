@@ -51,7 +51,7 @@ public class AppDbContext : IdentityDbContext<Users>
     public DbSet<Chats> Chats { get; set; } = default!;
     public DbSet<EmailLog> EmailLogs { get; set; } = default!;
     public DbSet<Project> Projects { get; set; } = default!;
-    public DbSet<ProjectUser> ProjectUsers { get; set; } = default!;
+    public DbSet<ProjectMember> ProjectUsers { get; set; } = default!;
     public DbSet<SystemAdmin> SystemAdmins { get; set; } = default!;
 
 
@@ -75,15 +75,15 @@ public class AppDbContext : IdentityDbContext<Users>
             .HasForeignKey(t => t.AssignedToUserId)
             .IsRequired(false); // Assuming assigned user can be null
 
-        modelBuilder.Entity<ProjectUser>()
+        modelBuilder.Entity<ProjectMember>()
                .HasKey(pu => new { pu.ProjectId, pu.UserId }); // Composite key
 
-        modelBuilder.Entity<ProjectUser>()
+        modelBuilder.Entity<ProjectMember>()
             .HasOne(pu => pu.Project)
             .WithMany(p => p.ProjectUsers)
             .HasForeignKey(pu => pu.ProjectId);
 
-        modelBuilder.Entity<ProjectUser>()
+        modelBuilder.Entity<ProjectMember>()
             .HasOne(pu => pu.User)
             .WithMany(u => u.ProjectUsers)
             .HasForeignKey(pu => pu.UserId);
@@ -138,3 +138,17 @@ public class AppDbContext : IdentityDbContext<Users>
     }
 }
 
+protected override void OnModelCreating(ModelBuilder builder)
+    {
+        base.OnModelCreating(builder);
+
+        builder.Entity<ProjectMember>()
+            .HasOne(pm => pm.Project)
+            .WithMany(p => p.Members)
+            .HasForeignKey(pm => pm.ProjectId);
+
+        builder.Entity<ProjectMember>()
+            .HasOne(pm => pm.User)
+            .WithMany(u => u.ProjectMemberships)
+            .HasForeignKey(pm => pm.UserId);
+    }

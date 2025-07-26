@@ -26,6 +26,6 @@ namespace UserRoles.Models
         public bool IsActive { get; set; } = true;
 
         // Navigation property for users in this project
-        public ICollection<ProjectUser> ProjectUsers { get; set; } = new List<ProjectUser>();
+        public ICollection<ProjectMember> Members { get; set; } = new List<ProjectMember>();
     }
 }

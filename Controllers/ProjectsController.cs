@@ -171,3 +171,23 @@ namespace UserRoles.Controllers
         }
     }
 }
+//assign user to a project
+[HttpPost("assign-member")]
+public async Task<IActionResult> AssignMember(int projectId, string userId, string role)
+{
+    var existing = await _context.ProjectMembers
+        .FirstOrDefaultAsync(pm => pm.ProjectId == projectId && pm.UserId == userId);
+
+    if (existing != null) return BadRequest("User already assigned.");
+
+    var member = new ProjectMember
+    {
+        ProjectId = projectId,
+        UserId = userId,
+        Role = role
+    };
+
+    _context.ProjectMembers.Add(member);
+    await _context.SaveChangesAsync();
+    return Ok("User assigned successfully.");
+}

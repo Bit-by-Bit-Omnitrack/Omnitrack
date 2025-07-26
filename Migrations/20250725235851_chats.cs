@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace UserRoles.Migrations
 {
     /// <inheritdoc />
-    public partial class projects : Migration
+    public partial class chats : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -68,7 +68,10 @@ namespace UserRoles.Migrations
                     TicketId = table.Column<int>(type: "int", nullable: false),
                     Sender = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Message = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    SentAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    SentAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Status = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    AttachmentPath = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    RoleTag = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -309,9 +312,10 @@ namespace UserRoles.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     AssignedToUserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreatedById = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     Details = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    DueDate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    DueDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    AssignedTo = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -319,6 +323,11 @@ namespace UserRoles.Migrations
                     table.ForeignKey(
                         name: "FK_Tasks_AspNetUsers_AssignedToUserId",
                         column: x => x.AssignedToUserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Tasks_AspNetUsers_CreatedById",
+                        column: x => x.CreatedById,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id");
                 });
@@ -559,6 +568,11 @@ namespace UserRoles.Migrations
                 name: "IX_Tasks_AssignedToUserId",
                 table: "Tasks",
                 column: "AssignedToUserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Tasks_CreatedById",
+                table: "Tasks",
+                column: "CreatedById");
 
             migrationBuilder.CreateIndex(
                 name: "IX_TicketAssignments_TicketID",
