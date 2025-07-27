@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace UserRoles.Migrations
 {
     /// <inheritdoc />
-    public partial class chats : Migration
+    public partial class ProjectMembers : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -377,25 +377,25 @@ namespace UserRoles.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ProjectUsers",
+                name: "ProjectMembers",
                 columns: table => new
                 {
                     ProjectId = table.Column<int>(type: "int", nullable: false),
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    ProjectUserId = table.Column<int>(type: "int", nullable: false),
+                    Id = table.Column<int>(type: "int", nullable: false),
                     ProjectRole = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ProjectUsers", x => new { x.ProjectId, x.UserId });
+                    table.PrimaryKey("PK_ProjectMembers", x => new { x.ProjectId, x.UserId });
                     table.ForeignKey(
-                        name: "FK_ProjectUsers_AspNetUsers_UserId",
+                        name: "FK_ProjectMembers_AspNetUsers_UserId",
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_ProjectUsers_Projects_ProjectId",
+                        name: "FK_ProjectMembers_Projects_ProjectId",
                         column: x => x.ProjectId,
                         principalTable: "Projects",
                         principalColumn: "ProjectId",
@@ -555,8 +555,8 @@ namespace UserRoles.Migrations
                 column: "ChecklistsId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ProjectUsers_UserId",
-                table: "ProjectUsers",
+                name: "IX_ProjectMembers_UserId",
+                table: "ProjectMembers",
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
@@ -646,7 +646,7 @@ namespace UserRoles.Migrations
                 name: "EmailLogs");
 
             migrationBuilder.DropTable(
-                name: "ProjectUsers");
+                name: "ProjectMembers");
 
             migrationBuilder.DropTable(
                 name: "Roles");

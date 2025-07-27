@@ -5,14 +5,15 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using UserRoles.Data;
 
 #nullable disable
 
 namespace UserRoles.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250725235851_chats")]
-    partial class chats
+    [Migration("20250727230745_ProjectMembers")]
+    partial class ProjectMembers
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -391,7 +392,7 @@ namespace UserRoles.Migrations
                     b.ToTable("Projects");
                 });
 
-            modelBuilder.Entity("UserRoles.Models.ProjectUser", b =>
+            modelBuilder.Entity("UserRoles.Models.ProjectMember", b =>
                 {
                     b.Property<int>("ProjectId")
                         .HasColumnType("int");
@@ -399,19 +400,19 @@ namespace UserRoles.Migrations
                     b.Property<string>("UserId")
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
+
                     b.Property<string>("ProjectRole")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<int>("ProjectUserId")
-                        .HasColumnType("int");
-
                     b.HasKey("ProjectId", "UserId");
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("ProjectUsers");
+                    b.ToTable("ProjectMembers");
                 });
 
             modelBuilder.Entity("UserRoles.Models.Role", b =>
@@ -802,16 +803,16 @@ namespace UserRoles.Migrations
                     b.Navigation("Checklists");
                 });
 
-            modelBuilder.Entity("UserRoles.Models.ProjectUser", b =>
+            modelBuilder.Entity("UserRoles.Models.ProjectMember", b =>
                 {
                     b.HasOne("UserRoles.Models.Project", "Project")
-                        .WithMany("ProjectUsers")
+                        .WithMany("Members")
                         .HasForeignKey("ProjectId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("UserRoles.Models.Users", "User")
-                        .WithMany("ProjectUsers")
+                        .WithMany("ProjectMemberships")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -915,7 +916,7 @@ namespace UserRoles.Migrations
 
             modelBuilder.Entity("UserRoles.Models.Project", b =>
                 {
-                    b.Navigation("ProjectUsers");
+                    b.Navigation("Members");
                 });
 
             modelBuilder.Entity("UserRoles.Models.Tasks", b =>
@@ -930,7 +931,7 @@ namespace UserRoles.Migrations
 
             modelBuilder.Entity("UserRoles.Models.Users", b =>
                 {
-                    b.Navigation("ProjectUsers");
+                    b.Navigation("ProjectMemberships");
                 });
 #pragma warning restore 612, 618
         }
