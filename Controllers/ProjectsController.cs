@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using UserRoles.Data;
@@ -52,6 +51,10 @@ namespace UserRoles.Controllers
 
             if (project == null) return NotFound();
 
+            ViewBag.Users = await _context.UsersTable
+                .Where(u => u.IsActive && u.IsApproved)
+                .ToListAsync();
+
             return View(project);
         }
 
@@ -67,16 +70,7 @@ namespace UserRoles.Controllers
         public async Task<IActionResult> Create([Bind("ProjectId,ProjectName,Description,StartDate,EndDate,IsActive")] Project project)
         {
             if (!ModelState.IsValid)
-            {
-                foreach (var value in ModelState.Values)
-                {
-                    foreach (var error in value.Errors)
-                    {
-                        Console.WriteLine("MODEL ERROR: " + error.ErrorMessage);
-                    }
-                }
                 return View(project);
-            }
 
             _context.Add(project);
             await _context.SaveChangesAsync();
@@ -86,12 +80,10 @@ namespace UserRoles.Controllers
         // GET: Projects/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null)
-                return NotFound();
+            if (id == null) return NotFound();
 
             var project = await _context.Projects.FindAsync(id);
-            if (project == null)
-                return NotFound();
+            if (project == null) return NotFound();
 
             return View(project);
         }
@@ -101,11 +93,9 @@ namespace UserRoles.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("ProjectId,ProjectName,Description,StartDate,EndDate,IsActive")] Project project)
         {
-            if (id != project.ProjectId)
-                return NotFound();
+            if (id != project.ProjectId) return NotFound();
 
-            if (!ModelState.IsValid)
-                return View(project);
+            if (!ModelState.IsValid) return View(project);
 
             try
             {
@@ -114,10 +104,8 @@ namespace UserRoles.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!ProjectExists(project.ProjectId))
-                    return NotFound();
-                else
-                    throw;
+                if (!ProjectExists(project.ProjectId)) return NotFound();
+                else throw;
             }
 
             return RedirectToAction(nameof(Index));
@@ -126,14 +114,12 @@ namespace UserRoles.Controllers
         // GET: Projects/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null)
-                return NotFound();
+            if (id == null) return NotFound();
 
             var project = await _context.Projects
                 .FirstOrDefaultAsync(m => m.ProjectId == id);
 
-            if (project == null)
-                return NotFound();
+            if (project == null) return NotFound();
 
             return View(project);
         }
@@ -172,6 +158,43 @@ namespace UserRoles.Controllers
             };
 
             _context.ProjectMembers.Add(member);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("Details", new { id = projectId });
+        }
+
+        // POST: Projects/RemoveMember
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RemoveMember(int projectId, string userId)
+        {
+            var member = await _context.ProjectMembers
+                .FirstOrDefaultAsync(pm => pm.ProjectId == projectId && pm.UserId == userId);
+
+            if (member == null)
+                return NotFound();
+
+            _context.ProjectMembers.Remove(member);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("Details", new { id = projectId });
+        }
+
+        // POST: Projects/EditMemberRole
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditMemberRole(int projectId, string userId, string newRole)
+        {
+            if (string.IsNullOrWhiteSpace(newRole))
+                return BadRequest("Role cannot be empty.");
+
+            var member = await _context.ProjectMembers
+                .FirstOrDefaultAsync(pm => pm.ProjectId == projectId && pm.UserId == userId);
+
+            if (member == null)
+                return NotFound();
+
+            member.ProjectRole = newRole;
             await _context.SaveChangesAsync();
 
             return RedirectToAction("Details", new { id = projectId });
