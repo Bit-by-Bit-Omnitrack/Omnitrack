@@ -1,10 +1,10 @@
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
+using UserRoles.Data;
 using UserRoles.Models;
 
 namespace UserRoles.Controllers
@@ -46,8 +46,8 @@ namespace UserRoles.Controllers
             if (id == null) return NotFound();
 
             var project = await _context.Projects
-                .Include(p => p.ProjectUsers)
-                    .ThenInclude(pu => pu.User)
+                .Include(p => p.Members)
+                    .ThenInclude(pm => pm.User)
                 .FirstOrDefaultAsync(p => p.ProjectId == id);
 
             if (project == null) return NotFound();
@@ -87,15 +87,12 @@ namespace UserRoles.Controllers
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
-            {
                 return NotFound();
-            }
 
             var project = await _context.Projects.FindAsync(id);
             if (project == null)
-            {
                 return NotFound();
-            }
+
             return View(project);
         }
 
@@ -105,47 +102,38 @@ namespace UserRoles.Controllers
         public async Task<IActionResult> Edit(int id, [Bind("ProjectId,ProjectName,Description,StartDate,EndDate,IsActive")] Project project)
         {
             if (id != project.ProjectId)
-            {
                 return NotFound();
+
+            if (!ModelState.IsValid)
+                return View(project);
+
+            try
+            {
+                _context.Update(project);
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!ProjectExists(project.ProjectId))
+                    return NotFound();
+                else
+                    throw;
             }
 
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(project);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!ProjectExists(project.ProjectId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            return View(project);
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: Projects/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
-            {
                 return NotFound();
-            }
 
             var project = await _context.Projects
                 .FirstOrDefaultAsync(m => m.ProjectId == id);
+
             if (project == null)
-            {
                 return NotFound();
-            }
 
             return View(project);
         }
@@ -159,10 +147,34 @@ namespace UserRoles.Controllers
             if (project != null)
             {
                 _context.Projects.Remove(project);
+                await _context.SaveChangesAsync();
             }
 
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
+        }
+
+        // POST: Projects/AssignMember
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AssignMember(int projectId, string userId, string role)
+        {
+            var existing = await _context.ProjectMembers
+                .FirstOrDefaultAsync(pm => pm.ProjectId == projectId && pm.UserId == userId);
+
+            if (existing != null)
+                return BadRequest("User already assigned to this project.");
+
+            var member = new ProjectMember
+            {
+                ProjectId = projectId,
+                UserId = userId,
+                ProjectRole = role
+            };
+
+            _context.ProjectMembers.Add(member);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("Details", new { id = projectId });
         }
 
         private bool ProjectExists(int id)
@@ -170,24 +182,4 @@ namespace UserRoles.Controllers
             return _context.Projects.Any(e => e.ProjectId == id);
         }
     }
-}
-//assign user to a project
-[HttpPost("assign-member")]
-public async Task<IActionResult> AssignMember(int projectId, string userId, string role)
-{
-    var existing = await _context.ProjectMembers
-        .FirstOrDefaultAsync(pm => pm.ProjectId == projectId && pm.UserId == userId);
-
-    if (existing != null) return BadRequest("User already assigned.");
-
-    var member = new ProjectMember
-    {
-        ProjectId = projectId,
-        UserId = userId,
-        Role = role
-    };
-
-    _context.ProjectMembers.Add(member);
-    await _context.SaveChangesAsync();
-    return Ok("User assigned successfully.");
 }
