@@ -5,22 +5,26 @@ namespace UserRoles.Models
 {
     public class ProjectMember
     {
+        [Key]
         public int Id { get; set; }
 
         [Required]
         public int ProjectId { get; set; }
-        [ForeignKey("ProjectId")]
+
+        // Navigation to the Project entity
+        [ForeignKey(nameof(ProjectId))]
         public Project Project { get; set; }
 
         [Required]
         public string UserId { get; set; }
-        [ForeignKey("UserId")]
+
+        // Navigation to the User entity
+        [ForeignKey(nameof(UserId))]
         public Users User { get; set; }
 
-        // The role of the user within this specific project
-        // This is distinct from their global application roles.
+        // Project-specific role — distinct from global app roles
         [Required]
-        [StringLength(50)]
-        public string ProjectRole { get; set; } // e.g., "Developer", "Project Manager", "QA"
+        [StringLength(50, ErrorMessage = "Role name cannot exceed 50 characters.")]
+        public string ProjectRole { get; set; } // e.g., Developer, Manager, QA
     }
 }

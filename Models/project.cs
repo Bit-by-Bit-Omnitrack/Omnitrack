@@ -1,10 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace UserRoles.Models
 {
     public class Project
     {
+        [Key]
         public int ProjectId { get; set; }
 
         [Required]
@@ -17,15 +19,15 @@ namespace UserRoles.Models
 
         [Display(Name = "Start Date")]
         [DataType(DataType.Date)]
-        public DateTime StartDate { get; set; } = DateTime.Now; // Default to current date
+        public DateTime StartDate { get; set; } = DateTime.Now;
 
         [Display(Name = "End Date")]
         [DataType(DataType.Date)]
-        public DateTime? EndDate { get; set; } // Nullable if end date can be undecided
+        public DateTime? EndDate { get; set; }
 
         public bool IsActive { get; set; } = true;
 
-        // Navigation property for users in this project
+        // Navigation property for members assigned to this project
         public ICollection<ProjectMember> Members { get; set; } = new List<ProjectMember>();
     }
 }
