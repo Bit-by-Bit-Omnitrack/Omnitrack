@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace UserRoles.Migrations
 {
     /// <inheritdoc />
-    public partial class projects : Migration
+    public partial class ProjectMembers : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -68,7 +68,10 @@ namespace UserRoles.Migrations
                     TicketId = table.Column<int>(type: "int", nullable: false),
                     Sender = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Message = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    SentAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    SentAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Status = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    AttachmentPath = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    RoleTag = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -309,9 +312,10 @@ namespace UserRoles.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     AssignedToUserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreatedById = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     Details = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    DueDate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    DueDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    AssignedTo = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -319,6 +323,11 @@ namespace UserRoles.Migrations
                     table.ForeignKey(
                         name: "FK_Tasks_AspNetUsers_AssignedToUserId",
                         column: x => x.AssignedToUserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Tasks_AspNetUsers_CreatedById",
+                        column: x => x.CreatedById,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id");
                 });
@@ -368,25 +377,25 @@ namespace UserRoles.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ProjectUsers",
+                name: "ProjectMembers",
                 columns: table => new
                 {
                     ProjectId = table.Column<int>(type: "int", nullable: false),
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    ProjectUserId = table.Column<int>(type: "int", nullable: false),
+                    Id = table.Column<int>(type: "int", nullable: false),
                     ProjectRole = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ProjectUsers", x => new { x.ProjectId, x.UserId });
+                    table.PrimaryKey("PK_ProjectMembers", x => new { x.ProjectId, x.UserId });
                     table.ForeignKey(
-                        name: "FK_ProjectUsers_AspNetUsers_UserId",
+                        name: "FK_ProjectMembers_AspNetUsers_UserId",
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_ProjectUsers_Projects_ProjectId",
+                        name: "FK_ProjectMembers_Projects_ProjectId",
                         column: x => x.ProjectId,
                         principalTable: "Projects",
                         principalColumn: "ProjectId",
@@ -546,8 +555,8 @@ namespace UserRoles.Migrations
                 column: "ChecklistsId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ProjectUsers_UserId",
-                table: "ProjectUsers",
+                name: "IX_ProjectMembers_UserId",
+                table: "ProjectMembers",
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
@@ -559,6 +568,11 @@ namespace UserRoles.Migrations
                 name: "IX_Tasks_AssignedToUserId",
                 table: "Tasks",
                 column: "AssignedToUserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Tasks_CreatedById",
+                table: "Tasks",
+                column: "CreatedById");
 
             migrationBuilder.CreateIndex(
                 name: "IX_TicketAssignments_TicketID",
@@ -632,7 +646,7 @@ namespace UserRoles.Migrations
                 name: "EmailLogs");
 
             migrationBuilder.DropTable(
-                name: "ProjectUsers");
+                name: "ProjectMembers");
 
             migrationBuilder.DropTable(
                 name: "Roles");
