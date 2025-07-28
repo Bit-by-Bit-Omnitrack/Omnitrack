@@ -20,7 +20,7 @@
     align-items: center;
     margin: 0;
     padding: 8%; /* added padding to push box away from center */
-    z-index: -1; /* pushes it behind other content */
+    z-index: 0; /* pushes it behind other content */
 }
 
 
