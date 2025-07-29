@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualBasic;
 using UserRoles.Models;
+using Microsoft.AspNetCore.Authorization;
 using UserRoles.Data; // Gives access to AppDbContext and other data-related classes
 
 namespace UserRoles.Controllers
@@ -75,7 +76,7 @@ namespace UserRoles.Controllers
             return View(ticket);
         }
 
-        // GET: Tickets1/Create
+        [Authorize(Roles = "Project Leader")]
         public async Task<IActionResult> Create()
         {
             // Populate ViewBag.Users for the dropdown in the Create view
