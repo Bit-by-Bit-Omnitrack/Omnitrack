@@ -18,16 +18,16 @@
                 <dd class="col-sm-9">@Model.Name</dd>
 
                 <dt class="col-sm-3 text-muted">Assigned To</dt>
-                <dd class="col-sm-9">@Model.AssignedToUser?.FullName ?? "Unassigned"</dd>
+                <dd class="col-sm-9">@Model.AssignedToUser?.FullName </dd>
 
                 <dt class="col-sm-3 text-muted">Created By</dt>
-                <dd class="col-sm-9">@Model.CreatedByUser?.UserName ?? "N/A"</dd>
+                <dd class="col-sm-9">@Model.CreatedByUser?.UserName </dd>
 
                 <dt class="col-sm-3 text-muted">Details</dt>
                 <dd class="col-sm-9">@Model.Details</dd>
 
                 <dt class="col-sm-3 text-muted">Due Date</dt>
-                <dd class="col-sm-9">@Model.DueDate.ToString("dd MMM yyyy") ?? "Not Set"</dd>
+                <dd class="col-sm-9">@Model.DueDate.ToString("dd MMM yyyy") </dd>
             </dl>
         </div>
     </div>
