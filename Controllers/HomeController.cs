@@ -3,17 +3,22 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using UserRoles.Models;
 using UserRoles.Data; // Gives access to AppDbContext and other data-related classes
+using Microsoft.AspNetCore.Identity;
+
 
 namespace UserRoles.Controllers
 {
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
+        private readonly UserManager<Users> _userManager;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(ILogger<HomeController> logger, UserManager<Users> userManager)
         {
             _logger = logger;
+            _userManager = userManager;
         }
+
 
         public IActionResult Index()
         {
@@ -44,7 +49,18 @@ namespace UserRoles.Controllers
         {
             return View(); 
         }
-        
+
+        //  Welcome Landing Page
+        [Authorize]
+        public async Task<IActionResult> Welcome()
+        {
+            var currentUser = await _userManager.GetUserAsync(HttpContext.User);
+
+            ViewBag.FullName = currentUser?.FullName ?? "User";
+            return View();
+        }
+
+
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {

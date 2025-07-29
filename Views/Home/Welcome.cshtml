@@ -1,0 +1,74 @@
+﻿@{
+    ViewData["Title"] = "Welcome";
+    var userName = ViewBag.FullName ?? "User";
+    var quotes = new List<string>
+    {
+        "The future depends on what you do today. – Mahatma Gandhi",
+        "Success is not final, failure is not fatal: It is the courage to continue that counts. – Winston Churchill",
+        "Don’t watch the clock; do what it does. Keep going. – Sam Levenson",
+        "Start where you are. Use what you have. Do what you can. – Arthur Ashe",
+        "It always seems impossible until it’s done. – Nelson Mandela",
+        "Believe you can and you're halfway there. – Theodore Roosevelt",
+        "Push yourself, because no one else is going to do it for you.",
+        "Work hard in silence. Let your success be the noise.",
+        "Don’t limit your challenges, challenge your limits.",
+         "Productivity is never an accident. It is always the result of a commitment to excellence.",
+        "The secret of getting ahead is getting started.",
+        "Do something today that your future self will thank you for.",
+        "Success is the sum of small efforts repeated day in and day out.",
+        "Don’t watch the clock; do what it does. Keep going.",
+        "The way to get started is to quit talking and begin doing.",
+        "Start where you are. Use what you have. Do what you can.",
+        "Focus on being productive instead of busy.",
+        "Discipline is the bridge between goals and accomplishment.",
+        "Your limitation—it's only your imagination.",
+        "Great things are done by a series of small things brought together.",
+        "Success doesn’t come from what you do occasionally, it comes from what you do consistently.",
+        "Push yourself, because no one else is going to do it for you.",
+        "Dream it. Wish it. Do it.",
+        "Sometimes later becomes never. Do it now.",
+        "The future depends on what you do today.",
+        "Don’t be afraid to give up the good to go for the great.",
+        "Stay positive, work hard, and make it happen.",
+        "Work hard in silence. Let your success be your noise.",
+        "The only difference between ordinary and extraordinary is that little extra.",
+        "Every accomplishment starts with the decision to try.",
+        "It’s not about having time. It’s about making time.",
+        "Your only limit is your mind.",
+        "Small progress is still progress.",
+        "Success is not final, failure is not fatal: It is the courage to continue that counts."
+
+    };
+    var random = new Random();
+    var quoteOfTheDay = quotes[random.Next(quotes.Count)];
+}
+
+<div class="container mt-5">
+    <h1 class="display-4 mb-4">Welcome to Omnitrack, @userName </h1>
+    <blockquote class="blockquote">
+        <p class="mb-0">"@quoteOfTheDay"</p>
+    </blockquote>
+
+    <h3 class="mt-5">What would you like to view?</h3>
+
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <a class="card text-center shadow-sm p-4 text-decoration-none" href="/Tickets/Index">
+                <h4> Tickets</h4>
+                <p>Manage all ticket workflows</p>
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a class="card text-center shadow-sm p-4 text-decoration-none" href="/Tasks/Index">
+                <h4> Tasks</h4>
+                <p>Stay on top of your tasks</p>
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a class="card text-center shadow-sm p-4 text-decoration-none" href="/Projects/Index">
+                <h4> Projects</h4>
+                <p>View and track your projects</p>
+            </a>
+        </div>
+    </div>
+</div>
