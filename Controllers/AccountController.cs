@@ -61,7 +61,8 @@ namespace UserRoles.Controllers
 
             if (result.Succeeded)
             {
-                return RedirectToAction("Index", "Tickets");
+                //  Redirect to Welcome page after login
+                return RedirectToAction("Welcome", "Home");
             }
             else if (result.IsLockedOut)
             {
