@@ -109,12 +109,20 @@ builder.Services.AddIdentity<Users, IdentityRole>(options =>
 .AddEntityFrameworkStores<AppDbContext>()
 .AddDefaultTokenProviders();
 
-// Configure Application Cookie (still relevant for MVC views if you use them)
 builder.Services.ConfigureApplicationCookie(options =>
 {
-    options.LoginPath = "/Account/Login"; // explicitly set login path
+    options.LoginPath = "/Account/Login";
     options.AccessDeniedPath = "/Account/AccessDenied";
+    options.ReturnUrlParameter = "ReturnUrl";
+
+    // Redirect to Welcome page after login
+    options.Events.OnRedirectToLogin = context =>
+    {
+        context.Response.Redirect("/Home/Welcome");
+        return Task.CompletedTask;
+    };
 });
+
 
 var app = builder.Build();
 

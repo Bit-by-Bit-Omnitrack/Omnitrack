@@ -130,3 +130,17 @@ a, .btn {
     transition: all 0.2s ease-in-out;
     
 }
+
+/* -------------------------------------------
+   Custom Card Styling for Welcome Page Cards
+-------------------------------------------- */
+.card {
+    border-radius: 12px;
+    background-color: #f8f9fa;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }

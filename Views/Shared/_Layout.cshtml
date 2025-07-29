@@ -127,60 +127,78 @@
                 <nav class="mt-2">
                     <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
                         <!-- Dashboard -->
-                        <li class="nav-item menu-open">
-                            <a asp-controller="Tickets" asp-action="Index" class="nav-link active">
+                        <li class="nav-item">
+                            <a asp-controller="Home" asp-action="Dashboard" class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" ? "active" : "")">
                                 <i class="nav-icon fas fa-tachometer-alt"></i>
                                 <p>Dashboard</p>
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a asp-controller="Tasks" asp-action="Index" class="nav-link">
 
-                                <i class="fa-solid fa-list-check"></i>
-                                <p>
-                                    Tasks
-                                </p>
+                        <!-- Tickets -->
+                        <li class="nav-item">
+                            <a asp-controller="Tickets" asp-action="Index" class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Tickets" ? "active" : "")">
+                                <i class="nav-icon fas fa-ticket-alt"></i>
+                                <p>Tickets</p>
                             </a>
                         </li>
-                       
-                        <!-- Authenticate Users -->
+
+                        <!-- Tasks -->
                         <li class="nav-item">
-                            <a asp-controller="User" asp-action="Authenticate" class="nav-link">
-                                <i class="fa-solid fa-check"></i>
-                                <p>
-                                    Authenticate Users
-                                </p>
+                            <a asp-controller="Tasks" asp-action="Index" class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Tasks" ? "active" : "")">
+                                <i class="nav-icon fas fa-tasks"></i>
+                                <p>Tasks</p>
                             </a>
                         </li>
-                       
 
-                        <!-- Authenticated Users -->
+                        <!-- Projects -->
                         <li class="nav-item">
-                            <a asp-controller="User" asp-action="Index" class="nav-link">
-                            
-                          <i class="fa-solid fa-users"></i>
-                                <p>
-                                    Users
-                                </p> 
-                                </a>
-                        </li>
- 
-                        <li class="nav-item">
-                            <a asp-controller="User" asp-action="RejectedUsers" class="nav-link">
-                                <i class="nav-icon fas fa-user-slash"></i>
-                                <p>Rejected Users</p>
-                            </a>
-                       </li>
-
-                       <!-- Projects -->
-                        <li class="nav-item">
-                            <a asp-controller="Projects" asp-action="Index" class="nav-link">
+                            <a asp-controller="Projects" asp-action="Index" class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Projects" ? "active" : "")">
                                 <i class="nav-icon fas fa-project-diagram"></i>
                                 <p>Projects</p>
                             </a>
                         </li>
 
+                        <!-- Users Treeview -->
+                        <li class="nav-item has-treeview @(ViewContext.RouteData.Values["controller"]?.ToString() == "User" ? "menu-open" : "")">
+                            <a href="#" class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "User" ? "active" : "")">
+                                <i class="nav-icon fas fa-users"></i>
+                                <p>
+                                    Users
+                                    <i class="right fas fa-angle-left"></i>
+                                </p>
+                            </a>
+                            <ul class="nav nav-treeview">
+                                <li class="nav-item">
+                                    <a asp-controller="User" asp-action="Index" class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")">
+                                        <i class="fas fa-users nav-icon"></i>
+                                        <p>All Users</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a asp-controller="User" asp-action="Authenticate" class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Authenticate" ? "active" : "")">
+                                        <i class="fas fa-user-check nav-icon"></i>
+                                        <p>Authenticate Users</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a asp-controller="User" asp-action="RejectedUsers" class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "RejectedUsers" ? "active" : "")">
+                                        <i class="fas fa-user-slash nav-icon"></i>
+                                        <p>Rejected Users</p>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+
+
+
+
+
+
+
+
+
                     </ul>
+
                 </nav>
                 <!-- /.sidebar-menu -->
             </div>
