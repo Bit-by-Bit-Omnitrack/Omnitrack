@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using UserRoles.Models;
 using UserRoles.Data;
+using Microsoft.AspNetCore.Authorization;
 
 namespace UserRoles.Controllers
 {
@@ -52,7 +53,7 @@ namespace UserRoles.Controllers
             return View(tasks);
         }
 
-        // GET: Tasks/Create
+        [Authorize(Roles = "Project Leader")]
         public async Task<IActionResult> Create()
         {
             ViewBag.Users = new SelectList(await _userManager.Users.Where(u => u.IsActive).ToListAsync(), "Id", "UserName");

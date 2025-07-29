@@ -1,53 +1,58 @@
 @model IEnumerable<UserRoles.Models.Tasks>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Tasks Dashboard";
 }
 
-<h1>Tasks List</h1>
+<h2 class="mb-4 text-center text-uppercase fw-bold">Tasks Overview</h2>
 
-<p>
-    <a asp-action="Create" class="btn btn-success">Create New Task</a>
-</p>
+<div class="text-end mb-4">
+    <a asp-action="Create" class="btn btn-success shadow">
+        <i class="fas fa-plus-circle me-2"></i>Create New Task
+    </a>
+</div>
 
 <div class="container-fluid">
-    <div class="row">
+    <div class="row g-4">
         @foreach (var item in Model)
         {
-            <div class="col-md-4 col-lg-3 mb-4">
-                @* Adjust column sizes as needed for responsiveness *@
-                <div class="card h-100 shadow-sm">
-                    @* h-100 makes cards equal height, shadow-sm adds a subtle shadow *@
+            <div class="col-md-6 col-lg-4 col-xl-3">
+                <div class="card h-100 border-0 shadow-lg task-card">
                     <div class="card-body d-flex flex-column">
-                        <h5 class="card-title text-primary">@Html.DisplayFor(modelItem => item.Name)</h5>
-                        <h6 class="card-subtitle mb-2 text-muted">Assigned To: @Html.DisplayFor(modelItem => item.AssignedToUser.FullName)</h6>
+                        <h5 class="card-title text-primary fw-bold">@item.Name</h5>
+                        <h6 class="card-subtitle text-muted mb-2">
+                            <i class="fas fa-user-circle me-1"></i>Assigned To: @item.AssignedToUser?.FullName 
+                        </h6>
+
                         <p class="card-text flex-grow-1">
-                            @* flex-grow-1 makes details take up available space *@
-                            <strong>Details:</strong> @Html.DisplayFor(modelItem => item.Details)
+                            <i class="fas fa-align-left me-1 text-secondary"></i>
+                            <strong>Details:</strong> @item.Details
                         </p>
-                        <ul class="list-group list-group-flush mb-3">
+
+                        <ul class="list-group list-group-flush small mb-3">
                             <li class="list-group-item">
-                                <strong>Created By:</strong>
-                                @if (item.CreatedByUser != null)
-                                {
-                                    @Html.DisplayFor(modelItem => item.CreatedByUser.UserName)
-
-                                }
-                                else
-                                {
-                                    <span>N/A</span>
-
-                                }
+                                <i class="fas fa-user-edit me-1"></i>
+                                <strong>Created By:</strong> @item.CreatedByUser?.UserName 
                             </li>
-                            <li class="list-group-item"><strong>Due Date:</strong> @Html.DisplayFor(modelItem => item.DueDate)</li>
+                            <li class="list-group-item">
+                                <i class="fas fa-calendar-alt me-1"></i>
+                                <strong>Due Date:</strong> @item.DueDate.ToString("dd MMM yyyy") 
+                            </li>
                         </ul>
-                        <div class="mt-auto d-flex justify-content-around">
-                            @* mt-auto pushes buttons to the bottom, justify-content-around spaces them out *@
-                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-primary btn-sm">Edit</a>
-                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-info btn-sm">Details</a>
-                            <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger btn-sm">Delete</a>
 
-                            <a asp-controller="Tickets" asp-action="Index" asp-route-filterTaskId="@item.Id" class="btn btn-secondary btn-sm">View Tickets</a>
+                        <div class="mt-auto d-flex flex-wrap gap-2 justify-content-between">
+                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-outline-primary btn-sm" title="Edit Task">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-info btn-sm" title="View Details">
+                                <i class="fas fa-info-circle"></i>
+                            </a>
+                            <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-outline-danger btn-sm" title="Delete Task">
+                                <i class="fas fa-trash-alt"></i>
+                            </a>
+                            <a asp-controller="Tickets" asp-action="Index" asp-route-filterTaskId="@item.Id" class="btn btn-outline-secondary btn-sm" title="View Related Tickets">
+                                <i class="fas fa-ticket-alt"></i>
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -55,3 +60,14 @@
         }
     </div>
 </div>
+
+<style>
+    .task-card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+        .task-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0.75rem 1.5rem rgba(0, 0, 0, 0.1);
+        }
+</style>
