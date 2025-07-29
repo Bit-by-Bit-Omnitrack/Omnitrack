@@ -1,11 +1,16 @@
 ﻿@{
-    ViewData["Title"] = "Account Pending Approval";
+    ViewData["Title"] = "Pending Approval";
 }
 
-<div class="text-center mt-5">
-    <h2 class="text-warning">Pending Approval</h2>
-    <p class="lead mt-3">Your account has been registered but is not active yet.</p>
-    <p class="text-muted">Please wait for an administrator to approve your request.</p>
+<div class="container mt-5">
+    <div class="card shadow-lg">
+        <div class="card-body text-center">
+            <h2 class="text-warning mb-4">Account Pending Approval</h2>
+            <p class="lead">Thank you for registering with <strong>OmniTrack</strong>.</p>
+            <p>Your account has been created but is currently awaiting admin approval.</p>
+            <p>You will receive an email once your account is activated.</p>
 
-    <a asp-action="Login" class="btn btn-primary mt-4">Back to Login</a>
+            <a class="btn btn-primary mt-3" href="@Url.Action("Login", "Account")">Back to Login</a>
+        </div>
+    </div>
 </div>

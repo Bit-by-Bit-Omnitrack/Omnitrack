@@ -203,7 +203,7 @@ namespace UserRoles.Controllers
                 }
 
                 TempData["Message"] = "Registration successful. Awaiting approval.";
-                return RedirectToAction("Login", "Account");
+                return RedirectToAction("PendingApproval", "Account");
             }
 
             foreach (var error in result.Errors)
