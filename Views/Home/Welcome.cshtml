@@ -1,6 +1,6 @@
 ﻿@{
     ViewData["Title"] = "Welcome";
-    var userName = User.Identity.Name ?? "User"; // fallback just in case
+    var userName = ViewBag.FullName ?? "User";
     var quotes = new List<string>
     {
         "The future depends on what you do today. – Mahatma Gandhi",
