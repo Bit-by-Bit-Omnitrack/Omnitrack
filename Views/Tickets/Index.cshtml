@@ -1,10 +1,9 @@
 @model IEnumerable<UserRoles.Models.Ticket>
-
 @{
     ViewData["Title"] = "Tickets Dashboard";
     var statuses = (List<UserRoles.Models.TicketStatus>)ViewBag.Statuses;
-    var tasksFilter = (SelectList)ViewBag.TasksFilter; // Get the tasks filter SelectList
-    var currentFilterTaskId = Context.Request.Query["filterTaskId"]; // Get the currently applied filter TaskId
+    var tasksFilter = (SelectList)ViewBag.TasksFilter;
+    var currentFilterTaskId = Context.Request.Query["filterTaskId"];
     var currentTaskName = "";
     if (!string.IsNullOrEmpty(currentFilterTaskId) && tasksFilter != null)
     {
@@ -16,52 +15,74 @@
     }
 }
 
-<h1>Tickets Dashboard @(!string.IsNullOrEmpty(currentTaskName) ? $"for Task: {currentTaskName}" : "")</h1>
+<div class="container-fluid my-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="h3 fw-bold text-primary">
+            <i class="fas fa-columns me-2"></i> Tickets Dashboard
+            @(!string.IsNullOrEmpty(currentTaskName) ? $" - Task: {currentTaskName}" : "")
+        </h1>
+        <a asp-action="Create" class="btn btn-success">
+            <i class="fas fa-plus-circle me-1"></i> New Ticket
+        </a>
+    </div>
 
-<p>
-    <a asp-action="Create" class="btn btn-success">Create New Ticket</a> @* Changed text from "Task" to "Ticket" *@
-</p>
-@* Task Filter Section 
-<div class="mb-3">
-    <form asp-action="Index" method="get" class="form-inline">
-        <label for="filterTaskId" class="mr-2">Filter by Task:</label>
-        <select name="filterTaskId" id="filterTaskId" class="form-control mr-2">
-            <option value="">All Tasks</option> @* Option to show all tasks 
-            @foreach (var taskOption in tasksFilter)
-            {
-                <option value="@taskOption.Value" selected="@(taskOption.Selected)">@taskOption.Text</option>
-            }
-        </select>
-        <button type="submit" class="btn btn-primary">Apply Filter</button>
-    </form>
-</div>
-*@
-
-<div class="kanban-board">
-    @foreach (var status in statuses)
-    {
-        <div class="kanban-column" id="status-@status.Id" data-status-id="@status.Id">
-            <h2>@status.StatusName</h2>
-            <div class="kanban-cards">
-                @foreach (var item in Model.Where(t => t.StatusID == status.Id))
-                {
-                    <div class="kanban-card draggable" draggable="true" data-ticket-id="@item.Id">
-                        <h4>@Html.DisplayFor(modelItem => item.Title)</h4>
-                        <p>Assigned To: @(item.AssignedToUser?.UserName ?? "N/A")</p>
-                        <p>Priority: @(item.Priority?.Name ?? "N/A")</p>
-                        <p>Task: @(item.Tasks?.Name ?? "N/A")</p> @* Display the task name *@
-                        <p>Due Date: @(item.DueDate.HasValue ? item.DueDate.Value.ToShortDateString() : "N/A")</p>
-                        <div class="card-actions">
-                            <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                            <a asp-action="Edit" asp-route-id="@item.Id">Edit</a>|
-                            <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-                        </div>
-                    </div>
-                }
-            </div>
+  @*  <form asp-action="Index" method="get" class="row g-2 mb-4 align-items-center">
+        <div class="col-auto">
+            <label for="filterTaskId" class="col-form-label fw-bold">Filter by Task:</label>
         </div>
-    }
-</div>
+        <div class="col-auto">
+            <select name="filterTaskId" id="filterTaskId" class="form-select">
+                <option value="">All Tasks</option>
+                @foreach (var taskOption in tasksFilter)
+                {
+                    <option value="@taskOption.Value" selected="@(taskOption.Selected)">
+                        @taskOption.Text
+                    </option>
+                }
+            </select>
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-outline-primary">
+                <i class="fas fa-filter me-1"></i> Apply Filter
+            </button>
+        </div>
+    </form>*@
+    <div class="kanban-scroll-wrapper mb-4">
+        <div class="kanban-board d-flex flex-nowrap">
+            @foreach (var status in statuses)
+            {
+                <div class="kanban-column card me-3 flex-shrink-0 shadow-sm border-0"
+                     id="status-@status.Id"
+                     data-status-id="@status.Id"
+                     style="min-width: 300px; max-width: 320px;">
+                    <div class="card-header bg-light border-bottom fw-semibold text-dark">
+                        <i class="fas fa-circle text-secondary me-2"></i>@status.StatusName
+                    </div>
+                    <div class="card-body kanban-cards p-2" style="min-height: 300px; max-height: 75vh; overflow-y: auto;">
+                        @foreach (var item in Model.Where(t => t.StatusID == status.Id))
+                        {
+                            <div class="kanban-card draggable card border-0 mb-2 shadow-sm" draggable="true" data-ticket-id="@item.Id">
+                                <div class="card-body p-2">
+                                    <h5 class="card-title fw-bold">@item.Title</h5>
+                                    <p class="card-text mb-1"><i class="fas fa-user me-1 text-muted"></i><strong>Assigned:</strong> @(item.AssignedToUser?.UserName ?? "N/A")</p>
+                                    <p class="card-text mb-1"><i class="fas fa-layer-group me-1 text-muted"></i><strong>Priority:</strong> @(item.Priority?.Name ?? "N/A")</p>
+                                    <p class="card-text mb-1"><i class="fas fa-tasks me-1 text-muted"></i><strong>Task:</strong> @(item.Tasks?.Name ?? "N/A")</p>
+                                    <p class="card-text"><i class="fas fa-calendar-alt me-1 text-muted"></i><strong>Due:</strong> @(item.DueDate?.ToShortDateString() ?? "N/A")</p>
+                                    <div class="text-end mt-2">
+                                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary">Details</a>
+                                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-warning">Edit</a>
+                                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger">Delete</a>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+
 
 @section Scripts {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

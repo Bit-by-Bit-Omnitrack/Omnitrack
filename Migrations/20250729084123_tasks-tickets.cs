@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace UserRoles.Migrations
 {
     /// <inheritdoc />
-    public partial class ProjectMembers : Migration
+    public partial class taskstickets : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -314,8 +314,7 @@ namespace UserRoles.Migrations
                     AssignedToUserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     CreatedById = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     Details = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    DueDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    AssignedTo = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    DueDate = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {

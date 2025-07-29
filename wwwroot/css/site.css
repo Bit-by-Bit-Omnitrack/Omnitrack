@@ -3,89 +3,41 @@ html {
 }
 /* wwwroot/css/site.css (or a new kanban.css file) */
 
+.kanban-scroll-wrapper {
+    overflow-x: auto;
+    padding-bottom: 1rem;
+}
+
 .kanban-board {
     display: flex;
-    gap: 20px;
-    padding: 20px;
-    /* Changed: Semi-transparent background for the entire board container */
-    background-color: rgba(240, 242, 245, 0.7); /* 70% opacity */
-    border-radius: 8px;
-    overflow-x: auto;
+    flex-wrap: nowrap;
 }
 
 .kanban-column {
-    /* Changed: Semi-transparent background for each column */
-    background-color: rgba(224, 230, 237, 0.7); /* 70% opacity, adjust color as needed */
-    border-radius: 8px;
-    padding: 15px;
-    min-width: 280px;
-    flex-shrink: 0;
-    display: flex;
-    flex-direction: column;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Keep shadow for depth */
+    background-color: #fdfdfd;
+    transition: background-color 0.3s ease;
 }
 
-    .kanban-column h2 {
-        font-size: 1.4em;
-        margin-top: 0;
-        margin-bottom: 15px;
-        color: #333; /* Keep text readable */
-        border-bottom: 1px solid rgba(204, 204, 204, 0.5); /* Semi-transparent border */
-        padding-bottom: 10px;
-    }
-
-.kanban-cards {
-    flex-grow: 1;
-    min-height: 100px;
-    padding: 5px;
+.kanban-card:hover {
+    background-color: #f5f5f5;
+    cursor: move;
 }
 
-.kanban-card {
-    /* Changed: Keep cards mostly opaque for readability, or slightly transparent */
-    background-color: rgba(255, 255, 255, 0.9); /* 90% opaque, nearly solid white */
-    border: 1px solid rgba(221, 221, 221, 0.8); /* Slightly transparent border */
-    border-radius: 6px;
-    padding: 15px;
-    margin-bottom: 10px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-    cursor: grab;
-    transition: transform 0.2s ease-in-out;
+/* Optional: Smooth scroll behavior */
+.kanban-scroll-wrapper::-webkit-scrollbar {
+    height: 10px;
 }
 
-    .kanban-card:active {
-        cursor: grabbing;
-    }
-
-    .kanban-card.dragging {
-        opacity: 0.5; /* This opacity makes the dragged card transparent anyway */
-        border: 2px dashed #007bff;
-        transform: rotate(2deg);
-    }
-
-.card-actions {
-    margin-top: 10px;
-    font-size: 0.9em;
+.kanban-scroll-wrapper::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 5px;
 }
 
-    .card-actions a {
-        margin-right: 10px;
-        text-decoration: none;
-        color: #007bff;
-    }
 
-        .card-actions a:hover {
-            text-decoration: underline;
-        }
-
-/* Optional: Style for when an item is being dragged over a column */
-.kanban-column.drag-over .kanban-cards {
-    background-color: rgba(204, 224, 255, 0.4); /* More transparent drag-over effect */
-    border: 2px dashed #007bff;
-}
 
 
 @media (min-width: 768px) {
-  html {
+    html {
     font-size: 16px;
   }
 }

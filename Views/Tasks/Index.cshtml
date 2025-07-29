@@ -31,12 +31,12 @@
                                 @if (item.CreatedByUser != null)
                                 {
                                     @Html.DisplayFor(modelItem => item.CreatedByUser.UserName)
-                                   
+
                                 }
                                 else
                                 {
                                     <span>N/A</span>
-                                    
+
                                 }
                             </li>
                             <li class="list-group-item"><strong>Due Date:</strong> @Html.DisplayFor(modelItem => item.DueDate)</li>
@@ -46,7 +46,7 @@
                             <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-primary btn-sm">Edit</a>
                             <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-info btn-sm">Details</a>
                             <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger btn-sm">Delete</a>
-                           
+
                             <a asp-controller="Tickets" asp-action="Index" asp-route-filterTaskId="@item.Id" class="btn btn-secondary btn-sm">View Tickets</a>
                         </div>
                     </div>
