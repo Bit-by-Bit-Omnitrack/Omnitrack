@@ -20,8 +20,15 @@
                 <div class="card h-100 border-0 shadow-lg task-card">
                     <div class="card-body d-flex flex-column">
                         <h5 class="card-title text-primary fw-bold">@item.Name</h5>
+
                         <h6 class="card-subtitle text-muted mb-2">
-                            <i class="fas fa-user-circle me-1"></i>Assigned To: @item.AssignedToUser?.FullName 
+                            <i class="fas fa-project-diagram me-1"></i>
+                            Project: @item.Project?.ProjectName ?? "<em>None</em>"
+                        </h6>
+
+                        <h6 class="card-subtitle text-muted mb-2">
+                            <i class="fas fa-user-circle me-1"></i>
+                            Assigned To: @item.AssignedToUser?.FullName
                         </h6>
 
                         <p class="card-text flex-grow-1">
@@ -32,11 +39,11 @@
                         <ul class="list-group list-group-flush small mb-3">
                             <li class="list-group-item">
                                 <i class="fas fa-user-edit me-1"></i>
-                                <strong>Created By:</strong> @item.CreatedByUser?.UserName 
+                                <strong>Created By:</strong> @item.CreatedByUser?.UserName
                             </li>
                             <li class="list-group-item">
                                 <i class="fas fa-calendar-alt me-1"></i>
-                                <strong>Due Date:</strong> @item.DueDate.ToString("dd MMM yyyy") 
+                                <strong>Due Date:</strong> @item.DueDate.ToString("dd MMM yyyy")
                             </li>
                         </ul>
 

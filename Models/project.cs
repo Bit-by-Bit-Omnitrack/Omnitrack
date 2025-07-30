@@ -27,7 +27,10 @@ namespace UserRoles.Models
 
         public bool IsActive { get; set; } = true;
 
-        // Navigation property for members assigned to this project
+        // Navigation property for members assigned to project
         public ICollection<ProjectMember> Members { get; set; } = new List<ProjectMember>();
+        // Navigation property for taks assigned to project 
+        public ICollection<Tasks> Tasks { get; set; } = new List<Tasks>();
+
     }
 }

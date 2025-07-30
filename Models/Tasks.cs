@@ -1,7 +1,7 @@
-using System;
-using System.Collections.Generic; // Add this using directive
-using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
 
 namespace UserRoles.Models
 {
@@ -20,10 +20,14 @@ namespace UserRoles.Models
         public Users? CreatedByUser { get; set; }
 
         public string Details { get; set; }
-
         public DateTime DueDate { get; set; }
 
-        // New: Navigation property for Tickets associated with this Task
+        // Link to Project
+        [ForeignKey("Project")]
+        public int ProjectId { get; set; }
+        public Project Project { get; set; }
+
+        // ✅ Navigation property for Tickets associated with this Task
         public ICollection<Ticket>? Tickets { get; set; }
     }
 }
