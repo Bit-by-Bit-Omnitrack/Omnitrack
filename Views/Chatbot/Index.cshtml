@@ -3,20 +3,36 @@
     ViewData["Title"] = "Chatbot";
 }
 
-<h2>Chat with Omnitrack Assistant</h2>
+<div class="container mt-4">
+    <h2 class="mb-4 text-primary">Chat with OmniBot</h2>
 
-<div class="card shadow-sm p-4 bg-light mb-4" style="max-height: 400px; overflow-y: auto;">
-    @foreach (var msg in Model)
-    {
-        <div class="mb-2">
-            <strong>@msg.Sender:</strong> @msg.Message
-            <small class="text-muted d-block">@msg.TimeSent.ToString("HH:mm:ss")</small>
+    <div class="card shadow-sm border-0 mb-3" style="height: 400px; overflow-y: auto;" id="chatBox">
+        <div class="card-body d-flex flex-column gap-3">
+            @foreach (var msg in Model)
+            {
+                var isUser = msg.Sender == "You" || msg.Sender == User.Identity.Name;
+                <div class="d-flex @(isUser ? "justify-content-end" : "justify-content-start")">
+                    <div class="p-3 rounded-3 shadow-sm"
+                         style="max-width: 75%; background-color:@(isUser ? "#DCF8C6" : "#F1F0F0");">
+                        <div class="fw-semibold mb-1 text-muted" style="font-size: 0.9rem;">@msg.Sender</div>
+                        <div>@msg.Message</div>
+                        <div class="text-muted small text-end mt-1">@msg.TimeSent.ToString("HH:mm")</div>
+                    </div>
+                </div>
+            }
         </div>
-    }
+    </div>
+
+    <form asp-action="SendMessage" method="post" class="d-flex gap-2">
+        <input type="text" name="message" class="form-control rounded-pill px-4" placeholder="Type a message..." required />
+        <button type="submit" class="btn btn-primary rounded-pill px-4">Send</button>
+    </form>
 </div>
 
-<form asp-action="SendMessage" method="post" class="d-flex">
-    <input type="text" name="message" class="form-control me-2" placeholder="Type a message..." required />
-    <button type="submit" class="btn btn-primary">Send</button>
-</form>
-
+@section Scripts {
+    <script>
+        // Scroll to bottom of chat on load
+        var chatBox = document.getElementById('chatBox');
+        chatBox.scrollTop = chatBox.scrollHeight;
+    </script>
+}

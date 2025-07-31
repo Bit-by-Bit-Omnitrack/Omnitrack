@@ -44,7 +44,7 @@ namespace UserRoles.Controllers
 
             chatHistory.Add(new ChatMessage
             {
-                Sender = "Bot",
+                Sender = "OmniBot",
                 Message = botResponse
             });
 
