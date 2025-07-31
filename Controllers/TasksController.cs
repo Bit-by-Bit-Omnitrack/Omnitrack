@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -23,111 +23,91 @@ namespace UserRoles.Controllers
             _userManager = userManager;
         }
 
-        // GET: Tasks
+        // ✅ GET: Tasks
         public async Task<IActionResult> Index()
         {
-            // Eager load AssignedToUser AND CreatedByUser
-            return View(await _context.Tasks
-                .Include(t => t.AssignedToUser)
-                .Include(t => t.CreatedByUser) // Include the CreatedByUser
-                .ToListAsync());
-        }
-
-        // GET: Tasks/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
             var tasks = await _context.Tasks
                 .Include(t => t.AssignedToUser)
-                .Include(t => t.CreatedByUser) // Include CreatedByUser for details view
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (tasks == null)
-            {
-                return NotFound();
-            }
+                .Include(t => t.CreatedByUser)
+                .Include(t => t.Project) // Include Project for display
+                .ToListAsync();
 
             return View(tasks);
         }
 
+        // ✅ GET: Tasks/Details/5
+        public async Task<IActionResult> Details(int? id)
+        {
+            if (id == null) return NotFound();
+
+            var tasks = await _context.Tasks
+                .Include(t => t.AssignedToUser)
+                .Include(t => t.CreatedByUser)
+                .Include(t => t.Project)
+                .FirstOrDefaultAsync(m => m.Id == id);
+
+            if (tasks == null) return NotFound();
+
+            return View(tasks);
+        }
+
+        // ✅ GET: Tasks/Create
         [Authorize(Roles = "Project Leader")]
         public async Task<IActionResult> Create()
         {
             ViewBag.Users = new SelectList(await _userManager.Users.Where(u => u.IsActive).ToListAsync(), "Id", "UserName");
+            ViewBag.Projects = new SelectList(await _context.Projects.ToListAsync(), "ProjectId", "ProjectName");
             return View();
         }
 
-        // POST: Tasks/Create
+        // ✅ POST: Tasks/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,AssignedToUserId,Details,DueDate")] Tasks tasks) // Removed CreatedBy from bind
+        public async Task<IActionResult> Create([Bind("Id,Name,AssignedToUserId,Details,DueDate,ProjectId")] Tasks tasks)
         {
             if (ModelState.IsValid)
             {
                 var currentUser = await _userManager.GetUserAsync(User);
-                if (currentUser != null)
-                {
-                    tasks.CreatedById = currentUser.Id; // Assign the CreatedById
-                }
-                else
-                {
-                    // Handle cases where there's no current user (e.g., if you have an admin seed task)
-                    // You might want to assign a specific "System" user ID here if you have one,
-                    // or make CreatedById non-nullable and enforce a user.
-                    // For now, let's keep it nullable as per your model.
-                    tasks.CreatedById = null; // Or a specific ID for "System" user if you have one
-                }
+                tasks.CreatedById = currentUser?.Id;
 
                 _context.Add(tasks);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
+
             ViewBag.Users = new SelectList(await _userManager.Users.Where(u => u.IsActive).ToListAsync(), "Id", "UserName", tasks.AssignedToUserId);
+            ViewBag.Projects = new SelectList(await _context.Projects.ToListAsync(), "ProjectId", "ProjectName", tasks.ProjectId);
             return View(tasks);
         }
 
-        // GET: Tasks/Edit/5
+        // ✅ GET: Tasks/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
             var tasks = await _context.Tasks.FindAsync(id);
-            if (tasks == null)
-            {
-                return NotFound();
-            }
+            if (tasks == null) return NotFound();
+
             ViewBag.Users = new SelectList(await _userManager.Users.Where(u => u.IsActive).ToListAsync(), "Id", "UserName", tasks.AssignedToUserId);
+            ViewBag.Projects = new SelectList(await _context.Projects.ToListAsync(), "ProjectId", "ProjectName", tasks.ProjectId);
             return View(tasks);
         }
 
-        // POST: Tasks/Edit/5
+        // ✅ POST: Tasks/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,AssignedToUserId,Details,DueDate")] Tasks tasks) // Removed CreatedBy from bind
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,AssignedToUserId,Details,DueDate,ProjectId")] Tasks tasks)
         {
-            if (id != tasks.Id)
-            {
-                return NotFound();
-            }
+            if (id != tasks.Id) return NotFound();
 
             if (ModelState.IsValid)
             {
                 try
                 {
-                    // Fetch the original task to preserve CreatedById
+                    // Preserve CreatedById
                     var existingTask = await _context.Tasks.AsNoTracking().FirstOrDefaultAsync(t => t.Id == id);
-                    if (existingTask == null)
-                    {
-                        return NotFound();
-                    }
+                    if (existingTask == null) return NotFound();
 
-                    // Assign the existing CreatedById to the updated tasks object
                     tasks.CreatedById = existingTask.CreatedById;
 
                     _context.Update(tasks);
@@ -135,42 +115,34 @@ namespace UserRoles.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!TasksExists(tasks.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    if (!TasksExists(tasks.Id)) return NotFound();
+                    else throw;
                 }
                 return RedirectToAction(nameof(Index));
             }
+
             ViewBag.Users = new SelectList(await _userManager.Users.Where(u => u.IsActive).ToListAsync(), "Id", "UserName", tasks.AssignedToUserId);
+            ViewBag.Projects = new SelectList(await _context.Projects.ToListAsync(), "ProjectId", "ProjectName", tasks.ProjectId);
             return View(tasks);
         }
 
-        // GET: Tasks/Delete/5
+        // ✅ GET: Tasks/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
             var tasks = await _context.Tasks
                 .Include(t => t.AssignedToUser)
-                .Include(t => t.CreatedByUser) // Include CreatedByUser for delete confirmation
+                .Include(t => t.CreatedByUser)
+                .Include(t => t.Project)
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (tasks == null)
-            {
-                return NotFound();
-            }
+
+            if (tasks == null) return NotFound();
 
             return View(tasks);
         }
 
-        // POST: Tasks/Delete/5
+        // ✅ POST: Tasks/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
@@ -179,9 +151,9 @@ namespace UserRoles.Controllers
             if (tasks != null)
             {
                 _context.Tasks.Remove(tasks);
+                await _context.SaveChangesAsync();
             }
 
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
