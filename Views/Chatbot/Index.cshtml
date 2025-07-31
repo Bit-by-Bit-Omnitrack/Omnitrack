@@ -1,0 +1,22 @@
+﻿@model List<UserRoles.Models.ChatMessage>
+@{
+    ViewData["Title"] = "Chatbot";
+}
+
+<h2>Chat with Omnitrack Assistant</h2>
+
+<div class="card shadow-sm p-4 bg-light mb-4" style="max-height: 400px; overflow-y: auto;">
+    @foreach (var msg in Model)
+    {
+        <div class="mb-2">
+            <strong>@msg.Sender:</strong> @msg.Message
+            <small class="text-muted d-block">@msg.TimeSent.ToString("HH:mm:ss")</small>
+        </div>
+    }
+</div>
+
+<form asp-action="SendMessage" method="post" class="d-flex">
+    <input type="text" name="message" class="form-control me-2" placeholder="Type a message..." required />
+    <button type="submit" class="btn btn-primary">Send</button>
+</form>
+

@@ -12,8 +12,8 @@ using UserRoles.Data;
 namespace UserRoles.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250729132602_Tasks-viaw")]
-    partial class Tasksviaw
+    [Migration("20250731090053_chatbot")]
+    partial class chatbot
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
