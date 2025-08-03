@@ -32,5 +32,8 @@ namespace UserRoles.Models
         // Navigation property for taks assigned to project 
         public ICollection<Tasks> Tasks { get; set; } = new List<Tasks>();
 
+        // Navigation property for tickets associated with the project
+        public ICollection<Ticket> Tickets { get; set; } = new List<Ticket>();
+
     }
 }
