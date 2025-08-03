@@ -1,15 +1,16 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualBasic;
-using UserRoles.Models;
-using Microsoft.AspNetCore.Authorization;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using UserRoles.Data; // Gives access to AppDbContext and other data-related classes
+using UserRoles.Models;
+using UserRoles.Services;
 
 namespace UserRoles.Controllers
 {
@@ -17,6 +18,8 @@ namespace UserRoles.Controllers
     {
         private readonly AppDbContext _context;
         private readonly UserManager<Users> _userManager;
+        private readonly ITicketService _ticketService;
+
 
         public TicketsController(AppDbContext context, UserManager<Users> userManager)
         {
@@ -293,12 +296,14 @@ namespace UserRoles.Controllers
             return _context.Tickets.Any(e => e.Id == id);
         }
 
-        [HttpGet("api/tickets/summary")]
+        [HttpGet("summary")]
         public async Task<IActionResult> GetTicketSummaries()
         {
             var summaries = await _ticketService.GetTicketSummariesAsync();
             return Ok(summaries);
         }
+
+
     }
-    
-    }
+
+}
