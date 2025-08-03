@@ -91,7 +91,7 @@ builder.Services.AddSwaggerGen(c =>
 // Add our EmailService so we can inject and send real emails
 builder.Services.AddScoped<IEmailService, EmailService>(); // use scoped for DB-safe access
 builder.Services.AddScoped<SeedService>(); // Needed to make seeding work when called
-
+builder.Services.AddScoped<ITicketService, TicketService>();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Default")));

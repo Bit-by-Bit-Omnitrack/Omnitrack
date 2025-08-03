@@ -1,13 +1,16 @@
 ﻿using UserRoles.DTOs;
 using Microsoft.EntityFrameworkCore;
+using UserRoles.Data;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace UserRoles.Services
 {
-    public class TicketService
+    public class TicketService : ITicketService
     {
-        private readonly ApplicationDbContext _context;
+        private readonly AppDbContext _context;
 
-        public TicketService(ApplicationDbContext context)
+        public TicketService(AppDbContext context)
         {
             _context = context;
         }
@@ -17,26 +20,19 @@ namespace UserRoles.Services
             var tickets = await _context.Tickets
                 .Include(t => t.Status)
                 .Include(t => t.Priority)
-                .Include(t => t.AssignedToUser)
-                .Include(t => t.CreatedByUser)
-                .Include(t => t.Tasks)
                 .Select(t => new TicketSummaryDto
                 {
                     Id = t.Id,
                     TicketID = t.TicketID,
                     Title = t.Title,
                     Description = t.Description,
-                    Status = t.Status != null ? t.Status.Name : "Unknown",
+                    Status = t.Status != null ? t.Status.StatusName : "Unknown",
                     Priority = t.Priority != null ? t.Priority.Name : "Normal",
-                    AssignedTo = t.AssignedToUser != null
-                        ? $"{t.AssignedToUser.FirstName} {t.AssignedToUser.LastName}"
-                        : "Unassigned",
-                    CreatedBy = t.CreatedByUser != null
-                        ? $"{t.CreatedByUser.FirstName} {t.CreatedByUser.LastName}"
-                        : "Unknown",
+                    AssignedToUserId = t.AssignedToUserId,
+                    CreatedByID = t.CreatedByID,
                     CreatedDate = t.CreatedDate,
                     DueDate = t.DueDate,
-                    TaskTitle = t.Tasks != null ? t.Tasks.Title : null
+                    TaskId = t.TasksId
                 })
                 .ToListAsync();
 
