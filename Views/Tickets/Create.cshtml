@@ -43,6 +43,14 @@
                 </div>
 
                 <div class="mb-3">
+                    <label asp-for="ProjectId" class="form-label fw-semibold">Project</label>
+                    <select asp-for="ProjectId" class="form-select" asp-items="ViewBag.Projects">
+                        <option value="">-- Select Project --</option>
+                    </select>
+                    <span asp-validation-for="ProjectId" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
                     <label asp-for="PriorityId" class="form-label fw-semibold">Priority</label>
                     <select asp-for="PriorityId" class="form-select" asp-items="ViewBag.Priorities">
                         <option value="">-- Select Priority --</option>
