@@ -292,5 +292,13 @@ namespace UserRoles.Controllers
         {
             return _context.Tickets.Any(e => e.Id == id);
         }
+
+        [HttpGet("api/tickets/summary")]
+        public async Task<IActionResult> GetTicketSummaries()
+        {
+            var summaries = await _ticketService.GetTicketSummariesAsync();
+            return Ok(summaries);
+        }
     }
-}
+    
+    }
