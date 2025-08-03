@@ -34,12 +34,19 @@ namespace UserRoles.Controllers
                 .Include(t => t.Status)
                 .Include(t => t.Priority)
                 .Include(t => t.Tasks)
+                .Include(t => t.Project) // Include Project navigation property
                 .AsQueryable(); // Use AsQueryable to allow further filtering
 
             // Apply task filter if filterTaskId is provided
             if (filterTaskId.HasValue && filterTaskId.Value > 0)
             {
                 ticketsQuery = ticketsQuery.Where(t => t.TasksId == filterTaskId.Value);
+            }
+
+            // Apply project filter if filterProjectId is provided
+            if (filterProjectId.HasValue && filterProjectId.Value > 0)
+            {
+                ticketsQuery = ticketsQuery.Where(t => t.ProjectId == filterProjectId.Value);
             }
 
             var tickets = await ticketsQuery.ToListAsync();
@@ -49,6 +56,8 @@ namespace UserRoles.Controllers
             // Populate ViewBag for tasks dropdown in the filter
             ViewBag.TasksFilter = new SelectList(await _context.Tasks.ToListAsync(), "Id", "Name", filterTaskId);
 
+            // Populate ViewBag for projects dropdown in the filter
+            ViewBag.filterProjectId = new SelectList(await _context.Projects.ToListAsync(), "ProjectId", "ProjectName", filterProjectId);
 
             return View(tickets);
         }
@@ -67,6 +76,7 @@ namespace UserRoles.Controllers
                 .Include(t => t.Status)
                 .Include(t => t.Priority)// If you add a navigation property for status
                 .Include(t => t.Tasks)
+                .Include(t => t.Project) // Include Project navigation property
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (ticket == null)
             {
@@ -76,13 +86,14 @@ namespace UserRoles.Controllers
             return View(ticket);
         }
 
-        [Authorize(Roles = "Project Leader")]
+        [Authorize(Roles = "Project Leader, System Administrator")]
         public async Task<IActionResult> Create()
         {
             // Populate ViewBag.Users for the dropdown in the Create view
             ViewBag.Users = new SelectList(await _userManager.Users.Where(u => u.IsActive).ToListAsync(), "Id", "UserName");
             ViewBag.Priorities = new SelectList(await _context.Priorities.ToListAsync(), "Id", "Name");
             ViewBag.Tasks = new SelectList(await _context.Tasks.ToListAsync(), "Id", "Name");
+            ViewBag.Projects = new SelectList(await _context.Projects.ToListAsync(), "ProjectId", "ProjectName");
             return View();
         }
 
@@ -126,6 +137,7 @@ namespace UserRoles.Controllers
             ViewBag.Statuses = new SelectList(await _context.TicketStatuses.ToListAsync(), "Id", "Name");
             ViewBag.Priorities = new SelectList(await _context.Priorities.ToListAsync(), "Id", "Name", ticket.PriorityId);
             ViewBag.Tasks = new SelectList(await _context.Tasks.ToListAsync(), "Id", "Name", ticket.TasksId);
+            ViewBag.Projects = new SelectList(await _context.Projects.ToListAsync(), "ProjectId", "ProjectName", ticket.ProjectId);
             _context.Add(ticket);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
