@@ -47,6 +47,7 @@ namespace UserRoles.Controllers
             var project = await _context.Projects
                 .Include(p => p.Members)
                     .ThenInclude(pm => pm.User)
+                .Include(p => p.Tickets)
                 .FirstOrDefaultAsync(p => p.ProjectId == id);
 
             if (project == null) return NotFound();
