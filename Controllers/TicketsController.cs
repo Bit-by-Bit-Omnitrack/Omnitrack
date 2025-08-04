@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using UserRoles.Data; // Gives access to AppDbContext and other data-related classes
 using UserRoles.Models;
 using UserRoles.Services;
+using UserRoles.ViewModels;
 
 namespace UserRoles.Controllers
 {
@@ -301,6 +302,29 @@ namespace UserRoles.Controllers
         {
             var summaries = await _ticketService.GetTicketSummariesAsync();
             return Ok(summaries);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Summary()
+        {
+            var dtos = await _ticketService.GetTicketSummariesAsync();
+
+            var viewModels = dtos.Select(dto => new TicketSummaryViewModel
+            {
+                Id = dto.Id,
+                TicketID = dto.TicketID,
+                Title = dto.Title,
+                Description = dto.Description,
+                Status = dto.Status,
+                Priority = dto.Priority,
+                AssignedToUserId = dto.AssignedToUserId,
+                CreatedByID = dto.CreatedByID,
+                CreatedDate = dto.CreatedDate,
+                DueDate = dto.DueDate,
+                TaskId = dto.TaskId
+            }).ToList();
+
+            return View(viewModels);
         }
 
 

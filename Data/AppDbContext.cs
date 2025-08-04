@@ -1,6 +1,7 @@
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using UserRoles.Models;
+using UserRoles.ViewModels;
 
 namespace UserRoles.Data
 {
@@ -98,5 +99,6 @@ namespace UserRoles.Data
                 new TicketStatus { Id = 4, StatusName = "Done" }
             );
         }
+        public DbSet<UserRoles.ViewModels.TicketSummaryViewModel> TicketSummaryViewModel { get; set; } = default!;
     }
 }

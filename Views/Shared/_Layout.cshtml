@@ -140,12 +140,31 @@
                             </a>
                         </li>
 
-                        <!-- Tickets -->
-                        <li class="nav-item">
-                            <a asp-controller="Tickets" asp-action="Index" class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Tickets" ? "active" : "")">
+                        <!-- Tickets Dropdown -->
+                        <li class="nav-item has-treeview @(ViewContext.RouteData.Values["controller"]?.ToString() == "Tickets" ? "menu-open" : "")">
+                            <a href="#" class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Tickets" ? "active" : "")">
                                 <i class="nav-icon fas fa-ticket-alt"></i>
-                                <p>Tickets</p>
+                                <p>
+                                    Tickets
+                                    <i class="right fas fa-angle-left"></i>
+                                </p>
                             </a>
+                            <ul class="nav nav-treeview">
+                                <!-- View Tickets -->
+                                <li class="nav-item">
+                                    <a asp-controller="Tickets" asp-action="Index" class="nav-link">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>View Tickets</p>
+                                    </a>
+                                </li>
+                                <!-- Ticket Summary -->
+                                <li class="nav-item">
+                                    <a asp-controller="Tickets" asp-action="Summary" class="nav-link">
+                                        <i class="far fa-chart-bar nav-icon"></i>
+                                        <p>Ticket Summary</p>
+                                    </a>
+                                </li>
+                            </ul>
                         </li>
 
                         <!-- Tasks -->
@@ -284,6 +303,29 @@
                 "responsive": true
             });
         });
+
+              $(document).ready(function () {
+          $('#ticketSummaryTable').DataTable();
+
+          fetch('/api/tickets/summary')
+            .then(response => response.json())
+            .then(data => {
+              const tbody = $('#ticketSummaryTable tbody');
+              data.forEach(summary => {
+                const row = `
+                  <tr>
+                    <td>${summary.projectName}</td>
+                    <td>${summary.totalTickets}</td>
+                    <td>${summary.openTickets}</td>
+                    <td>${summary.closedTickets}</td>
+                    <td>${summary.inProgressTickets}</td>
+                  </tr>`;
+                tbody.append(row);
+              });
+            })
+            .catch(error => console.error('Error loading ticket summaries:', error));
+        });
+
     </script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
