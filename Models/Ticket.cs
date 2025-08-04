@@ -42,6 +42,8 @@ namespace UserRoles.Models
         [ForeignKey("TasksId")]
         public int? TasksId { get; set; } // Foreign key reference to the Tasks table (now nullable)
         public Tasks? Tasks { get; set; } // property
+
+        [ForeignKey("ProjectId")]
         public int? ProjectId { get; set; } // Foreign key reference to the Project table (now nullable)
         public Project? Project { get; set; } // property
 

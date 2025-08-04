@@ -173,3 +173,16 @@ else
 
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    @functions {
+        public string GetPriorityColor(string priority)
+        {
+            return priority?.ToLower() switch
+            {
+                "high" => "danger",
+                "medium" => "warning",
+                "low" => "success",
+                _ => "secondary"
+            };
+        }
+    }
+

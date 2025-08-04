@@ -25,7 +25,7 @@ namespace UserRoles.Controllers
         }
 
         // GET: Tickets1
-        public async Task<IActionResult> Index(int? filterTaskId) // Added filterTaskId parameter
+        public async Task<IActionResult> Index(int? filterTaskId, int? filterProjectId) // Added filterTaskId parameter
         {
             // Start with all tickets, eager load related data
             var ticketsQuery = _context.Tickets
@@ -57,7 +57,7 @@ namespace UserRoles.Controllers
             ViewBag.TasksFilter = new SelectList(await _context.Tasks.ToListAsync(), "Id", "Name", filterTaskId);
 
             // Populate ViewBag for projects dropdown in the filter
-            ViewBag.filterProjectId = new SelectList(await _context.Projects.ToListAsync(), "ProjectId", "ProjectName", filterProjectId);
+            ViewBag.ProjectsFilter = new SelectList(await _context.Projects.ToListAsync(), "ProjectId", "ProjectName", filterProjectId);
 
             return View(tickets);
         }
@@ -102,20 +102,15 @@ namespace UserRoles.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-
-        public async Task<IActionResult> Create([Bind("Title, Description, AssignedToUserId, DueDate, PriorityId, TasksId")] Ticket ticket)
+        public async Task<IActionResult> Create([Bind("Title,Description,AssignedToUserId,DueDate,PriorityId,TasksId,ProjectId")] Ticket ticket)
         {
-            // --- Set auto-generated and default values BEFORE ModelState.IsValid check ---
-
+            // Set auto-generated and default values
             ticket.TicketID = $"TCK-{Guid.NewGuid().ToString().Substring(0, 8).ToUpper()}";
             ticket.TaskID = $"TSK-{Guid.NewGuid().ToString().Substring(0, 8).ToUpper()}";
             ticket.StatusID = 1; // Default status: 1 = To Do
             ticket.CreatedDate = DateTime.UtcNow;
 
-            // Default status: 1 = To Do
-            ticket.StatusID = 1;
-
-            // Set CreatedByID to current logged-in username
+            // Set CreatedByID to current logged-in user
             var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser != null)
             {
@@ -133,14 +128,15 @@ namespace UserRoles.Controllers
              await _context.SaveChangesAsync();
              return RedirectToAction(nameof(Index));
             */
+
+            // If we got this far, something failed, redisplay form
             ViewBag.Users = new SelectList(await _userManager.Users.Where(u => u.IsActive).ToListAsync(), "Id", "UserName", ticket.AssignedToUserId);
             ViewBag.Statuses = new SelectList(await _context.TicketStatuses.ToListAsync(), "Id", "Name");
             ViewBag.Priorities = new SelectList(await _context.Priorities.ToListAsync(), "Id", "Name", ticket.PriorityId);
             ViewBag.Tasks = new SelectList(await _context.Tasks.ToListAsync(), "Id", "Name", ticket.TasksId);
             ViewBag.Projects = new SelectList(await _context.Projects.ToListAsync(), "ProjectId", "ProjectName", ticket.ProjectId);
-            _context.Add(ticket);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+
+            return View(ticket);
         }
 
         [HttpPost]
