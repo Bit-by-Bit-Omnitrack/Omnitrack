@@ -24,8 +24,8 @@ namespace UserRoles.Models
 
         // Link to Project
         [ForeignKey("Project")]
-        public int ProjectId { get; set; }
-        public Project Project { get; set; }
+        public int? ProjectId { get; set; }
+        public Project? Project { get; set; }
 
         // ✅ Navigation property for Tickets associated with this Task
         public ICollection<Ticket>? Tickets { get; set; }
