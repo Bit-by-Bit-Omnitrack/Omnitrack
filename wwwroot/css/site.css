@@ -96,3 +96,47 @@ a, .btn {
         transform: translateY(-5px);
         box-shadow: 0 4px 20px rgba(0,0,0,0.1);
     }
+
+/* -------------------------------------------
+   Pending Approval Page Enhancements
+-------------------------------------------- */
+
+/* Background image */
+body.pending-approval-bg {
+    background: url('/images/bg-login.jpg') no-repeat center center fixed;
+    background-size: cover;
+}
+
+/* Fade-in animation */
+.fade-in {
+    animation: fadeIn 0.6s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Optional: Make the card semi-transparent if needed */
+.pending-approval-card {
+    background-color: rgba(255, 255, 255, 0.95);
+    border-radius: 12px;
+}
+
+/* Customize the button */
+.btn-primary {
+    background-color: #0069d9;
+    border-color: #0062cc;
+}
+
+    .btn-primary:hover {
+        background-color: #0056b3;
+        border-color: #004085;
+    }
