@@ -33,4 +33,10 @@
 		<Folder Include="Migrations\" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <Content Update="wwwroot\Images\OmniTrack_Promo_Image.jpg">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	</ItemGroup>
+
 </Project>

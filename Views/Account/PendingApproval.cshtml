@@ -1,16 +1,15 @@
 ﻿@{
     ViewData["Title"] = "Pending Approval";
+    ViewData["BodyClass"] = "pending-approval-bg"; // This sets the custom body class
     Layout = "~/Views/Shared/_AccountLayout.cshtml"; // Use minimal layout without sidebar for unapproved users
 
 }
-@section bodyClass {
-    <text>pending-approval-bg</text>
-}
+
 
 
 
 <div class="container mt-5">
-    <div class="card shadow-lg">
+    <div class="card shadow-lg pending-approval-card">
         <div class="card-body text-center">
             @if (TempData["Message"] != null)
             {

@@ -13,8 +13,11 @@
 
     <!-- Your custom styles -->
     <link rel="stylesheet" href="~/css/account.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
+
 </head>
-<body class="@RenderSection("bodyClass", required: false)">
+<body class="@(ViewData["BodyClass"])">
+
 
     <div class="container mt-5">
         @RenderBody()

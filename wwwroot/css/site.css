@@ -101,11 +101,6 @@ a, .btn {
    Pending Approval Page Enhancements
 -------------------------------------------- */
 
-/* Background image */
-body.pending-approval-bg {
-    background: url('/images/bg-login.jpg') no-repeat center center fixed;
-    background-size: cover;
-}
 
 /* Fade-in animation */
 .fade-in {
@@ -140,3 +135,13 @@ body.pending-approval-bg {
         background-color: #0056b3;
         border-color: #004085;
     }
+
+body.pending-approval-bg {
+    background-image: url('/Images/OmniTrack_Promo_Image.jpg');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    min-height: 100vh;
+}
+
+
