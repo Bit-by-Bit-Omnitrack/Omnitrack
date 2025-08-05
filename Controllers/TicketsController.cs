@@ -25,7 +25,7 @@ namespace UserRoles.Controllers
         }
 
         // GET: Tickets1
-        public async Task<IActionResult> Index(int? filterTaskId) // Added filterTaskId parameter
+        public async Task<IActionResult> Index(int? filterTaskId, int? filterProjectId) // Added filterTaskId parameter
         {
             // Start with all tickets, eager load related data
             var ticketsQuery = _context.Tickets
@@ -34,12 +34,19 @@ namespace UserRoles.Controllers
                 .Include(t => t.Status)
                 .Include(t => t.Priority)
                 .Include(t => t.Tasks)
+                .Include(t => t.Project) // Include Project navigation property
                 .AsQueryable(); // Use AsQueryable to allow further filtering
 
             // Apply task filter if filterTaskId is provided
             if (filterTaskId.HasValue && filterTaskId.Value > 0)
             {
                 ticketsQuery = ticketsQuery.Where(t => t.TasksId == filterTaskId.Value);
+            }
+
+            // Apply project filter if filterProjectId is provided
+            if (filterProjectId.HasValue && filterProjectId.Value > 0)
+            {
+                ticketsQuery = ticketsQuery.Where(t => t.ProjectId == filterProjectId.Value);
             }
 
             var tickets = await ticketsQuery.ToListAsync();
@@ -49,6 +56,8 @@ namespace UserRoles.Controllers
             // Populate ViewBag for tasks dropdown in the filter
             ViewBag.TasksFilter = new SelectList(await _context.Tasks.ToListAsync(), "Id", "Name", filterTaskId);
 
+            // Populate ViewBag for projects dropdown in the filter
+            ViewBag.ProjectsFilter = new SelectList(await _context.Projects.ToListAsync(), "ProjectId", "ProjectName", filterProjectId);
 
             return View(tickets);
         }
@@ -67,6 +76,7 @@ namespace UserRoles.Controllers
                 .Include(t => t.Status)
                 .Include(t => t.Priority)// If you add a navigation property for status
                 .Include(t => t.Tasks)
+                .Include(t => t.Project) // Include Project navigation property
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (ticket == null)
             {
@@ -76,59 +86,52 @@ namespace UserRoles.Controllers
             return View(ticket);
         }
 
-        [Authorize(Roles = "Project Leader")]
+        [Authorize(Roles = "Project Leader, System Administrator")]
         public async Task<IActionResult> Create()
         {
             // Populate ViewBag.Users for the dropdown in the Create view
             ViewBag.Users = new SelectList(await _userManager.Users.Where(u => u.IsActive).ToListAsync(), "Id", "UserName");
             ViewBag.Priorities = new SelectList(await _context.Priorities.ToListAsync(), "Id", "Name");
             ViewBag.Tasks = new SelectList(await _context.Tasks.ToListAsync(), "Id", "Name");
+            ViewBag.Projects = new SelectList(await _context.Projects.ToListAsync(), "ProjectId", "ProjectName");
             return View();
         }
 
         // POST: Tickets1/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-
-        public async Task<IActionResult> Create([Bind("Title, Description, AssignedToUserId, DueDate, PriorityId, TasksId")] Ticket ticket)
+        public async Task<IActionResult> Create(Ticket ticket)
         {
-            // --- Set auto-generated and default values BEFORE ModelState.IsValid check ---
-
             ticket.TicketID = $"TCK-{Guid.NewGuid().ToString().Substring(0, 8).ToUpper()}";
             ticket.TaskID = $"TSK-{Guid.NewGuid().ToString().Substring(0, 8).ToUpper()}";
-            ticket.StatusID = 1; // Default status: 1 = To Do
-            ticket.CreatedDate = DateTime.UtcNow;
-
-            // Default status: 1 = To Do
             ticket.StatusID = 1;
-
-            // Set CreatedByID to current logged-in username
-            var currentUser = await _userManager.GetUserAsync(User);
-            if (currentUser != null)
-            {
-                ticket.CreatedByID = currentUser.Id;
-            }
-            else
-            {
-                ticket.CreatedByID = "System"; // Fallback
-            }
-
-            // Set CreatedDate to now
             ticket.CreatedDate = DateTime.UtcNow;
+            var currentUser = await _userManager.GetUserAsync(User);
+            ticket.CreatedByID = currentUser?.Id ?? "System";
 
-            /* _context.Add(ticket);
-             await _context.SaveChangesAsync();
-             return RedirectToAction(nameof(Index));
-            */
+            ModelState.Remove("TicketID");
+            ModelState.Remove("TaskID");
+            ModelState.Remove("StatusID");
+            ModelState.Remove("CreatedByID");
+            ModelState.Remove("CreatedDate");
+            ModelState.Remove("Priority");
+
+            if (ModelState.IsValid)
+            {
+                _context.Add(ticket);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+
             ViewBag.Users = new SelectList(await _userManager.Users.Where(u => u.IsActive).ToListAsync(), "Id", "UserName", ticket.AssignedToUserId);
-            ViewBag.Statuses = new SelectList(await _context.TicketStatuses.ToListAsync(), "Id", "Name");
             ViewBag.Priorities = new SelectList(await _context.Priorities.ToListAsync(), "Id", "Name", ticket.PriorityId);
             ViewBag.Tasks = new SelectList(await _context.Tasks.ToListAsync(), "Id", "Name", ticket.TasksId);
-            _context.Add(ticket);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            ViewBag.Projects = new SelectList(await _context.Projects.ToListAsync(), "ProjectId", "ProjectName", ticket.ProjectId);
+
+            return View(ticket);
         }
 
         [HttpPost]

@@ -14,6 +14,24 @@
             <form asp-action="Create" class="shadow-sm p-4 bg-white rounded border">
                 <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    <div class="alert alert-danger">
+                        <h5>Validation Errors:</h5>
+                        <ul class="mb-0">
+                            @foreach (var modelState in ViewData.ModelState)
+                            {
+                                @foreach (var error in modelState.Value.Errors)
+                                {
+                                    <li><strong>@modelState.Key:</strong> @error.ErrorMessage</li>
+                                }
+                            }
+                        </ul>
+                    </div>
+                }
+
                 <div class="mb-3">
                     <label asp-for="Title" class="form-label fw-semibold">Title</label>
                     <input asp-for="Title" class="form-control" placeholder="Enter ticket title" />
@@ -40,6 +58,14 @@
                         <option value="">-- Select a Task --</option>
                     </select>
                     <span asp-validation-for="TasksId" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="ProjectId" class="form-label fw-semibold">Project</label>
+                    <select asp-for="ProjectId" class="form-select" asp-items="ViewBag.Projects">
+                        <option value="">-- Select Project --</option>
+                    </select>
+                    <span asp-validation-for="ProjectId" class="text-danger small"></span>
                 </div>
 
                 <div class="mb-3">

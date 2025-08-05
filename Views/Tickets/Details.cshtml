@@ -21,6 +21,20 @@
                 <dt class="col-sm-3 text-muted">Related Task</dt>
                 <dd class="col-sm-9">@Model.Tasks?.Name </dd>
 
+                <dt class="col-sm-3 text-muted">Project</dt>
+                <dd class="col-sm-9">
+                    @if (Model.Project != null)
+                    {
+                        <a asp-controller="Projects" asp-action="Details" asp-route-id="@Model.Project.ProjectId" class="text-decoration-none text-primary">
+                            @Model.Project.ProjectName
+                        </a>
+                    }
+                    else
+                    {
+                        <span class="text-muted">No project assigned</span>
+                    }
+                </dd>
+
                 <dt class="col-sm-3 text-muted">Status</dt>
                 <dd class="col-sm-9">
                     <span class="badge bg-info text-dark">@Model.Status?.StatusName </span>

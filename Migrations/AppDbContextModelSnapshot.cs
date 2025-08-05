@@ -542,6 +542,9 @@ namespace UserRoles.Migrations
                     b.Property<int>("PriorityId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("ProjectId")
+                        .HasColumnType("int");
+
                     b.Property<int>("StatusID")
                         .HasColumnType("int");
 
@@ -576,6 +579,8 @@ namespace UserRoles.Migrations
                     b.HasIndex("CreatedByID");
 
                     b.HasIndex("PriorityId");
+
+                    b.HasIndex("ProjectId");
 
                     b.HasIndex("StatusID");
 
@@ -873,6 +878,10 @@ namespace UserRoles.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("UserRoles.Models.Project", "Project")
+                        .WithMany("Tickets")
+                        .HasForeignKey("ProjectId");
+
                     b.HasOne("UserRoles.Models.TicketStatus", "Status")
                         .WithMany()
                         .HasForeignKey("StatusID")
@@ -892,6 +901,8 @@ namespace UserRoles.Migrations
                     b.Navigation("CreatedByUser");
 
                     b.Navigation("Priority");
+
+                    b.Navigation("Project");
 
                     b.Navigation("Status");
 
@@ -925,6 +936,8 @@ namespace UserRoles.Migrations
                     b.Navigation("Members");
 
                     b.Navigation("Tasks");
+
+                    b.Navigation("Tickets");
                 });
 
             modelBuilder.Entity("UserRoles.Models.Tasks", b =>

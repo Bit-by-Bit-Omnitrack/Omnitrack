@@ -37,7 +37,54 @@
         </div>
     </div>
 
-    <h4 class="mb-3">Assign Member to Project</h4>
+    <h3 class="mb-4">Assigned Tickets to this Project</h3>
+@if (Model.Tickets != null && Model.Tickets.Any())
+{
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Title</th>
+                        <th>Status</th>
+                        <th>Priority</th>
+                        <th>Assigned To</th>
+                        <th>Due Date</th>
+                        <th style="width: 150px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var ticket in Model.Tickets)
+                    {
+                        <tr>
+                            <td>@ticket.Title</td>
+                            <td><span class="badge bg-info text-dark">@ticket.Status?.StatusName</span></td>
+                            <td><span class="badge bg-@GetPriorityColor(ticket.Priority?.Name)">@ticket.Priority?.Name</span>
+                            </td>
+                            <td>@ticket.AssignedToUser?.UserName ?? "N/A"</td>
+                            <td>@ticket.DueDate?.ToString("dd MMM yyyy") ?? "N/A"</td>
+                            <td>
+                                <a asp-action="Details" asp-route-id="@ticket.Id" class="btn btn-sm btn-outline-secondary">
+                                    <i class="fas fa-eye"></i> View
+                                </a>
+                                <a asp-action="Edit" asp-route-id="@ticket.Id" class="btn btn-sm btn-outline-warning">
+                                    <i class="fas fa-edit"></i> Edit
+                                </a>
+                                <a asp-action="Delete" asp-route-id="@ticket.Id" class="btn btn-sm btn-outline-danger">
+                                    <i class="fas fa-trash"></i> Delete
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+}
+else
+{
+        <p class="text-muted fst-italic">No tickets have been assigned to this project yet.</p>
+}
+
+    <h4 class="mb-3">Assign Member To This Project</h4>
     <form asp-action="AssignMember" method="post" class="mb-5">
         <input type="hidden" name="projectId" value="@Model.ProjectId" />
 
@@ -54,7 +101,8 @@
 
         <div class="mb-3">
             <label for="role" class="form-label">Project Role</label>
-            <input type="text" name="role" id="role" class="form-control" required placeholder="e.g. Developer, PM, QA" />
+            <input type="text" name="role" id="role" class="form-control" required
+                placeholder="e.g. Developer, PM, QA" />
         </div>
 
         <button type="submit" class="btn btn-primary">
@@ -63,8 +111,8 @@
     </form>
 
     <h4 class="mb-3">Current Project Members</h4>
-    @if (Model.Members != null && Model.Members.Any())
-    {
+@if (Model.Members != null && Model.Members.Any())
+{
         <div class="table-responsive">
             <table class="table table-bordered table-striped align-middle">
                 <thead class="table-light">
@@ -95,7 +143,8 @@
                                     <input type="hidden" name="projectId" value="@Model.ProjectId" />
                                     <input type="hidden" name="userId" value="@member.UserId" />
                                     <div class="input-group input-group-sm" style="width: 160px;">
-                                        <input type="text" name="newRole" value="@member.ProjectRole" class="form-control" placeholder="New role" />
+                                        <input type="text" name="newRole" value="@member.ProjectRole" class="form-control"
+                                            placeholder="New role" />
                                         <button type="submit" class="btn btn-sm btn-warning" title="Update Role">
                                             <i class="fas fa-pen"></i>
                                         </button>
@@ -107,11 +156,11 @@
                 </tbody>
             </table>
         </div>
-    }
-    else
-    {
+}
+else
+{
         <p class="text-muted fst-italic">No members have been assigned to this project yet.</p>
-    }
+}
 
     <div class="mt-4">
         <a asp-action="Edit" asp-route-id="@Model.ProjectId" class="btn btn-outline-primary me-2">
@@ -121,7 +170,19 @@
             <i class="fas fa-arrow-left me-1"></i> Back to Project List
         </a>
     </div>
-</div>
 
-<!-- Font Awesome for icons -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    @functions {
+        public string GetPriorityColor(string priority)
+        {
+            return priority?.ToLower() switch
+            {
+                "high" => "danger",
+                "medium" => "warning",
+                "low" => "success",
+                _ => "secondary"
+            };
+        }
+    }
+
