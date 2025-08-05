@@ -8,22 +8,6 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<Compile Remove="Data\OldMigrationsBackUp\20250710101138_MyMaster.cs" />
-		<Compile Remove="Data\OldMigrationsBackUp\20250710101138_MyMaster.Designer.cs" />
-		<Compile Remove="Data\OldMigrationsBackUp\20250711072039_ticketing.cs" />
-		<Compile Remove="Data\OldMigrationsBackUp\20250711072039_ticketing.Designer.cs" />
-		<Compile Remove="Data\OldMigrationsBackUp\20250711130514_ticketings.cs" />
-		<Compile Remove="Data\OldMigrationsBackUp\20250711130514_ticketings.Designer.cs" />
-		<Compile Remove="Data\OldMigrationsBackUp\20250711131730_ticketin.cs" />
-		<Compile Remove="Data\OldMigrationsBackUp\20250711131730_ticketin.Designer.cs" />
-		<Compile Remove="Data\OldMigrationsBackUp\20250711181829_building Ticket System.cs" />
-		<Compile Remove="Data\OldMigrationsBackUp\20250711181829_building Ticket System.Designer.cs" />
-		<Compile Remove="Data\OldMigrationsBackUp\20250711183502_building Ticket Systems.cs" />
-		<Compile Remove="Data\OldMigrationsBackUp\20250711183502_building Ticket Systems.Designer.cs" />
-		<Compile Remove="Data\OldMigrationsBackUp\AppDbContextModelSnapshot.cs" />
-	</ItemGroup>
-
-	<ItemGroup>
 		<PackageReference Include="MailKit" Version="4.13.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.7" />
 		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.7" />
@@ -46,7 +30,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Folder Include="Data\OldMigrationsBackUp\" />
 		<Folder Include="Migrations\" />
 	</ItemGroup>
 
