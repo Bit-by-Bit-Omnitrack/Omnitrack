@@ -140,31 +140,20 @@
                             </a>
                         </li>
 
-                        <!-- Tickets Dropdown -->
-                        <li class="nav-item has-treeview @(ViewContext.RouteData.Values["controller"]?.ToString() == "Tickets" ? "menu-open" : "")">
-                            <a href="#" class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Tickets" ? "active" : "")">
-                                <i class="nav-icon fas fa-ticket-alt"></i>
-                                <p>
-                                    Tickets
-                                    <i class="right fas fa-angle-left"></i>
-                                </p>
+                       
+                        <!-- Projects -->
+                        <li class="nav-item">
+                            <a asp-controller="Projects" asp-action="Index" class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Projects" ? "active" : "")">
+                                <i class="nav-icon fas fa-project-diagram"></i>
+                                <p>Projects</p>
                             </a>
-                            <ul class="nav nav-treeview">
-                                <!-- View Tickets -->
-                                <li class="nav-item">
-                                    <a asp-controller="Tickets" asp-action="Index" class="nav-link">
-                                        <i class="far fa-circle nav-icon"></i>
-                                        <p>View Tickets</p>
-                                    </a>
-                                </li>
-                                <!-- Ticket Summary -->
-                                <li class="nav-item">
-                                    <a asp-controller="Tickets" asp-action="Summary" class="nav-link">
-                                        <i class="far fa-chart-bar nav-icon"></i>
-                                        <p>Ticket Summary</p>
-                                    </a>
-                                </li>
-                            </ul>
+                        </li>
+                        <!-- Tickets -->
+                        <li class="nav-item">
+                            <a asp-controller="Tickets" asp-action="Index" class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Tickets" ? "active" : "")">
+                                <i class="nav-icon fas fa-ticket-alt"></i>
+                                <p>Tickets</p>
+                            </a>
                         </li>
 
                         <!-- Tasks -->
@@ -175,12 +164,38 @@
                             </a>
                         </li>
 
-                        <!-- Projects -->
-                        <li class="nav-item">
-                            <a asp-controller="Projects" asp-action="Index" class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Projects" ? "active" : "")">
-                                <i class="nav-icon fas fa-project-diagram"></i>
-                                <p>Projects</p>
+                        <!-- Reports Dropdown -->
+                        <li class="nav-item has-treeview @(ViewContext.RouteData.Values["controller"]?.ToString() == "Reports" ? "menu-open" : "")">
+                            <a href="#" class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Reports" ? "active" : "")">
+                                <i class="nav-icon fas fa-chart-pie"></i>
+                                <p>
+                                    Reports
+                                    <i class="right fas fa-angle-left"></i>
+                                </p>
                             </a>
+                            <ul class="nav nav-treeview">
+                                <!-- Project Report -->
+                                <li class="nav-item">
+                                    <a asp-controller="Reports" asp-action="ProjectReport" class="nav-link">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Project Report</p>
+                                    </a>
+                                </li>
+                                <!-- Task Report -->
+                                <li class="nav-item">
+                                    <a asp-controller="Reports" asp-action="TaskReport" class="nav-link">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Task Report</p>
+                                    </a>
+                                </li>
+                                <!-- Ticket Summary -->
+                                <li class="nav-item">
+                                    <a asp-controller="Reports" asp-action="TicketSummary" class="nav-link">
+                                        <i class="far fa-chart-bar nav-icon"></i>
+                                        <p>Ticket Summary</p>
+                                    </a>
+                                </li>
+                            </ul>
                         </li>
 
                         <!-- Users Treeview -->
