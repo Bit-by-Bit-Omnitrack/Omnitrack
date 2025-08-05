@@ -27,7 +27,7 @@ namespace UserRoles.Models
         public int ProjectId { get; set; }
         public Project Project { get; set; }
 
-        // ✅ Navigation property for Tickets associated with this Task
+        // Navigation property for Tickets associated with this Task
         public ICollection<Ticket>? Tickets { get; set; }
     }
 }

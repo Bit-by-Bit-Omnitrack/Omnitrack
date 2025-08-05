@@ -13,5 +13,7 @@
         public DateTime CreatedDate { get; set; }
         public DateTime? DueDate { get; set; }
         public int? TaskId { get; set; }
+       
+
     }
 }
