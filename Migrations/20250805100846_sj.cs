@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace UserRoles.Migrations
 {
     /// <inheritdoc />
-    public partial class ForAssigningTickets : Migration
+    public partial class sj : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -183,6 +183,19 @@ namespace UserRoles.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_SystemAdmins", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "TaskStatuses",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    StatusName = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TaskStatuses", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -385,7 +398,8 @@ namespace UserRoles.Migrations
                     CreatedById = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     Details = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     DueDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ProjectId = table.Column<int>(type: "int", nullable: false)
+                    ProjectId = table.Column<int>(type: "int", nullable: true),
+                    StatusID = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -404,8 +418,13 @@ namespace UserRoles.Migrations
                         name: "FK_Tasks_Projects_ProjectId",
                         column: x => x.ProjectId,
                         principalTable: "Projects",
-                        principalColumn: "ProjectId",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "ProjectId");
+                    table.ForeignKey(
+                        name: "FK_Tasks_TaskStatuses_StatusID",
+                        column: x => x.StatusID,
+                        principalTable: "TaskStatuses",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -512,6 +531,16 @@ namespace UserRoles.Migrations
                 });
 
             migrationBuilder.InsertData(
+                table: "TaskStatuses",
+                columns: new[] { "Id", "StatusName" },
+                values: new object[,]
+                {
+                    { 1, "To Do" },
+                    { 2, "In Progress" },
+                    { 3, "Complete" }
+                });
+
+            migrationBuilder.InsertData(
                 table: "TicketStatuses",
                 columns: new[] { "Id", "StatusName" },
                 values: new object[,]
@@ -590,6 +619,11 @@ namespace UserRoles.Migrations
                 name: "IX_Tasks_ProjectId",
                 table: "Tasks",
                 column: "ProjectId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Tasks_StatusID",
+                table: "Tasks",
+                column: "StatusID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_TicketAssignments_TicketID",
@@ -705,6 +739,9 @@ namespace UserRoles.Migrations
 
             migrationBuilder.DropTable(
                 name: "Projects");
+
+            migrationBuilder.DropTable(
+                name: "TaskStatuses");
         }
     }
 }

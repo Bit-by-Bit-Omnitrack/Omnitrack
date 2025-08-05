@@ -23,19 +23,48 @@ namespace UserRoles.Controllers
             _userManager = userManager;
         }
 
-        // ✅ GET: Tasks
+        // GET: Tasks
         public async Task<IActionResult> Index()
         {
+            // Fetch all tasks, including related Project, AssignedToUser, and CreatedByUser details
             var tasks = await _context.Tasks
                 .Include(t => t.AssignedToUser)
                 .Include(t => t.CreatedByUser)
-                .Include(t => t.Project) // Include Project for display
+                .Include(t => t.Project)
+                .Include(t => t.Status)
                 .ToListAsync();
+
+            // Fetch all task statuses for the kanban board columns
+            ViewBag.Statuses = await _context.TaskStatuses.ToListAsync();
 
             return View(tasks);
         }
 
-        // ✅ GET: Tasks/Details/5
+        // POST: Tasks/UpdateTaskStatus
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateTaskStatus(int taskId, int newStatusId)
+        {
+            var task = await _context.Tasks.FindAsync(taskId);
+            if (task == null)
+            {
+                return Json(new { success = false, message = "Task not found." });
+            }
+
+            task.StatusID = newStatusId;
+            try
+            {
+                _context.Update(task);
+                await _context.SaveChangesAsync();
+                return Json(new { success = true, message = "Task status updated successfully." });
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                return Json(new { success = false, message = "Concurrency error. Task may have been updated by another user." });
+            }
+        }
+
+        // GET: Tasks/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null) return NotFound();
@@ -44,6 +73,7 @@ namespace UserRoles.Controllers
                 .Include(t => t.AssignedToUser)
                 .Include(t => t.CreatedByUser)
                 .Include(t => t.Project)
+                .Include(t => t.Status)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (tasks == null) return NotFound();
@@ -51,24 +81,26 @@ namespace UserRoles.Controllers
             return View(tasks);
         }
 
-        // ✅ GET: Tasks/Create
+        // GET: Tasks/Create
         [Authorize(Roles = "Project Leader")]
         public async Task<IActionResult> Create()
         {
             ViewBag.Users = new SelectList(await _userManager.Users.Where(u => u.IsActive).ToListAsync(), "Id", "UserName");
             ViewBag.Projects = new SelectList(await _context.Projects.ToListAsync(), "ProjectId", "ProjectName");
+            ViewBag.Statuses = new SelectList(await _context.TaskStatuses.ToListAsync(), "Id", "StatusName");
             return View();
         }
 
-        // ✅ POST: Tasks/Create
+        // POST: Tasks/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,AssignedToUserId,Details,DueDate,ProjectId")] Tasks tasks)
+        public async Task<IActionResult> Create([Bind("Id,Name,AssignedToUserId,Details,DueDate,ProjectId,StatusID")] Tasks tasks)
         {
             if (ModelState.IsValid)
             {
                 var currentUser = await _userManager.GetUserAsync(User);
                 tasks.CreatedById = currentUser?.Id;
+                tasks.StatusID = tasks.StatusID > 0 ? tasks.StatusID : 1; // Default to 'To Do' status if not set.
 
                 _context.Add(tasks);
                 await _context.SaveChangesAsync();
@@ -77,10 +109,11 @@ namespace UserRoles.Controllers
 
             ViewBag.Users = new SelectList(await _userManager.Users.Where(u => u.IsActive).ToListAsync(), "Id", "UserName", tasks.AssignedToUserId);
             ViewBag.Projects = new SelectList(await _context.Projects.ToListAsync(), "ProjectId", "ProjectName", tasks.ProjectId);
+            ViewBag.Statuses = new SelectList(await _context.TaskStatuses.ToListAsync(), "Id", "StatusName", tasks.StatusID);
             return View(tasks);
         }
 
-        // ✅ GET: Tasks/Edit/5
+        // GET: Tasks/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null) return NotFound();
@@ -90,13 +123,14 @@ namespace UserRoles.Controllers
 
             ViewBag.Users = new SelectList(await _userManager.Users.Where(u => u.IsActive).ToListAsync(), "Id", "UserName", tasks.AssignedToUserId);
             ViewBag.Projects = new SelectList(await _context.Projects.ToListAsync(), "ProjectId", "ProjectName", tasks.ProjectId);
+            ViewBag.Statuses = new SelectList(await _context.TaskStatuses.ToListAsync(), "Id", "StatusName", tasks.StatusID);
             return View(tasks);
         }
 
-        // ✅ POST: Tasks/Edit/5
+        // POST: Tasks/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,AssignedToUserId,Details,DueDate,ProjectId")] Tasks tasks)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,AssignedToUserId,Details,DueDate,ProjectId,StatusID")] Tasks tasks)
         {
             if (id != tasks.Id) return NotFound();
 
@@ -104,7 +138,6 @@ namespace UserRoles.Controllers
             {
                 try
                 {
-                    // Preserve CreatedById
                     var existingTask = await _context.Tasks.AsNoTracking().FirstOrDefaultAsync(t => t.Id == id);
                     if (existingTask == null) return NotFound();
 
@@ -123,10 +156,11 @@ namespace UserRoles.Controllers
 
             ViewBag.Users = new SelectList(await _userManager.Users.Where(u => u.IsActive).ToListAsync(), "Id", "UserName", tasks.AssignedToUserId);
             ViewBag.Projects = new SelectList(await _context.Projects.ToListAsync(), "ProjectId", "ProjectName", tasks.ProjectId);
+            ViewBag.Statuses = new SelectList(await _context.TaskStatuses.ToListAsync(), "Id", "StatusName", tasks.StatusID);
             return View(tasks);
         }
 
-        // ✅ GET: Tasks/Delete/5
+        // GET: Tasks/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null) return NotFound();
@@ -135,6 +169,7 @@ namespace UserRoles.Controllers
                 .Include(t => t.AssignedToUser)
                 .Include(t => t.CreatedByUser)
                 .Include(t => t.Project)
+                .Include(t => t.Status)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (tasks == null) return NotFound();
@@ -142,7 +177,7 @@ namespace UserRoles.Controllers
             return View(tasks);
         }
 
-        // ✅ POST: Tasks/Delete/5
+        // POST: Tasks/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)

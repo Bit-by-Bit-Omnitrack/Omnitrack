@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using UserRoles.Models;
+using TaskStatus = UserRoles.Models.TaskStatus;
 
 namespace UserRoles.Data
 {
@@ -26,6 +27,9 @@ namespace UserRoles.Data
         public DbSet<ProjectMember> ProjectMembers { get; set; } = default!;
         public DbSet<SystemAdmin> SystemAdmins { get; set; } = default!;
 
+        // Add a new DbSet for TaskStatus
+        public DbSet<TaskStatus> TaskStatuses { get; set; } = default!;
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -43,7 +47,14 @@ namespace UserRoles.Data
                 .HasForeignKey(t => t.AssignedToUserId)
                 .IsRequired(false);
 
-            //  Ticket relationships
+            // Add new relationship for TaskStatus
+            modelBuilder.Entity<Tasks>()
+                .HasOne(t => t.Status)
+                .WithMany()
+                .HasForeignKey(t => t.StatusID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Ticket relationships
             modelBuilder.Entity<Ticket>()
                 .HasOne(t => t.Tasks)
                 .WithMany(t => t.Tickets)
@@ -68,7 +79,7 @@ namespace UserRoles.Data
                 .HasForeignKey(t => t.StatusID)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            //  ProjectMember composite key and relationships
+            // ProjectMember composite key and relationships
             modelBuilder.Entity<ProjectMember>()
                 .HasKey(pm => new { pm.ProjectId, pm.UserId });
 
@@ -82,7 +93,7 @@ namespace UserRoles.Data
                 .WithMany(u => u.ProjectMemberships)
                 .HasForeignKey(pm => pm.UserId);
 
-            //  Seeding Priorities
+            // Seeding Priorities
             modelBuilder.Entity<Priority>().HasData(
                 new Priority { Id = 1, Name = "Low", Color = "#28a745" },
                 new Priority { Id = 2, Name = "Medium", Color = "#ffc107" },
@@ -96,6 +107,13 @@ namespace UserRoles.Data
                 new TicketStatus { Id = 2, StatusName = "In Progress" },
                 new TicketStatus { Id = 3, StatusName = "Blocker" },
                 new TicketStatus { Id = 4, StatusName = "Done" }
+            );
+
+            // Seeding Task Statuses
+            modelBuilder.Entity<TaskStatus>().HasData(
+                new TaskStatus { Id = 1, StatusName = "To Do" },
+                new TaskStatus { Id = 2, StatusName = "In Progress" },
+                new TaskStatus { Id = 3, StatusName = "Complete" }
             );
         }
     }
