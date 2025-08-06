@@ -26,5 +26,8 @@ namespace UserRoles.Models
         [Required]
         [StringLength(50, ErrorMessage = "Role name cannot exceed 50 characters.")]
         public string ProjectRole { get; set; } // e.g., Developer, Manager, QA
+
+       
+        public DateTime JoinedDate { get; set; }
     }
 }

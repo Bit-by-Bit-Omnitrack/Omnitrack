@@ -1,7 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Mvc.ModelBinding; // Add this for [BindNever]
 
 namespace UserRoles.Models
 {
@@ -26,6 +25,10 @@ namespace UserRoles.Models
         [ForeignKey("Project")]
         public int? ProjectId { get; set; }
         public Project? Project { get; set; }
+
+        [ForeignKey("Status")]
+        public int StatusID { get; set; } 
+        public TaskStatus? Status { get; set; }
 
         // ✅ Navigation property for Tickets associated with this Task
         public ICollection<Ticket>? Tickets { get; set; }
