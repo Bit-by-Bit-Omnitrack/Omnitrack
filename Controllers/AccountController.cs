@@ -83,8 +83,11 @@ namespace UserRoles.Controllers
         [HttpGet]
         public IActionResult PendingApproval()
         {
+            ViewData["UserName"] = TempData["UserName"] ?? "User";
             return View();
         }
+
+
 
         [HttpGet]
         public IActionResult Register()
@@ -202,8 +205,11 @@ namespace UserRoles.Controllers
                     Console.WriteLine(ex.Message);
                 }
 
-                TempData["Message"] = "Registration successful. Awaiting approval.";
+                TempData["UserName"] = user.FullName;
+                TempData["Message"] = $"{user.FullName}, your registration was successful. Awaiting approval.";
                 return RedirectToAction("PendingApproval", "Account");
+
+
             }
 
             foreach (var error in result.Errors)
