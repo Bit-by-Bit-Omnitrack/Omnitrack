@@ -131,7 +131,7 @@ using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     var dbContext = services.GetRequiredService<AppDbContext>();
-     dbContext.Database.Migrate(); // Applies migrations
+   //  dbContext.Database.Migrate(); // Applies migrations
     await SeedService.SeedDatabase(services); // Run seeding inside same scope
 }
 
