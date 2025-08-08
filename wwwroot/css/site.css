@@ -97,51 +97,36 @@ a, .btn {
         box-shadow: 0 4px 20px rgba(0,0,0,0.1);
     }
 
-/* -------------------------------------------
-   Pending Approval Page Enhancements
--------------------------------------------- */
-
-
-/* Fade-in animation */
-.fade-in {
-    animation: fadeIn 0.6s ease-in-out;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
+/* Mobile and tablet view - stack Kanban columns */
+@media (max-width: 1024px) {
+    .kanban-board {
+        flex-wrap: wrap !important;
     }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
+    .kanban-column {
+        min-width: 50% !important; /* Show 2 columns per row */
+        max-width: 50% !important;
     }
 }
 
-/* Optional: Make the card semi-transparent if needed */
-.pending-approval-card {
-    background-color: rgba(255, 255, 255, 0.95);
-    border-radius: 12px;
-}
-
-/* Customize the button */
-.btn-primary {
-    background-color: #0069d9;
-    border-color: #0062cc;
-}
-
-    .btn-primary:hover {
-        background-color: #0056b3;
-        border-color: #004085;
+/* Small laptop view - 3 columns */
+@media (max-width: 1440px) {
+    .kanban-board {
+        flex-wrap: wrap !important;
     }
-
-body.pending-approval-bg {
-    background-image: url('/Images/OmniTrack_Promo_Image.jpg');
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-position: center;
-    min-height: 100vh;
+    .kanban-column {
+        min-width: 33.33% !important; /* Show 3 columns per row */
+        max-width: 33.33% !important;
+    }
 }
 
+/* Mobile view - 1 column */
+@media (max-width: 768px) {
+    .kanban-board {
+        flex-wrap: wrap !important;
+    }
+    .kanban-column {
+        min-width: 100% !important;
+        max-width: 100% !important;
+    }
+}
 
