@@ -165,6 +165,15 @@
                             </a>
                         </li>
 
+                    <!-- Reports -->
+                    <li class="nav-item">
+                        <a asp-controller="Reports" asp-action="Summary" class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Reports" ? "active" : "")">
+                            <i class="nav-icon fas fa-chart-pie"></i>
+                            <p>Reports</p>
+                        </a>
+                    </li>
+
+
                         <!-- Users Treeview -->
                         <li class="nav-item has-treeview @(ViewContext.RouteData.Values["controller"]?.ToString() == "User" ? "menu-open" : "")">
                             <a href="#" class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "User" ? "active" : "")">
