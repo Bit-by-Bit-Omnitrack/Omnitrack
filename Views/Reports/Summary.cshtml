@@ -1,0 +1,56 @@
+﻿@{
+    ViewData["Title"] = "Summary Report";
+}
+
+<h2 class="mb-4"> Summary Report</h2>
+
+<!--  Filter Form -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form id="filterForm" class="row g-3">
+            <div class="col-md-3">
+                <label for="startDate" class="form-label">Start Date</label>
+                <input type="date" id="startDate" class="form-control" />
+            </div>
+            <div class="col-md-3">
+                <label for="endDate" class="form-label">End Date</label>
+                <input type="date" id="endDate" class="form-control" />
+            </div>
+            <div class="col-md-3">
+                <label for="projectSelect" class="form-label">Project</label>
+                <select id="projectSelect" class="form-select">
+                    <option value="">All Projects</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="userSelect" class="form-label">User</label>
+                <select id="userSelect" class="form-select">
+                    <option value="">All Users</option>
+                </select>
+            </div>
+            <div class="col-md-12 text-end">
+                <button type="submit" class="btn btn-primary mt-3 me-2">Apply Filters</button>
+                <button id="exportTrendsCsv" type="button" class="btn btn-outline-secondary mt-3 me-2">Export Trends CSV</button>
+                <button id="exportProjectsCsv" type="button" class="btn btn-outline-secondary mt-3">Export Projects CSV</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!--  Charts -->
+<div class="row mb-4">
+    <div class="col-md-6"><canvas id="statusChart"></canvas></div>
+    <div class="col-md-6"><canvas id="priorityChart"></canvas></div>
+</div>
+<div class="row mb-4">
+    <div class="col-md-6"><canvas id="projectChart"></canvas></div>
+    <div class="col-md-6"><canvas id="userChart"></canvas></div>
+</div>
+<div class="row mb-4">
+    <div class="col-md-12"><canvas id="trendChart"></canvas></div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="~/js/summaryReport.js"></script>
+}
