@@ -53,8 +53,6 @@
                                 <thead class="table-light">
                                     <tr>
                                         <th>Title</th>
-                                        <th>Status</th>
-                                        <th>Priority</th>
                                         <th>Assigned To</th>
                                         <th>Due Date</th>
                                         <th style="width: 150px;">Actions</th>
@@ -65,10 +63,6 @@
                                     {
                                         <tr>
                                             <td>@ticket.Title</td>
-                                            <td><span class="badge bg-info text-dark">@ticket.Status?.StatusName</span></td>
-                                            <td><span
-                                                    class="badge bg-@GetPriorityColor(ticket.Priority?.Name)">@ticket.Priority?.Name</span>
-                                            </td>
                                             <td>@ticket.AssignedToUser?.UserName</td>
                                             <td>@ticket.DueDate?.ToString("dd MMM yyyy")</td>
                                             <td>
