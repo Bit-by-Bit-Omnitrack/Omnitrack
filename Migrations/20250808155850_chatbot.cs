@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace UserRoles.Migrations
 {
     /// <inheritdoc />
-    public partial class sj : Migration
+    public partial class chatbot : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -368,7 +368,8 @@ namespace UserRoles.Migrations
                     ProjectId = table.Column<int>(type: "int", nullable: false),
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Id = table.Column<int>(type: "int", nullable: false),
-                    ProjectRole = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false)
+                    ProjectRole = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    JoinedDate = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
