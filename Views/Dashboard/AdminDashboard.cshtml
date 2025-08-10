@@ -1,0 +1,31 @@
+﻿@{
+    ViewData["Title"] = "System Admin Dashboard";
+}
+
+<!-- Include shared dashboard header -->
+@await Html.PartialAsync("_DashboardHeader")
+
+<div class="container mt-5">
+    <h3 class="mt-4">System Administration Tools</h3>
+
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <a class="card text-center shadow-sm p-4 text-decoration-none" href="/Admin/ManageUsers">
+                <h4>Manage Users</h4>
+                <p>Create, update, and remove user accounts</p>
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a class="card text-center shadow-sm p-4 text-decoration-none" href="/Admin/ManageRoles">
+                <h4>Manage Roles</h4>
+                <p>Assign and update user permissions</p>
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a class="card text-center shadow-sm p-4 text-decoration-none" href="/Reports/Index">
+                <h4>System Reports</h4>
+                <p>View system usage, performance, and activity logs</p>
+            </a>
+        </div>
+    </div>
+</div>
