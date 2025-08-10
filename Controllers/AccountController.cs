@@ -66,16 +66,16 @@ namespace UserRoles.Controllers
 
                 // ADDED: Redirect based on role
                 if (roles.Contains("System Administrator")) // or "Admin" depending on your role name
-                    return RedirectToAction("Index", "AdminDashboard"); 
+                    return RedirectToAction("AdminDashboard", "Dashboard"); 
 
                 if (roles.Contains("Project Leader"))
-                    return RedirectToAction("Index", "LeaderDashboard"); 
+                    return RedirectToAction("LeaderDashboard", "Dashboard"); 
 
                 if (roles.Contains("Developer"))
-                    return RedirectToAction("Index", "DeveloperDashboard"); 
+                    return RedirectToAction("DeveloperDashboard", "Dashboard"); 
 
                 if (roles.Contains("Tester"))
-                    return RedirectToAction("Index", "TesterDashboard"); 
+                    return RedirectToAction("TesterDashboard", "Dashboard"); 
 
                 // Fallback redirect
                 return RedirectToAction("Index", "Home"); 
