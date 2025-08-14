@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using UserRoles.Data;
 using Microsoft.EntityFrameworkCore;
+using System;
 
 namespace UserRoles.Controllers
 {
@@ -57,16 +58,23 @@ namespace UserRoles.Controllers
             // --- Handle ongoing conversations ---
             if (chatbotState.CurrentAction != ChatbotState.BotAction.None)
             {
-                // Check if the current conversation is for creating a ticket or assigning a project
+                // Check if the current conversation is for creating a ticket
                 if (chatbotState.CurrentAction >= ChatbotState.BotAction.CreatingTicket_AskTitle &&
                     chatbotState.CurrentAction <= ChatbotState.BotAction.CreatingTicket_AskTask)
                 {
                     return await HandleTicketCreationConversation(input);
                 }
+                // Check if the current conversation is for assigning a project
                 else if (chatbotState.CurrentAction >= ChatbotState.BotAction.AssigningProject_AskUser &&
                          chatbotState.CurrentAction <= ChatbotState.BotAction.AssigningProject_AskProject)
                 {
                     return await HandleProjectAssignmentConversation(input);
+                }
+                // New: Check if the current conversation is for creating a task
+                else if (chatbotState.CurrentAction >= ChatbotState.BotAction.CreatingTask_AskName &&
+                         chatbotState.CurrentAction <= ChatbotState.BotAction.CreatingTask_AskStatus)
+                {
+                    return await HandleTaskCreationConversation(input);
                 }
             }
 
@@ -75,7 +83,7 @@ namespace UserRoles.Controllers
                 return "Hello! How can I assist you today?";
 
             if (input.Contains("help"))
-                return "Sure, I'm here to help. You can ask me to 'create ticket', 'view tickets', or 'assign project'.";
+                return "Sure, I'm here to help. You can ask me to 'create ticket', 'assign project', or 'create task'.";
 
             if (input.Contains("view ticket"))
                 return "You can view your open tickets on the dashboard.";
@@ -87,7 +95,6 @@ namespace UserRoles.Controllers
                 return "Okay, let's create a new ticket. What is the title of the ticket?";
             }
 
-            // New: Handle initial project assignment command
             if (input.Contains("assign project"))
             {
                 chatbotState.Reset();
@@ -99,16 +106,21 @@ namespace UserRoles.Controllers
                 return $"Okay, I can help with that. Who do you want to assign to a project? Available users: {userList}";
             }
 
-            return "Sorry, I didn’t understand that. Can you rephrase? You can ask me to 'create ticket', 'view tickets', or 'assign project'.";
+            // New: Handle initial task creation command
+            if (input.Contains("create task"))
+            {
+                chatbotState.Reset();
+                chatbotState.CurrentAction = ChatbotState.BotAction.CreatingTask_AskName;
+                return "Okay, let's create a new task. What is the name of the task?";
+            }
+
+            return "Sorry, I didn’t understand that. Can you rephrase? You can ask me to 'create ticket', 'assign project', or 'create task'.";
         }
 
-        // Existing method for ticket creation
         private async Task<string> HandleTicketCreationConversation(string input)
         {
-            // The existing logic for creating tickets remains here
             switch (chatbotState.CurrentAction)
             {
-                // ... (existing ticket creation cases)
                 case ChatbotState.BotAction.CreatingTicket_AskTitle:
                     chatbotState.TempTicket.Title = input;
                     chatbotState.CurrentAction = ChatbotState.BotAction.CreatingTicket_AskDescription;
@@ -117,17 +129,14 @@ namespace UserRoles.Controllers
                 case ChatbotState.BotAction.CreatingTicket_AskDescription:
                     chatbotState.TempTicket.Description = input;
                     chatbotState.CurrentAction = ChatbotState.BotAction.CreatingTicket_AskAssignedUser;
-
                     var users = await _userManager.Users.Where(u => u.IsActive).ToListAsync();
                     var userList = string.Join(", ", users.Select(u => u.UserName));
                     if (!users.Any()) return "No active users found to assign. Please assign later. What is the **due date** (YYYY-MM-DD)?";
-
                     return $"Who should this ticket be assigned to? (e.g., '{users.First().UserName}') Available users: {userList}";
 
                 case ChatbotState.BotAction.CreatingTicket_AskAssignedUser:
                     var assignedUserName = input;
                     var assignedUser = await _userManager.Users.FirstOrDefaultAsync(u => u.UserName.ToLower() == assignedUserName.ToLower());
-
                     if (assignedUser != null)
                     {
                         chatbotState.TempTicket.AssignedToUserId = assignedUser.Id;
@@ -196,23 +205,19 @@ namespace UserRoles.Controllers
             }
         }
 
-        // New method for handling project assignment conversation
         private async Task<string> HandleProjectAssignmentConversation(string input)
         {
             switch (chatbotState.CurrentAction)
             {
                 case ChatbotState.BotAction.AssigningProject_AskUser:
-                    // Find the user by username
                     var user = await _userManager.Users.FirstOrDefaultAsync(u => u.UserName.ToLower() == input.ToLower());
                     if (user != null)
                     {
                         chatbotState.TempProjectMember_UserId = user.Id;
                         chatbotState.CurrentAction = ChatbotState.BotAction.AssigningProject_AskProject;
-
                         var projects = await _context.Projects.ToListAsync();
                         var projectList = string.Join(", ", projects.Select(p => p.ProjectName));
                         if (!projects.Any()) return "No projects found. I can't assign a project right now.";
-
                         return $"Got it. Now, which project should '{user.UserName}' be assigned to? Available projects: {projectList}";
                     }
                     else
@@ -223,30 +228,23 @@ namespace UserRoles.Controllers
                     }
 
                 case ChatbotState.BotAction.AssigningProject_AskProject:
-                    // Find the project by name
                     var project = await _context.Projects.FirstOrDefaultAsync(p => p.ProjectName.ToLower() == input.ToLower());
                     if (project != null)
                     {
                         chatbotState.TempProjectMember_ProjectId = project.ProjectId;
-
-                        // Check for existing assignment
                         var existingAssignment = await _context.ProjectMembers
                             .AnyAsync(pm => pm.UserId == chatbotState.TempProjectMember_UserId && pm.ProjectId == chatbotState.TempProjectMember_ProjectId);
-
                         if (existingAssignment)
                         {
                             chatbotState.Reset();
                             return "This user is already a member of this project. Project assignment cancelled.";
                         }
-
-                        // Create and save the new ProjectMember
                         var projectMember = new ProjectMember
                         {
                             UserId = chatbotState.TempProjectMember_UserId,
                             ProjectId = chatbotState.TempProjectMember_ProjectId,
                             JoinedDate = DateTime.UtcNow
                         };
-
                         try
                         {
                             _context.ProjectMembers.Add(projectMember);
@@ -269,6 +267,136 @@ namespace UserRoles.Controllers
 
                 default:
                     return "An error occurred during project assignment. Please type 'assign project' to start over.";
+            }
+        }
+
+        private async Task<string> HandleTaskCreationConversation(string input)
+        {
+            switch (chatbotState.CurrentAction)
+            {
+                case ChatbotState.BotAction.CreatingTask_AskName:
+                    chatbotState.TempTask.Name = input;
+                    chatbotState.CurrentAction = ChatbotState.BotAction.CreatingTask_AskDetails;
+                    return "What are the details of the task?";
+
+                case ChatbotState.BotAction.CreatingTask_AskDetails:
+                    chatbotState.TempTask.Details = input;
+                    chatbotState.CurrentAction = ChatbotState.BotAction.CreatingTask_AskAssignedUser;
+                    var users = await _userManager.Users.Where(u => u.IsActive).ToListAsync();
+                    var userList = string.Join(", ", users.Select(u => u.UserName));
+                    if (!users.Any()) return "No active users found. What is the due date for the task? (YYYY-MM-DD)";
+                    return $"Who should this task be assigned to? (e.g., '{users.First().UserName}') Available users: {userList}";
+
+                case ChatbotState.BotAction.CreatingTask_AskAssignedUser:
+                    var assignedUserName = input;
+                    var assignedUser = await _userManager.Users.FirstOrDefaultAsync(u => u.UserName.ToLower() == assignedUserName.ToLower());
+                    if (assignedUser != null)
+                    {
+                        chatbotState.TempTask.AssignedToUserId = assignedUser.Id;
+                        chatbotState.CurrentAction = ChatbotState.BotAction.CreatingTask_AskDueDate;
+                        return "Task assigned. What is the due date for this task? (YYYY-MM-DD)";
+                    }
+                    else
+                    {
+                        var usersAgain = await _userManager.Users.Where(u => u.IsActive).ToListAsync();
+                        var userListAgain = string.Join(", ", usersAgain.Select(u => u.UserName));
+                        return $"User '{assignedUserName}' not found. Please try again or type 'skip' to assign later. Available users: {userListAgain}";
+                    }
+
+                case ChatbotState.BotAction.CreatingTask_AskDueDate:
+                    if (DateTime.TryParse(input, out DateTime dueDate))
+                    {
+                        chatbotState.TempTask.DueDate = dueDate;
+                        chatbotState.CurrentAction = ChatbotState.BotAction.CreatingTask_AskProject;
+                        var projects = await _context.Projects.ToListAsync();
+                        var projectList = string.Join(", ", projects.Select(p => p.ProjectName));
+                        if (!projects.Any()) return "No projects found. Creating task now. Say 'confirm' to create.";
+                        return $"Which project does this task belong to? (e.g., '{projects.First().ProjectName}') Available projects: {projectList}";
+                    }
+                    else
+                    {
+                        return "Invalid date format. Please use YYYY-MM-DD. What is the due date?";
+                    }
+
+                case ChatbotState.BotAction.CreatingTask_AskProject:
+                    var projectName = input;
+                    var project = await _context.Projects.FirstOrDefaultAsync(p => p.ProjectName.ToLower() == projectName.ToLower());
+                    if (project != null)
+                    {
+                        chatbotState.TempTask.ProjectId = project.ProjectId;
+                    }
+                    else
+                    {
+                        if (input != "skip")
+                        {
+                            var projectsAgain = await _context.Projects.ToListAsync();
+                            var projectListAgain = string.Join(", ", projectsAgain.Select(p => p.ProjectName));
+                            return $"Project '{projectName}' not found. Please try again or type 'skip' to not assign a project. Available projects: {projectListAgain}";
+                        }
+                    }
+                    chatbotState.CurrentAction = ChatbotState.BotAction.CreatingTask_AskStatus;
+                    var statuses = await _context.TaskStatuses.ToListAsync();
+                    var statusList = string.Join(", ", statuses.Select(s => s.StatusName));
+                    if (!statuses.Any()) return await CreateTaskFromChatbot();
+                    return $"What is the initial status of this task? (e.g., '{statuses.First().StatusName}') Available statuses: {statusList}";
+
+                case ChatbotState.BotAction.CreatingTask_AskStatus:
+                    var statusName = input;
+                    var status = await _context.TaskStatuses.FirstOrDefaultAsync(s => s.StatusName.ToLower() == statusName.ToLower());
+                    if (status != null)
+                    {
+                        chatbotState.TempTask.StatusID = status.Id;
+                    }
+                    else
+                    {
+                        if (input != "skip")
+                        {
+                            var statusesAgain = await _context.TaskStatuses.ToListAsync();
+                            var statusListAgain = string.Join(", ", statusesAgain.Select(s => s.StatusName));
+                            return $"Status '{statusName}' not found. Please try again or type 'skip' to use the default status. Available statuses: {statusListAgain}";
+                        }
+                    }
+                    return await CreateTaskFromChatbot();
+
+                default:
+                    return "Something went wrong in the task creation process. Please try again by typing 'create task'.";
+            }
+        }
+
+        private async Task<string> CreateTaskFromChatbot()
+        {
+            var newTask = chatbotState.TempTask;
+           // newTask.CreatedDate = DateTime.UtcNow;
+
+            // Set a default status if none was provided
+            if (newTask.StatusID == 0)
+            {
+                var defaultStatus = await _context.TaskStatuses.FirstOrDefaultAsync(s => s.StatusName.ToLower() == "to do");
+                newTask.StatusID = defaultStatus?.Id ?? 1; // Default to 'To Do' or 1 if not found
+            }
+
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser != null)
+            {
+                newTask.CreatedById = currentUser.Id;
+            }
+            else
+            {
+                newTask.CreatedById = "ChatbotUser";
+            }
+
+            try
+            {
+                _context.Add(newTask);
+                await _context.SaveChangesAsync();
+                chatbotState.Reset();
+                return $"Task '{newTask.Name}' has been successfully created.";
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error creating task from chatbot: {ex.Message}");
+                chatbotState.Reset();
+                return "I encountered an error while trying to create the task. Please try again later or contact support.";
             }
         }
 
