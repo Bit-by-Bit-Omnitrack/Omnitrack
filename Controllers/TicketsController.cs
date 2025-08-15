@@ -49,6 +49,9 @@ namespace UserRoles.Controllers
                 ticketsQuery = ticketsQuery.Where(t => t.ProjectId == filterProjectId.Value);
             }
 
+            // Exclude tickets with StatusID 5 (Completed) from the main dashboard view
+            ticketsQuery = ticketsQuery.Where(t => t.StatusID != 5);
+
             var tickets = await ticketsQuery.ToListAsync();
 
             ViewBag.Statuses = await _context.TicketStatuses.OrderBy(s => s.Id).ToListAsync();
@@ -60,6 +63,33 @@ namespace UserRoles.Controllers
             ViewBag.ProjectsFilter = new SelectList(await _context.Projects.ToListAsync(), "ProjectId", "ProjectName", filterProjectId);
 
             return View(tickets);
+        }
+
+        // GET: Tickets/History
+        // GET: Tickets/History
+        public async Task<IActionResult> History(int? statusId)
+        {
+            var completedTicketsQuery = _context.Tickets
+                .Include(t => t.CreatedByUser)
+                .Include(t => t.AssignedToUser)
+                .Include(t => t.Status)
+                .Include(t => t.Priority)
+                .Include(t => t.Tasks)
+                .Include(t => t.Project)
+                .Where(t => t.StatusID == 5) // Assuming StatusID 5 is "Completed" or "Archived"
+                .AsQueryable();
+
+            // Apply filter if a statusId is provided
+            if (statusId.HasValue)
+            {
+                completedTicketsQuery = completedTicketsQuery.Where(t => t.StatusID == statusId.Value);
+            }
+
+            var completedTickets = await completedTicketsQuery
+                .OrderByDescending(t => t.UpdatedDate)
+                .ToListAsync();
+
+            return View(completedTickets);
         }
 
         // GET: Tickets1/Details/5
@@ -174,6 +204,42 @@ namespace UserRoles.Controllers
             }
         }
 
+        // New action to archive a ticket by setting its status to 'Completed' (StatusID = 5)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ArchiveTicket(int id)
+        {
+            var ticket = await _context.Tickets.FindAsync(id);
+            if (ticket == null)
+            {
+                return NotFound();
+            }
+
+            // Assuming StatusID 5 is "Completed" or "Archived"
+            ticket.StatusID = 5;
+
+            // Update metadata
+            var currentUser = await _userManager.GetUserAsync(User);
+            ticket.UpdatedBy = currentUser?.Id ?? "System";
+            ticket.UpdatedDate = DateTime.UtcNow;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+                return Json(new { success = true, message = "Ticket archived successfully." });
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                return BadRequest("Failed to archive ticket due to a concurrency issue.");
+            }
+            catch (Exception ex)
+            {
+                // Log the exception
+                Console.WriteLine($"Error archiving ticket: {ex.Message}");
+                return StatusCode(500, "An error occurred while archiving the ticket.");
+            }
+        }
+
         // GET: Tickets1/Edit/5
         [HttpGet]
         public async Task<IActionResult> Edit(int? id)
@@ -214,7 +280,6 @@ namespace UserRoles.Controllers
                 ViewBag.Statuses = new SelectList(await _context.TicketStatuses.ToListAsync(), "Id", "StatusName", ticket.StatusID);
                 ViewBag.Priorities = new SelectList(await _context.Priorities.ToListAsync(), "Id", "Name", ticket.PriorityId);
                 ViewBag.Tasks = new SelectList(await _context.Tasks.ToListAsync(), "Id", "Name", ticket.TasksId); // Re-populate with selected TaskId
-                                                                                                                  //return View(ticket);
             }
 
             var existingTicket = await _context.Tickets.FirstOrDefaultAsync(t => t.Id == id);
