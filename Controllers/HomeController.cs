@@ -31,8 +31,8 @@ namespace UserRoles.Controllers
             return View();
         }
 
-        [Authorize(Roles = "Admin")]
-        public IActionResult Admin()
+        [Authorize(Roles = "System Administrator")]
+        public IActionResult SystemAdmin()
         {
             return View();
         }
@@ -56,10 +56,42 @@ namespace UserRoles.Controllers
         {
             var currentUser = await _userManager.GetUserAsync(HttpContext.User);
 
-            ViewBag.FullName = currentUser?.FullName ?? "User";
+            if (currentUser == null)
+            {
+                return RedirectToAction("Index"); // or a login page
+            }
+
+            // Get the user's roles
+            var roles = await _userManager.GetRolesAsync(currentUser);
+
+            if (roles.Contains("System Administrator"))
+                return RedirectToAction("AdminDashboard", "Home");
+
+            if (roles.Contains("Project Leader"))
+                return RedirectToAction("LeaderDashboard", "Home");
+
+            if (roles.Contains("Developer"))
+                return RedirectToAction("DeveloperDashboard", "Home");
+
+            if (roles.Contains("Tester"))
+                return RedirectToAction("TesterDashboard", "Home");
+
+            // Default fallback if no matching role
+            ViewBag.FullName = currentUser.FullName ?? "User";
             return View();
         }
 
+        [Authorize(Roles = "System Administrator")]
+        public IActionResult SystemAdminDashboard() => View();
+
+        [Authorize(Roles = "Project Leader")]
+        public IActionResult LeaderDashboard() => View();
+
+        [Authorize(Roles = "Developer")]
+        public IActionResult DeveloperDashboard() => View();
+
+        [Authorize(Roles = "Tester")]
+        public IActionResult TesterDashboard() => View();
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
