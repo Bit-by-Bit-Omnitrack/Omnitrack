@@ -1,0 +1,31 @@
+﻿@{
+    ViewData["Title"] = "Developer Dashboard";
+}
+
+<!-- Include shared dashboard header -->
+@await Html.PartialAsync("_DashboardHeader")
+
+<div class="container mt-5">
+    <h3 class="mt-4">Your Developer Tools</h3>
+
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <a class="card text-center shadow-sm p-4 text-decoration-none" href="/Tasks/Index">
+                <h4>Development Tasks</h4>
+                <p>View, create, and manage your coding tasks</p>
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a class="card text-center shadow-sm p-4 text-decoration-none" href="/Tickets/Index">
+                <h4>Bug Tickets</h4>
+                <p>Review and resolve assigned issues</p>
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a class="card text-center shadow-sm p-4 text-decoration-none" href="/Projects/Index">
+                <h4>Projects</h4>
+                <p>Track progress and collaborate on builds</p>
+            </a>
+        </div>
+    </div>
+</div>

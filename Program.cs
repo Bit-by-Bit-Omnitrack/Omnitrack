@@ -115,12 +115,7 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.AccessDeniedPath = "/Account/AccessDenied";
     options.ReturnUrlParameter = "ReturnUrl";
 
-    // Redirect to Welcome page after login
-    options.Events.OnRedirectToLogin = context =>
-    {
-        context.Response.Redirect("/Home/Welcome");
-        return Task.CompletedTask;
-    };
+  
 });
 
 
