@@ -6,6 +6,21 @@ namespace UserRoles.Controllers
     [Authorize] // Only logged-in users can access
     public class DashboardController : Controller
     {
+        public IActionResult Index()
+        {
+            if (User.IsInRole("System administrator"))
+                return RedirectToAction("AdminDashboard");
+            if (User.IsInRole("Project leader"))
+                return RedirectToAction("LeaderDashboard");
+            if (User.IsInRole("Developer"))
+                return RedirectToAction("DeveloperDashboard");
+            if (User.IsInRole("Tester"))
+                return RedirectToAction("TesterDashboard");
+
+            // Fallback if no role matches
+            return RedirectToAction("AccessDenied", "Account");
+        }
+
         public IActionResult AdminDashboard()
         {
             return View();
