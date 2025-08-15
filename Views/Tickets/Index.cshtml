@@ -21,32 +21,14 @@
             <i class="fas fa-columns me-2"></i> Tickets Dashboard
             @(!string.IsNullOrEmpty(currentTaskName) ? $" - Task: {currentTaskName}" : "")
         </h1>
-        <a asp-action="Create" class="btn btn-success">
-            <i class="fas fa-plus-circle me-1"></i> New Ticket
-        </a>
+        <div>
+            
+            <a asp-action="Create" class="btn btn-success">
+                <i class="fas fa-plus-circle me-1"></i> New Ticket
+            </a>
+        </div>
     </div>
 
-  @*  <form asp-action="Index" method="get" class="row g-2 mb-4 align-items-center">
-        <div class="col-auto">
-            <label for="filterTaskId" class="col-form-label fw-bold">Filter by Task:</label>
-        </div>
-        <div class="col-auto">
-            <select name="filterTaskId" id="filterTaskId" class="form-select">
-                <option value="">All Tasks</option>
-                @foreach (var taskOption in tasksFilter)
-                {
-                    <option value="@taskOption.Value" selected="@(taskOption.Selected)">
-                        @taskOption.Text
-                    </option>
-                }
-            </select>
-        </div>
-        <div class="col-auto">
-            <button type="submit" class="btn btn-outline-primary">
-                <i class="fas fa-filter me-1"></i> Apply Filter
-            </button>
-        </div>
-    </form>*@
     <div class="kanban-scroll-wrapper mb-4">
         <div class="kanban-board d-flex flex-nowrap">
             @foreach (var status in statuses)
@@ -58,11 +40,23 @@
                     <div class="card-header bg-light border-bottom fw-semibold text-dark">
                         <i class="fas fa-circle text-secondary me-2"></i>@status.StatusName
                     </div>
+
+                    <div class="card-footer bg-light text-center border-top">
+                        <a asp-action="History" asp-route-statusId="@status.Id" class="btn btn-sm btn-outline-info w-100">
+                            <i class="fas fa-history me-1"></i> View Archived
+                        </a>
+                    </div>
+
                     <div class="card-body kanban-cards p-2" style="min-height: 300px; max-height: 75vh; overflow-y: auto;">
                         @foreach (var item in Model.Where(t => t.StatusID == status.Id))
                         {
                             <div class="kanban-card draggable card border-0 mb-2 shadow-sm" draggable="true" data-ticket-id="@item.Id">
-                                <div class="card-body p-2">
+                                <div class="card-body p-2 position-relative">
+                                   
+                                    <button class="btn btn-sm btn-outline-primary rounded-circle archive-button" data-ticket-id="@item.Id" style="position: absolute; top: 10px; right: 10px;">
+                                        <i class="fas fa-archive"></i>
+                                    </button>
+
                                     <h5 class="card-title fw-bold">@item.Title</h5>
                                     <p class="card-text mb-1"><i class="fas fa-user me-1 text-muted"></i><strong>Assigned:</strong> @(item.AssignedToUser?.UserName ?? "N/A")</p>
                                     <p class="card-text mb-1"><i class="fas fa-layer-group me-1 text-muted"></i><strong>Priority:</strong> @(item.Priority?.Name ?? "N/A")</p>
@@ -82,8 +76,7 @@
             }
         </div>
     </div>
-
-
+</div>
 
 @section Scripts {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -102,7 +95,9 @@
                 });
 
                 item.addEventListener('dragend', () => {
-                    draggedItem.classList.remove('dragging');
+                    if (draggedItem) {
+                        draggedItem.classList.remove('dragging');
+                    }
                     draggedItem = null;
                 });
             });
@@ -130,12 +125,56 @@
 
                         // Update the UI immediately
                         const kanbanCards = column.querySelector('.kanban-cards');
-                        kanbanCards.appendChild(draggedItem); // Already moved in dragover, but confirm placement
+                        kanbanCards.appendChild(draggedItem);
 
                         // Send update to the server
                         updateTicketStatusOnServer(ticketId, newStatusId);
                     }
                 });
+            });
+
+            // Handle the new "Complete" button click
+            $('.complete-button').on('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation(); // Prevent the card's drag event from starting
+
+                const ticketId = $(this).data('ticket-id');
+                const ticketCard = $(this).closest('.kanban-card');
+                const newStatusId = 5; // Assuming StatusID 5 is "Completed"
+
+                // Optimistic UI update: apply strikethrough and hide the card
+                ticketCard.css('text-decoration', 'line-through').css('opacity', '0.7');
+
+                // Animate removal from the board after a short delay
+                setTimeout(() => {
+                    ticketCard.fadeOut('fast', function() {
+                        $(this).remove();
+                    });
+                }, 500);
+
+                updateTicketStatusOnServer(ticketId, newStatusId);
+            });
+
+            // Handle the new "Archive" button click
+            $('.archive-button').on('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation(); // Prevent the card's drag event from starting
+
+                const ticketId = $(this).data('ticket-id');
+                const ticketCard = $(this).closest('.kanban-card');
+
+                // Optimistic UI update: apply strikethrough and hide the card
+                ticketCard.css('text-decoration', 'line-through').css('opacity', '0.7');
+
+                // Animate removal from the board after a short delay
+                setTimeout(() => {
+                    ticketCard.fadeOut('fast', function() {
+                        $(this).remove();
+                    });
+                }, 500);
+
+                // Send the archive request to the server
+                archiveTicketOnServer(ticketId);
             });
 
             function getDragAfterElement(container, y) {
@@ -153,33 +192,60 @@
             }
 
             function updateTicketStatusOnServer(ticketId, newStatusId) {
-                // Using jQuery AJAX
                 $.ajax({
-                    url: '@Url.Action("UpdateTicketStatus", "Tickets")', // Correctly generate the URL
+                    url: '@Url.Action("UpdateTicketStatus", "Tickets")',
                     type: 'POST',
                     data: {
                         ticketId: ticketId,
                         newStatusId: newStatusId
                     },
                     headers: {
-                        'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val() // Send Anti-forgery token
+                        'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
                     },
                     success: function (response) {
                         if (response.success) {
                             console.log(response.message);
-                            // You might want to refresh only the specific ticket or column
-                            // For now, a full refresh or a more sophisticated UI update can be considered.
-                            // location.reload(); // Uncomment if you want to refresh the page after successful update
                         } else {
                             console.error("Error updating ticket status: " + response.message);
+                            // Revert UI change if server update fails
+                            $(`.kanban-card[data-ticket-id='${ticketId}']`).fadeIn().css('text-decoration', 'none').css('opacity', '1');
                             alert("Failed to update ticket status: " + response.message);
-                            // Optionally, revert the UI change if the server update fails
                         }
                     },
                     error: function (xhr, status, error) {
                         console.error("AJAX Error:", status, error, xhr.responseText);
+                        // Revert UI change if server update fails
+                        $(`.kanban-card[data-ticket-id='${ticketId}']`).fadeIn().css('text-decoration', 'none').css('opacity', '1');
                         alert("An error occurred while communicating with the server.");
-                        // Optionally, revert the UI change if the server update fails
+                    }
+                });
+            }
+
+            function archiveTicketOnServer(ticketId) {
+                $.ajax({
+                    url: '@Url.Action("ArchiveTicket", "Tickets")',
+                    type: 'POST',
+                    data: {
+                        id: ticketId
+                    },
+                    headers: {
+                        'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function (response) {
+                        if (response.success) {
+                            console.log(response.message);
+                        } else {
+                            console.error("Error archiving ticket: " + response.message);
+                            // Revert UI change if server update fails
+                            $(`.kanban-card[data-ticket-id='${ticketId}']`).fadeIn().css('text-decoration', 'none').css('opacity', '1');
+                            alert("Failed to archive ticket: " + response.message);
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("AJAX Error:", status, error, xhr.responseText);
+                        // Revert UI change if server update fails
+                        $(`.kanban-card[data-ticket-id='${ticketId}']`).fadeIn().css('text-decoration', 'none').css('opacity', '1');
+                        alert("An error occurred while communicating with the server.");
                     }
                 });
             }

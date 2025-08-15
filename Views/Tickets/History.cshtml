@@ -1,0 +1,62 @@
+﻿@model IEnumerable<UserRoles.Models.Ticket>
+
+@{
+    ViewData["Title"] = "Archived Tickets History";
+}
+
+<div class="container-fluid my-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="h3 fw-bold text-primary">
+            <i class="fas fa-history me-2"></i> Archived Tickets
+        </h1>
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i> Back to Dashboard
+        </a>
+    </div>
+
+    <p class="text-muted">
+        This page shows all tickets that have been marked as archived or completed.
+    </p>
+
+    <div class="table-responsive">
+        <table class="table table-hover table-striped">
+            <thead class="bg-light">
+                <tr>
+                    <th>Ticket ID</th>
+                    <th>Title</th>
+                    <th>Assigned To</th>
+                    <th>Priority</th>
+                    <th>Task</th>
+                    <th>Project</th>
+                    <th>Archived Date</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr class="align-middle">
+                        <td>
+                            <span class="badge bg-secondary">@item.TicketID</span>
+                        </td>
+                        <td>
+                            <strong class="text-muted text-decoration-line-through">@item.Title</strong>
+                        </td>
+                        <td>@(item.AssignedToUser?.UserName ?? "N/A")</td>
+                        <td>
+                            <span class="badge bg-@item.Priority?.Name.ToLower()">@item.Priority?.Name</span>
+                        </td>
+                        <td>@(item.Tasks?.Name ?? "N/A")</td>
+                        <td>@(item.Project?.ProjectName ?? "N/A")</td>
+                        <td>@item.UpdatedDate?.ToString("yyyy-MM-dd HH:mm")</td>
+                        <td class="text-end">
+                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-info">
+                                <i class="fas fa-info-circle"></i> Details
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
