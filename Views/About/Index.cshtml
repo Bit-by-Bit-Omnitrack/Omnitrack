@@ -1,0 +1,62 @@
+﻿@model UserRoles.Models.AboutViewModel
+@{
+    ViewData["Title"] = "About " + Model.AppName;
+}
+
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0"><i class="fas fa-info-circle mr-2"></i>About @Model.AppName</h1>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="content">
+    <div class="container-fluid">
+
+        <!-- Mission -->
+        <div class="card card-primary shadow-sm">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-bullseye mr-2"></i>Mission</h3>
+            </div>
+            <div class="card-body">@Model.Mission</div>
+        </div>
+
+        <!-- Vision -->
+        <div class="card card-success shadow-sm">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-eye mr-2"></i>Vision</h3>
+            </div>
+            <div class="card-body">@Model.Vision</div>
+        </div>
+
+        <!-- Team -->
+        <div class="card card-dark shadow-sm mt-3">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-users mr-2"></i>The Team — @Model.TeamName</h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    @foreach (var member in Model.TeamMembers)
+                    {
+                        <div class="col-sm-6 col-md-3 mb-3">
+                            <div class="info-box">
+                                <span class="info-box-icon bg-dark elevation-1"><i class="fas fa-user"></i></span>
+                                <div class="info-box-content">
+                                    <span class="info-box-text">@member</span>
+                                    <span class="info-box-number">@Model.TeamName</span>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+            <div class="card-footer">
+                <small class="text-muted"><strong>Version:</strong> @Model.Version</small>
+            </div>
+        </div>
+
+    </div>
+</section>

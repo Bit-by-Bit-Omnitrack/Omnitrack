@@ -1,0 +1,49 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using UserRoles.Models
+@inject UserManager<Users> UserManager
+
+@{
+    var currentUser = await UserManager.GetUserAsync(User);
+    string fullName = currentUser?.FullName ?? "User";
+
+    // List of motivational quotes
+    var quotes = new List<string>
+    {
+        "Believe you can and you're halfway there.",
+        "Success is not final, failure is not fatal: it is the courage to continue that counts.",
+        "Don’t watch the clock; do what it does. Keep going.",
+        "The only way to do great work is to love what you do.",
+        "The future depends on what you do today. – Mahatma Gandhi",
+        "Success is not final, failure is not fatal: It is the courage to continue that counts. – Winston Churchill",
+        "Don’t watch the clock; do what it does. Keep going. – Sam Levenson",
+        "Start where you are. Use what you have. Do what you can. – Arthur Ashe",
+        "It always seems impossible until it’s done. – Nelson Mandela",
+        "Believe you can and you're halfway there. – Theodore Roosevelt",
+        "Push yourself, because no one else is going to do it for you.",
+        "Work hard in silence. Let your success be the noise.",
+        "Don’t limit your challenges, challenge your limits.",
+        "Productivity is never an accident. It is always the result of a commitment to excellence.",
+        "The secret of getting ahead is getting started.",
+        "Do something today that your future self will thank you for.",
+        "Success is the sum of small efforts repeated day in and day out.",
+        "Focus on being productive instead of busy.",
+        "Discipline is the bridge between goals and accomplishment.",
+        "Your limitation—it's only your imagination.",
+        "Great things are done by a series of small things brought together.",
+        "Dream it. Wish it. Do it.",
+        "Sometimes later becomes never. Do it now.",
+        "Stay positive, work hard, and make it happen.",
+        "The only difference between ordinary and extraordinary is that little extra.",
+        "Every accomplishment starts with the decision to try.",
+        "Small progress is still progress."
+    };
+
+    // Pick a random quote with better randomness
+    var random = new Random(Guid.NewGuid().GetHashCode());
+    var randomQuote = quotes[random.Next(quotes.Count)];
+}
+
+<div class="dashboard-header" style="padding:20px; background-color:#f5f5f5; border-bottom:1px solid #ddd;">
+    <h2>Welcome, @fullName </h2>
+    <p style="font-style:italic; color:#555;">"@randomQuote"</p>
+</div>

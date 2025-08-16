@@ -61,8 +61,24 @@ namespace UserRoles.Controllers
 
             if (result.Succeeded)
             {
-                //  Redirect to Welcome page after login
-                return RedirectToAction("Welcome", "Home");
+                // ADDED: Get user roles
+                var roles = await userManager.GetRolesAsync(user);
+
+                // ADDED: Redirect based on role
+                if (roles.Contains("System Administrator")) // or "Admin" depending on your role name
+                    return RedirectToAction("AdminDashboard", "Dashboard"); 
+
+                if (roles.Contains("Project Leader"))
+                    return RedirectToAction("LeaderDashboard", "Dashboard"); 
+
+                if (roles.Contains("Developer"))
+                    return RedirectToAction("DeveloperDashboard", "Dashboard"); 
+
+                if (roles.Contains("Tester"))
+                    return RedirectToAction("TesterDashboard", "Dashboard"); 
+
+                // Fallback redirect
+                return RedirectToAction("Index", "Home"); 
             }
             else if (result.IsLockedOut)
             {
