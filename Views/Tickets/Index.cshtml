@@ -15,18 +15,16 @@
     }
 }
 
+
 <div class="container-fluid my-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h1 class="h3 fw-bold text-primary">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+        <h1 class="h3 fw-bold text-primary mb-2">
             <i class="fas fa-columns me-2"></i> Tickets Dashboard
             @(!string.IsNullOrEmpty(currentTaskName) ? $" - Task: {currentTaskName}" : "")
         </h1>
-        <div>
-            
-            <a asp-action="Create" class="btn btn-success">
-                <i class="fas fa-plus-circle me-1"></i> New Ticket
-            </a>
-        </div>
+        <a asp-action="Create" class="btn btn-success mb-2">
+            <i class="fas fa-plus-circle me-1"></i> New Ticket
+        </a>
     </div>
 
     <div class="kanban-scroll-wrapper mb-4">
@@ -51,17 +49,12 @@
                         @foreach (var item in Model.Where(t => t.StatusID == status.Id))
                         {
                             <div class="kanban-card draggable card border-0 mb-2 shadow-sm" draggable="true" data-ticket-id="@item.Id">
-                                <div class="card-body p-2 position-relative">
-                                   
-                                    <button class="btn btn-sm btn-outline-primary rounded-circle archive-button" data-ticket-id="@item.Id" style="position: absolute; top: 10px; right: 10px;">
-                                        <i class="fas fa-archive"></i>
-                                    </button>
-
-                                    <h5 class="card-title fw-bold">@item.Title</h5>
-                                    <p class="card-text mb-1"><i class="fas fa-user me-1 text-muted"></i><strong>Assigned:</strong> @(item.AssignedToUser?.UserName ?? "N/A")</p>
-                                    <p class="card-text mb-1"><i class="fas fa-layer-group me-1 text-muted"></i><strong>Priority:</strong> @(item.Priority?.Name ?? "N/A")</p>
-                                    <p class="card-text mb-1"><i class="fas fa-tasks me-1 text-muted"></i><strong>Task:</strong> @(item.Tasks?.Name ?? "N/A")</p>
-                                    <p class="card-text mb-1"><i class="fas fa-folder me-1 text-muted"></i><strong>Project:</strong> @(item.Project?.ProjectName ?? "N/A")</p>
+                                <div class="card-body p-2">
+                                    <h5 class="card-title fw-bold text-truncate">@item.Title</h5>
+                                    <p class="card-text mb-1 text-truncate"><i class="fas fa-user me-1 text-muted"></i><strong>Assigned:</strong> @(item.AssignedToUser?.UserName ?? "N/A")</p>
+                                    <p class="card-text mb-1 text-truncate"><i class="fas fa-layer-group me-1 text-muted"></i><strong>Priority:</strong> @(item.Priority?.Name ?? "N/A")</p>
+                                    <p class="card-text mb-1 text-truncate"><i class="fas fa-tasks me-1 text-muted"></i><strong>Task:</strong> @(item.Tasks?.Name ?? "N/A")</p>
+                                    <p class="card-text mb-1 text-truncate"><i class="fas fa-folder me-1 text-muted"></i><strong>Project:</strong> @(item.Project?.ProjectName ?? "N/A")</p>
                                     <p class="card-text"><i class="fas fa-calendar-alt me-1 text-muted"></i><strong>Due:</strong> @(item.DueDate?.ToShortDateString() ?? "N/A")</p>
                                     <div class="text-end mt-2">
                                         <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary">Details</a>
@@ -84,14 +77,11 @@
         $(document).ready(function () {
             let draggedItem = null;
 
-            // Make cards draggable
             document.querySelectorAll('.draggable').forEach(item => {
                 item.addEventListener('dragstart', (e) => {
                     draggedItem = item;
-                    e.dataTransfer.setData('text/plain', item.dataset.ticketId); // Store ticket ID
-                    setTimeout(() => {
-                        item.classList.add('dragging'); // Add a class for styling while dragging
-                    }, 0);
+                    e.dataTransfer.setData('text/plain', item.dataset.ticketId);
+                    setTimeout(() => { item.classList.add('dragging'); }, 0);
                 });
 
                 item.addEventListener('dragend', () => {
@@ -102,10 +92,9 @@
                 });
             });
 
-            // Make columns droppable
             document.querySelectorAll('.kanban-column').forEach(column => {
                 column.addEventListener('dragover', (e) => {
-                    e.preventDefault(); // Allow drop
+                    e.preventDefault();
                     const kanbanCards = column.querySelector('.kanban-cards');
                     if (kanbanCards && draggedItem) {
                         const afterElement = getDragAfterElement(kanbanCards, e.clientY);
@@ -122,6 +111,7 @@
                     if (draggedItem) {
                         const ticketId = parseInt(e.dataTransfer.getData('text/plain'));
                         const newStatusId = parseInt(column.dataset.statusId);
+
 
                         // Update the UI immediately
                         const kanbanCards = column.querySelector('.kanban-cards');
@@ -179,7 +169,6 @@
 
             function getDragAfterElement(container, y) {
                 const draggableElements = [...container.querySelectorAll('.draggable:not(.dragging)')];
-
                 return draggableElements.reduce((closest, child) => {
                     const box = child.getBoundingClientRect();
                     const offset = y - box.top - box.height / 2;

@@ -262,6 +262,7 @@ namespace UserRoles.Controllers
                 .ToListAsync(), "Id", "StatusName", ticket.StatusID);
             ViewBag.Priorities = new SelectList(await _context.Priorities.ToListAsync(), "Id", "Name", ticket.PriorityId);
             ViewBag.Tasks = new SelectList(await _context.Tasks.ToListAsync(), "Id", "Name", ticket.TasksId);
+            ViewBag.Projects = new SelectList(await _context.Projects.ToListAsync(), "ProjectId", "ProjectName", ticket.ProjectId);
 
             return View(ticket);
         }
@@ -269,7 +270,7 @@ namespace UserRoles.Controllers
         // POST: Tickets1/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Description,AssignedToUserId,DueDate,StatusID,PriorityId,TasksId")] Ticket ticket)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Description,AssignedToUserId,DueDate,StatusID,PriorityId,TasksId,ProjectId")] Ticket ticket)
         {
             if (id != ticket.Id)
                 return NotFound();
@@ -280,6 +281,7 @@ namespace UserRoles.Controllers
                 ViewBag.Statuses = new SelectList(await _context.TicketStatuses.ToListAsync(), "Id", "StatusName", ticket.StatusID);
                 ViewBag.Priorities = new SelectList(await _context.Priorities.ToListAsync(), "Id", "Name", ticket.PriorityId);
                 ViewBag.Tasks = new SelectList(await _context.Tasks.ToListAsync(), "Id", "Name", ticket.TasksId); // Re-populate with selected TaskId
+                ViewBag.Projects = new SelectList(await _context.Projects.ToListAsync(), "ProjectId", "ProjectName", ticket.ProjectId);                                                                                                   
             }
 
             var existingTicket = await _context.Tickets.FirstOrDefaultAsync(t => t.Id == id);
@@ -296,6 +298,7 @@ namespace UserRoles.Controllers
                 existingTicket.StatusID = ticket.StatusID;
                 existingTicket.PriorityId = ticket.PriorityId; // Added this line to update priority
                 existingTicket.TasksId = ticket.TasksId; // Added this line to update tasks
+                existingTicket.ProjectId = ticket.ProjectId; // Added this line to update project
 
                 // Update metadata
                 var currentUser = await _userManager.GetUserAsync(User);

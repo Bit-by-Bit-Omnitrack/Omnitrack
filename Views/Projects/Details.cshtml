@@ -7,6 +7,7 @@
 <div class="container py-4">
     <h2 class="mb-4 text-primary fw-bold">Project Details</h2>
 
+    <!-- Project Info Card -->
     <div class="card mb-4 shadow-sm">
         <div class="card-body">
             <dl class="row mb-0">
@@ -17,10 +18,10 @@
                 <dd class="col-sm-9">@Model.Description</dd>
 
                 <dt class="col-sm-3 text-muted">Start Date</dt>
-                <dd class="col-sm-9">@Model.StartDate.ToString("dd MMM yyyy") ?? "N/A"</dd>
+                <dd class="col-sm-9">@Model.StartDate.ToString("dd MMM yyyy")</dd>
 
                 <dt class="col-sm-3 text-muted">End Date</dt>
-                <dd class="col-sm-9">@Model.EndDate?.ToString("dd MMM yyyy") ?? "N/A"</dd>
+                <dd class="col-sm-9">@Model.EndDate?.ToString("dd MMM yyyy")</dd>
 
                 <dt class="col-sm-3 text-muted">Active</dt>
                 <dd class="col-sm-9">
@@ -37,130 +38,152 @@
         </div>
     </div>
 
-    <h3 class="mb-4">Assigned Tickets to this Project</h3>
-@if (Model.Tickets != null && Model.Tickets.Any())
-{
-        <div class="table-responsive">
-            <table class="table table-bordered table-striped align-middle">
-                <thead class="table-light">
-                    <tr>
-                        <th>Title</th>
-                        <th>Status</th>
-                        <th>Priority</th>
-                        <th>Assigned To</th>
-                        <th>Due Date</th>
-                        <th style="width: 150px;">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var ticket in Model.Tickets)
+    <div class="row">
+        <!-- Assigned Tickets Card -->
+        <div class="col-12 col-lg-6 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-light fw-semibold">
+                    Assigned Tickets to this Project
+                </div>
+                <div class="card-body">
+                    @if (Model.Tickets != null && Model.Tickets.Any())
                     {
-                        <tr>
-                            <td>@ticket.Title</td>
-                            <td><span class="badge bg-info text-dark">@ticket.Status?.StatusName</span></td>
-                            <td><span class="badge bg-@GetPriorityColor(ticket.Priority?.Name)">@ticket.Priority?.Name</span>
-                            </td>
-                            <td>@ticket.AssignedToUser?.UserName ?? "N/A"</td>
-                            <td>@ticket.DueDate?.ToString("dd MMM yyyy") ?? "N/A"</td>
-                            <td>
-                                <a asp-action="Details" asp-route-id="@ticket.Id" class="btn btn-sm btn-outline-secondary">
-                                    <i class="fas fa-eye"></i> View
-                                </a>
-                                <a asp-action="Edit" asp-route-id="@ticket.Id" class="btn btn-sm btn-outline-warning">
-                                    <i class="fas fa-edit"></i> Edit
-                                </a>
-                                <a asp-action="Delete" asp-route-id="@ticket.Id" class="btn btn-sm btn-outline-danger">
-                                    <i class="fas fa-trash"></i> Delete
-                                </a>
-                            </td>
-                        </tr>
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Title</th>
+                                        <th>Assigned To</th>
+                                        <th>Due Date</th>
+                                        <th style="width: 150px;">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var ticket in Model.Tickets)
+                                    {
+                                        <tr>
+                                            <td>@ticket.Title</td>
+                                            <td>@ticket.AssignedToUser?.UserName</td>
+                                            <td>@ticket.DueDate?.ToString("dd MMM yyyy")</td>
+                                            <td>
+                                                <a asp-action="Details" asp-route-id="@ticket.Id"
+                                                    class="btn btn-sm btn-outline-secondary">
+                                                    <i class="fas fa-eye"></i> View
+                                                </a>
+                                                <a asp-action="Edit" asp-route-id="@ticket.Id"
+                                                    class="btn btn-sm btn-outline-warning">
+                                                    <i class="fas fa-edit"></i> Edit
+                                                </a>
+                                                <a asp-action="Delete" asp-route-id="@ticket.Id"
+                                                    class="btn btn-sm btn-outline-danger">
+                                                    <i class="fas fa-trash"></i> Delete
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
                     }
-                </tbody>
-            </table>
-        </div>
-}
-else
-{
-        <p class="text-muted fst-italic">No tickets have been assigned to this project yet.</p>
-}
-
-    <h4 class="mb-3">Assign Member To This Project</h4>
-    <form asp-action="AssignMember" method="post" class="mb-5">
-        <input type="hidden" name="projectId" value="@Model.ProjectId" />
-
-        <div class="mb-3">
-            <label for="userId" class="form-label">Select User</label>
-            <select name="userId" id="userId" class="form-select" required>
-                <option value="" selected disabled>-- Choose User --</option>
-                @foreach (var user in ViewBag.Users as List<UserRoles.Models.Users>)
-                {
-                    <option value="@user.Id">@user.FullName (@user.Email)</option>
-                }
-            </select>
-        </div>
-
-        <div class="mb-3">
-            <label for="role" class="form-label">Project Role</label>
-            <input type="text" name="role" id="role" class="form-control" required
-                placeholder="e.g. Developer, PM, QA" />
-        </div>
-
-        <button type="submit" class="btn btn-primary">
-            <i class="fas fa-user-plus me-1"></i> Assign Member
-        </button>
-    </form>
-
-    <h4 class="mb-3">Current Project Members</h4>
-@if (Model.Members != null && Model.Members.Any())
-{
-        <div class="table-responsive">
-            <table class="table table-bordered table-striped align-middle">
-                <thead class="table-light">
-                    <tr>
-                        <th>User</th>
-                        <th>Email</th>
-                        <th>Role</th>
-                        <th style="width: 220px;">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var member in Model.Members)
+                    else
                     {
-                        <tr>
-                            <td>@member.User.FullName</td>
-                            <td>@member.User.Email</td>
-                            <td>@member.ProjectRole</td>
-                            <td>
-                                <form asp-action="RemoveMember" method="post" class="d-inline me-2">
-                                    <input type="hidden" name="projectId" value="@Model.ProjectId" />
-                                    <input type="hidden" name="userId" value="@member.UserId" />
-                                    <button type="submit" class="btn btn-sm btn-danger" title="Remove Member">
-                                        <i class="fas fa-user-minus"></i>
-                                    </button>
-                                </form>
-
-                                <form asp-action="EditMemberRole" method="post" class="d-inline">
-                                    <input type="hidden" name="projectId" value="@Model.ProjectId" />
-                                    <input type="hidden" name="userId" value="@member.UserId" />
-                                    <div class="input-group input-group-sm" style="width: 160px;">
-                                        <input type="text" name="newRole" value="@member.ProjectRole" class="form-control"
-                                            placeholder="New role" />
-                                        <button type="submit" class="btn btn-sm btn-warning" title="Update Role">
-                                            <i class="fas fa-pen"></i>
-                                        </button>
-                                    </div>
-                                </form>
-                            </td>
-                        </tr>
+                        <p class="text-muted fst-italic mb-0">No tickets have been assigned to this project yet.</p>
                     }
-                </tbody>
-            </table>
+                </div>
+            </div>
         </div>
-}
-else
-{
-        <p class="text-muted fst-italic">No members have been assigned to this project yet.</p>
-}
+
+        <!-- Assign Member + Members Card -->
+        <div class="col-12 col-lg-6 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-light fw-semibold">
+                    Manage Project Members
+                </div>
+                <div class="card-body">
+                    <!-- Assign Member Form -->
+                    <h5 class="mb-3">Assign Member To This Project</h5>
+                    <form asp-action="AssignMember" method="post" class="mb-4">
+                        <input type="hidden" name="projectId" value="@Model.ProjectId" />
+
+                        <div class="mb-3">
+                            <label for="userId" class="form-label">Select User</label>
+                            <select name="userId" id="userId" class="form-select" required>
+                                <option value="" selected disabled>-- Choose User --</option>
+                                @foreach (var user in ViewBag.Users as List<UserRoles.Models.Users>)
+                                {
+                                    <option value="@user.Id">@user.FullName (@user.Email)</option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="role" class="form-label">Project Role</label>
+                            <input type="text" name="role" id="role" class="form-control" required
+                                placeholder="e.g. Developer, PM, QA" />
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-user-plus me-1"></i> Assign Member
+                        </button>
+                    </form>
+
+                    <!-- Current Members Table -->
+                    <h5 class="mb-3">Current Project Members</h5>
+                    @if (Model.Members != null && Model.Members.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>User</th>
+                                        <th>Email</th>
+                                        <th>Role</th>
+                                        <th style="width: 220px;">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var member in Model.Members)
+                                    {
+                                        <tr>
+                                            <td>@member.User.FullName</td>
+                                            <td>@member.User.Email</td>
+                                            <td>@member.ProjectRole</td>
+                                            <td>
+                                                <form asp-action="RemoveMember" method="post" class="d-inline me-2">
+                                                    <input type="hidden" name="projectId" value="@Model.ProjectId" />
+                                                    <input type="hidden" name="userId" value="@member.UserId" />
+                                                    <button type="submit" class="btn btn-sm btn-danger" title="Remove Member">
+                                                        <i class="fas fa-user-minus"></i>
+                                                    </button>
+                                                </form>
+
+                                                <form asp-action="EditMemberRole" method="post" class="d-inline">
+                                                    <input type="hidden" name="projectId" value="@Model.ProjectId" />
+                                                    <input type="hidden" name="userId" value="@member.UserId" />
+                                                    <div class="input-group input-group-sm" style="width: 160px;">
+                                                        <input type="text" name="newRole" value="@member.ProjectRole"
+                                                            class="form-control" placeholder="New role" />
+                                                        <button type="submit" class="btn btn-sm btn-warning"
+                                                            title="Update Role">
+                                                            <i class="fas fa-pen"></i>
+                                                        </button>
+                                                    </div>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted fst-italic mb-0">No members have been assigned to this project yet.</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div class="mt-4">
         <a asp-action="Edit" asp-route-id="@Model.ProjectId" class="btn btn-outline-primary me-2">
@@ -171,8 +194,9 @@ else
         </a>
     </div>
 
-    <!-- Font Awesome for icons -->
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
     @functions {
         public string GetPriorityColor(string priority)
         {
@@ -185,4 +209,4 @@ else
             };
         }
     }
-
+</div>
