@@ -1,0 +1,106 @@
+﻿@{
+    ViewData["Title"] = "Summary Report";
+}
+
+<div class="container-fluid py-4">
+    <!-- Page Header -->
+    <div class="mb-4">
+        <h1 class="fw-bold" Summary Report</h1>
+        <p class="text-muted">An overview of tickets, trends, and performance metrics. </p>
+    </div>
+
+    <!-- KPI Cards -->
+    <div class="row g-3 mb-4" id="kpiCards">
+        <div class="col-md-3">
+            <div class="card shadow-sm text-center p-3">
+                <h6 class="text-muted">Total Tickets</h6>
+                <h3 id="totalTickets" class="fw-bold placeholder-glow"><span class="placeholder col-6"></span></h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm text-center p-3">
+                <h6 class="text-muted">Open Tickets</h6>
+                <h3 id="openTickets" class="fw-bold placeholder-glow"><span class="placeholder col-6"></span></h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm text-center p-3">
+                <h6 class="text-muted">Closed Tickets</h6>
+                <h3 id="closedTickets" class="fw-bold placeholder-glow"><span class="placeholder col-6"></span></h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm text-center p-3">
+                <h6 class="text-muted">Avg. Resolution (Days)</h6>
+                <h3 id="avgResolution" class="fw-bold placeholder-glow"><span class="placeholder col-6"></span></h3>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Form -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form id="filterForm" class="row g-3">
+                <div class="col-md-3">
+                    <label for="startDate" class="form-label">Start Date</label>
+                    <input type="date" id="startDate" class="form-control" />
+                </div>
+                <div class="col-md-3">
+                    <label for="endDate" class="form-label">End Date</label>
+                    <input type="date" id="endDate" class="form-control" />
+                </div>
+                <div class="col-md-3">
+                    <label for="projectSelect" class="form-label">Project</label>
+                    <select id="projectSelect" class="form-select">
+                        <option value="">All Projects</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="userSelect" class="form-label">User</label>
+                    <select id="userSelect" class="form-select">
+                        <option value="">All Users</option>
+                    </select>
+                </div>
+                <div class="col-md-12 text-end">
+                    <button type="submit" class="btn btn-primary mt-3 me-2">Apply Filters</button>
+                    <button id="clearFilters" type="button" class="btn btn-outline-secondary mt-3 me-2">Clear</button>
+                    <button id="exportTrendsCsv" type="button" class="btn btn-outline-secondary mt-3 me-2">Export Trends CSV</button>
+                    <button id="exportProjectsCsv" type="button" class="btn btn-outline-secondary mt-3">Export Projects CSV</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <h5>Status Overview</h5>
+            <canvas id="statusChart"></canvas>
+        </div>
+        <div class="col-md-6">
+            <h5>Priority Distribution</h5>
+            <canvas id="priorityChart"></canvas>
+        </div>
+    </div>
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <h5>Projects Breakdown</h5>
+            <canvas id="projectChart"></canvas>
+        </div>
+        <div class="col-md-6">
+            <h5>User Activity</h5>
+            <canvas id="userChart"></canvas>
+        </div>
+    </div>
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h5>Ticket Trends</h5>
+            <canvas id="trendChart"></canvas>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="~/js/summaryReport.js"></script>
+}

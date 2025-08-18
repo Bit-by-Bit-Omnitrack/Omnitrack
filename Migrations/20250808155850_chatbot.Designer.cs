@@ -12,8 +12,8 @@ using UserRoles.Data;
 namespace UserRoles.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250805075001_ui_enhancements")]
-    partial class ui_enhancements
+    [Migration("20250808155850_chatbot")]
+    partial class chatbot
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -403,6 +403,9 @@ namespace UserRoles.Migrations
                     b.Property<int>("Id")
                         .HasColumnType("int");
 
+                    b.Property<DateTime>("JoinedDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("ProjectRole")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -478,6 +481,40 @@ namespace UserRoles.Migrations
                     b.ToTable("TaskItem");
                 });
 
+            modelBuilder.Entity("UserRoles.Models.TaskStatus", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("StatusName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("TaskStatuses");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            StatusName = "To Do"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            StatusName = "In Progress"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            StatusName = "Complete"
+                        });
+                });
+
             modelBuilder.Entity("UserRoles.Models.Tasks", b =>
                 {
                     b.Property<int>("Id")
@@ -503,7 +540,10 @@ namespace UserRoles.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("ProjectId")
+                    b.Property<int?>("ProjectId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("StatusID")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -513,6 +553,8 @@ namespace UserRoles.Migrations
                     b.HasIndex("CreatedById");
 
                     b.HasIndex("ProjectId");
+
+                    b.HasIndex("StatusID");
 
                     b.ToTable("Tasks");
                 });
@@ -543,6 +585,9 @@ namespace UserRoles.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<int>("PriorityId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ProjectId")
                         .HasColumnType("int");
 
                     b.Property<int>("StatusID")
@@ -579,6 +624,8 @@ namespace UserRoles.Migrations
                     b.HasIndex("CreatedByID");
 
                     b.HasIndex("PriorityId");
+
+                    b.HasIndex("ProjectId");
 
                     b.HasIndex("StatusID");
 
@@ -846,8 +893,12 @@ namespace UserRoles.Migrations
 
                     b.HasOne("UserRoles.Models.Project", "Project")
                         .WithMany("Tasks")
-                        .HasForeignKey("ProjectId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasForeignKey("ProjectId");
+
+                    b.HasOne("UserRoles.Models.TaskStatus", "Status")
+                        .WithMany()
+                        .HasForeignKey("StatusID")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("AssignedToUser");
@@ -855,6 +906,8 @@ namespace UserRoles.Migrations
                     b.Navigation("CreatedByUser");
 
                     b.Navigation("Project");
+
+                    b.Navigation("Status");
                 });
 
             modelBuilder.Entity("UserRoles.Models.Ticket", b =>
@@ -876,6 +929,10 @@ namespace UserRoles.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("UserRoles.Models.Project", "Project")
+                        .WithMany("Tickets")
+                        .HasForeignKey("ProjectId");
+
                     b.HasOne("UserRoles.Models.TicketStatus", "Status")
                         .WithMany()
                         .HasForeignKey("StatusID")
@@ -895,6 +952,8 @@ namespace UserRoles.Migrations
                     b.Navigation("CreatedByUser");
 
                     b.Navigation("Priority");
+
+                    b.Navigation("Project");
 
                     b.Navigation("Status");
 
@@ -928,6 +987,8 @@ namespace UserRoles.Migrations
                     b.Navigation("Members");
 
                     b.Navigation("Tasks");
+
+                    b.Navigation("Tickets");
                 });
 
             modelBuilder.Entity("UserRoles.Models.Tasks", b =>

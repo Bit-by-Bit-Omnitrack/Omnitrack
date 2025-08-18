@@ -1,0 +1,31 @@
+﻿@{
+    ViewData["Title"] = "Project Leader Dashboard";
+}
+
+<!-- Include shared dashboard header -->
+@await Html.PartialAsync("_DashboardHeader")
+
+<div class="container mt-5">
+    <h3 class="mt-4">Project Leader Tools</h3>
+
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <a class="card text-center shadow-sm p-4 text-decoration-none" href="/Projects/Index">
+                <h4>Manage Projects</h4>
+                <p>Oversee timelines, milestones, and deliverables</p>
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a class="card text-center shadow-sm p-4 text-decoration-none" href="/Tasks/Index">
+                <h4>Assign Tasks</h4>
+                <p>Delegate and track team task progress</p>
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a class="card text-center shadow-sm p-4 text-decoration-none" href="/Tickets/Index">
+                <h4>Review Tickets</h4>
+                <p>Monitor and resolve reported issues</p>
+            </a>
+        </div>
+    </div>
+</div>

@@ -115,12 +115,7 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.AccessDeniedPath = "/Account/AccessDenied";
     options.ReturnUrlParameter = "ReturnUrl";
 
-    // Redirect to Welcome page after login
-    options.Events.OnRedirectToLogin = context =>
-    {
-        context.Response.Redirect("/Home/Welcome");
-        return Task.CompletedTask;
-    };
+  
 });
 
 
@@ -131,7 +126,7 @@ using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     var dbContext = services.GetRequiredService<AppDbContext>();
-     dbContext.Database.Migrate(); // Applies migrations
+   //  dbContext.Database.Migrate(); // Applies migrations
     await SeedService.SeedDatabase(services); // Run seeding inside same scope
 }
 
@@ -168,6 +163,7 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Account}/{action=Login}/{id?}");
+
 
 
 app.Run();

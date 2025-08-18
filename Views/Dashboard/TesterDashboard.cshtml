@@ -1,0 +1,31 @@
+﻿@{
+    ViewData["Title"] = "Tester Dashboard";
+}
+
+<!-- Include shared dashboard header -->
+@await Html.PartialAsync("_DashboardHeader")
+
+<div class="container mt-5">
+    <h3 class="mt-4">Your Testing Tools</h3>
+
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <a class="card text-center shadow-sm p-4 text-decoration-none" href="/Tickets/Index">
+                <h4>Test Tickets</h4>
+                <p>Log and track all bug reports</p>
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a class="card text-center shadow-sm p-4 text-decoration-none" href="/Tasks/Index">
+                <h4>Testing Tasks</h4>
+                <p>View and manage your assigned tests</p>
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a class="card text-center shadow-sm p-4 text-decoration-none" href="/Projects/Index">
+                <h4>Test Projects</h4>
+                <p>Follow QA progress for projects</p>
+            </a>
+        </div>
+    </div>
+</div>
