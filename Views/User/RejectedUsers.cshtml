@@ -38,8 +38,13 @@ else
                         }
                     </td>
                     <td>
-                        <form asp-action="Approve" method="post" asp-controller="User">
-                            <input type="hidden" name="id" value="@user.Id" />
+                        <!-- Point to AccountController.ApproveUser -->
+                        <form asp-action="ApproveUser" asp-controller="Account" method="post">
+                            <!--  Use correct parameter name "userId" -->
+                            <input type="hidden" name="userId" value="@user.Id" />
+                            <!--  Pass source so controller knows it came from Rejected -->
+                            <input type="hidden" name="source" value="Rejected" />
+
                             <button type="submit" class="btn btn-success btn-sm">Approve</button>
                         </form>
                     </td>

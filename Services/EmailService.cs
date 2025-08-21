@@ -95,7 +95,7 @@ namespace UserRoles.Services
                 });
 
                 await _context.SaveChangesAsync(); // commit failure log
-                throw;
+                // throw;
             }
             finally
             {
