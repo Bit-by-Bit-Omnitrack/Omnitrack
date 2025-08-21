@@ -238,7 +238,7 @@ namespace UserRoles.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ApproveUser(string userId)
+        public async Task<IActionResult> ApproveUser(string userId, string source)
         {
             var user = await userManager.FindByIdAsync(userId);
             if (user == null)
@@ -246,18 +246,31 @@ namespace UserRoles.Controllers
                 return NotFound();
             }
 
+            // Activate the user and clear rejection reason if any
             user.IsActive = true;
+            user.RejectionReason = null;
             await userManager.UpdateAsync(user);
 
             await emailService.SendEmailAsync(
                 user.Email,
                 "Account Approved",
-                $@"<p>Hello {user.FullName},</p><p>Your account on <strong>OmniTrack</strong> has been approved.</p><p>You can now log in and access the system.</p><p>Regards,<br/>OmniTrack Team</p>"
+                $@"<p>Hello {user.FullName},</p>
+           <p>Your account on <strong>OmniTrack</strong> has been approved.</p>
+           <p>You can now log in and access the system.</p>
+           <p>Regards,<br/>OmniTrack Team</p>"
             );
 
-            TempData["Message"] = "User approved successfully.";
-            return RedirectToAction("PendingApproval");
+            TempData["Message"] = $"User {user.FullName} approved successfully.";
+
+            // Redirect based on where the request came from
+            if (source == "Rejected")
+                return RedirectToAction("RejectedUsers", "User");
+
+            return RedirectToAction("Authenticate", "User"); // default pending list
         }
+
+
+
 
         [HttpGet]
         public IActionResult AccessDenied()
