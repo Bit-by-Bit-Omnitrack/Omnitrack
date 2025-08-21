@@ -238,7 +238,7 @@ namespace UserRoles.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ApproveUser(string userId)
+        public async Task<IActionResult> ApproveUser(string userId, string source)
         {
             var user = await userManager.FindByIdAsync(userId);
             if (user == null)
@@ -246,7 +246,9 @@ namespace UserRoles.Controllers
                 return NotFound();
             }
 
+            // Activate the user and clear rejection reason if any
             user.IsActive = true;
+            user.RejectionReason = null;
             await userManager.UpdateAsync(user);
 
             await emailService.SendEmailAsync(
@@ -259,8 +261,15 @@ namespace UserRoles.Controllers
             );
 
             TempData["Message"] = $"User {user.FullName} approved successfully.";
-            return RedirectToAction("Authenticate", "User"); //  go back to admin approval list
+
+            // Redirect based on where the request came from
+            if (source == "Rejected")
+                return RedirectToAction("RejectedUsers", "User");
+
+            return RedirectToAction("Authenticate", "User"); // default pending list
         }
+
+
 
 
         [HttpGet]

@@ -169,3 +169,26 @@ a, .btn {
     .contact-card i {
         margin-right: 8px;
     }
+
+
+/* -------------------------------------------
+   Pending Approval Page Styling
+-------------------------------------------- */
+body.pending-approval-bg {
+    background-image: url('/Images/2account-bg.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    min-height: 100vh;
+}
+
+/* Style the card for readability */
+.pending-approval-card {
+    background: rgba(255, 255, 255, 0.9); /* Transparent white background */
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    max-width: 700px;
+    margin: auto;
+}
+
+
