@@ -252,12 +252,16 @@ namespace UserRoles.Controllers
             await emailService.SendEmailAsync(
                 user.Email,
                 "Account Approved",
-                $@"<p>Hello {user.FullName},</p><p>Your account on <strong>OmniTrack</strong> has been approved.</p><p>You can now log in and access the system.</p><p>Regards,<br/>OmniTrack Team</p>"
+                $@"<p>Hello {user.FullName},</p>
+           <p>Your account on <strong>OmniTrack</strong> has been approved.</p>
+           <p>You can now log in and access the system.</p>
+           <p>Regards,<br/>OmniTrack Team</p>"
             );
 
-            TempData["Message"] = "User approved successfully.";
-            return RedirectToAction("PendingApproval");
+            TempData["Message"] = $"User {user.FullName} approved successfully.";
+            return RedirectToAction("Authenticate", "User"); //  go back to admin approval list
         }
+
 
         [HttpGet]
         public IActionResult AccessDenied()
