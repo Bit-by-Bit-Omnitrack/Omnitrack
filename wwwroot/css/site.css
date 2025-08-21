@@ -130,3 +130,42 @@ a, .btn {
     }
 }
 
+
+/* -------------------------------------------
+   Contact Page Styling
+-------------------------------------------- */
+.contact-background {
+    background-image: url('/Images/2account-bg.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    min-height: 100vh; /* Full height of screen */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+}
+
+.contact-card {
+    background: rgba(255, 255, 255, 0.9); /* Transparent white for readability */
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    max-width: 600px;
+    width: 100%;
+    text-align: center;
+}
+
+    .contact-card h2 {
+        margin-bottom: 15px;
+        font-weight: bold;
+    }
+
+    .contact-card p {
+        font-size: 1.1rem;
+        margin: 10px 0;
+    }
+
+    .contact-card i {
+        margin-right: 8px;
+    }
