@@ -1,6 +1,15 @@
 ﻿@model UserRoles.Models.AboutViewModel
 @{
     ViewData["Title"] = "About " + Model.AppName;
+
+    // Map names to image files
+    var memberImages = new Dictionary<string, string>
+    {
+        { "Tshenolo Millicent Mogane", Url.Content("~/Images/TshenoloMogane.jpg") },
+        { "Azola Jokweni", Url.Content("~/Images/AzolaJokweni.jpg") },
+        { "Esther Mkhabela", Url.Content("~/Images/EstherMkhabela.jpg") },
+        { "Tlotlo Molefe", Url.Content("~/Images/TlotloMolefe.jpeg") }
+    };
 }
 
 <section class="content-header">
@@ -38,15 +47,18 @@
                 <h3 class="card-title"><i class="fas fa-users mr-2"></i>The Team — @Model.TeamName</h3>
             </div>
             <div class="card-body">
-                <div class="row">
+                <div class="row text-center">
                     @foreach (var member in Model.TeamMembers)
                     {
                         <div class="col-sm-6 col-md-3 mb-3">
-                            <div class="info-box">
-                                <span class="info-box-icon bg-dark elevation-1"><i class="fas fa-user"></i></span>
-                                <div class="info-box-content">
-                                    <span class="info-box-text">@member</span>
-                                    <span class="info-box-number">@Model.TeamName</span>
+                            <div class="card h-100 shadow-sm">
+                                <img src="@memberImages[member]"
+                                     alt="@member"
+                                     class="card-img-top rounded-circle p-3"
+                                     style="width:150px; height:150px; object-fit:cover; margin:auto;" />
+                                <div class="card-body">
+                                    <h6 class="card-title">@member</h6>
+                                    <p class="card-text text-muted">@Model.TeamName</p>
                                 </div>
                             </div>
                         </div>
