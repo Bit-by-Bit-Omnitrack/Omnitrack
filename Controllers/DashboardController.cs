@@ -21,21 +21,25 @@ namespace UserRoles.Controllers
             return RedirectToAction("AccessDenied", "Account");
         }
 
+        [Authorize(Roles = "System Administrator")]
         public IActionResult AdminDashboard()
         {
             return View();
         }
 
+        [Authorize(Roles = "Project Leader")]
         public IActionResult LeaderDashboard()
         {
             return View();
         }
 
+        [Authorize(Roles = "Developer")]
         public IActionResult DeveloperDashboard()
         {
             return View();
         }
 
+        [Authorize(Roles = "Tester")]
         public IActionResult TesterDashboard()
         {
             return View();

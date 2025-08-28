@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Authorization; // added for IEmailService
 
 namespace UserRoles.Controllers
 {
-     // Ensure only authorized users can access this controller
+    [Authorize(Roles = "System Administrator")] // Ensure only authorized users can access this controller
     public class UserController : Controller
     {
         private readonly UserManager<Users> _userManager;

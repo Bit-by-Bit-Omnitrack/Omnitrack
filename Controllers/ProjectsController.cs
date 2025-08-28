@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -60,12 +61,14 @@ namespace UserRoles.Controllers
         }
 
         // GET: Projects/Create
+        [Authorize(Roles = "Project Leader")] //Only the Project Leader can create a project
         public IActionResult Create()
         {
             return View();
         }
 
         // POST: Projects/Create
+        [Authorize(Roles = "Project Leader")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("ProjectId,ProjectName,Description,StartDate,EndDate,IsActive")] Project project)
@@ -79,6 +82,7 @@ namespace UserRoles.Controllers
         }
 
         // GET: Projects/Edit/5
+        [Authorize(Roles = "Project Leader")] //Only the Project Leader can edit a project
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null) return NotFound();
@@ -90,6 +94,7 @@ namespace UserRoles.Controllers
         }
 
         // POST: Projects/Edit/5
+        [Authorize(Roles = "Project Leader")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("ProjectId,ProjectName,Description,StartDate,EndDate,IsActive")] Project project)
@@ -113,6 +118,7 @@ namespace UserRoles.Controllers
         }
 
         // GET: Projects/Delete/5
+        [Authorize(Roles = "Project Leader")] //Only the Project Leader can delete a project
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null) return NotFound();
@@ -126,6 +132,7 @@ namespace UserRoles.Controllers
         }
 
         // POST: Projects/Delete/5
+        [Authorize(Roles = "Project Leader")]
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
@@ -141,6 +148,7 @@ namespace UserRoles.Controllers
         }
 
         // POST: Projects/AssignMember
+        [Authorize(Roles = "Project Leader")] //Only the Project Leader can assign members
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AssignMember(int projectId, string userId, string role)
@@ -165,6 +173,7 @@ namespace UserRoles.Controllers
         }
 
         // POST: Projects/RemoveMember
+        [Authorize(Roles = "Project Leader")] //Only the Project Leader can remove members
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> RemoveMember(int projectId, string userId)
@@ -182,6 +191,7 @@ namespace UserRoles.Controllers
         }
 
         // POST: Projects/EditMemberRole
+        [Authorize(Roles = "Project Leader")] //Only the Project Leader can edit a member's role
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditMemberRole(int projectId, string userId, string newRole)

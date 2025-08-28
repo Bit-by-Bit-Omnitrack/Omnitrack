@@ -49,15 +49,17 @@
                     <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
                 </li>
                 <li class="nav-item d-none d-sm-inline-block">
-                <a asp-controller="Dashboard"
-                   asp-action="@(User.IsInRole("Admin") ? "AdminDashboard"
-                                         : User.IsInRole("ProjectLeader") ? "LeaderDashboard"
-                                         : User.IsInRole("Developer") ? "DeveloperDashboard"
-                                         : "TesterDashboard")"
-                   class="nav-link">
+                @{
+                    var dashboardAction = User.IsInRole("System Administrator") ? "AdminDashboard"
+                    : User.IsInRole("Project Leader") ? "LeaderDashboard"
+                    : User.IsInRole("Developer") ? "DeveloperDashboard"
+                    : User.IsInRole("Tester") ? "TesterDashboard"
+                    : "Index"; // fallback
+                }
+
+                <a asp-controller="Dashboard" asp-action="@dashboardAction" class="btn btn-primary">
                     Home
                 </a>
-
                 </li>
             <li class="nav-item d-none d-sm-inline-block">
                 <a asp-controller="Contact" asp-action="Index" class="nav-link">Contact</a> <!-- ADDED -->
@@ -141,23 +143,25 @@
                     </div>
                 </div>
             -->
+            @{
+                var SideDashboardAction = User.IsInRole("System Administrator") ? "AdminDashboard"
+                : User.IsInRole("Project Leader") ? "LeaderDashboard"
+                : User.IsInRole("Developer") ? "DeveloperDashboard"
+                : User.IsInRole("Tester") ? "TesterDashboard"
+                : null; // fallback if no role
+            }
 
                 <!-- Sidebar Menu -->
                 <nav class="mt-2">
                     <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
                         <!-- Dashboard -->
                         <li class="nav-item">
-                        <a asp-controller="Dashboard"
-                           asp-action="@(User.IsInRole("Admin") ? "AdminDashboard"
-                                          : User.IsInRole("ProjectLeader") ? "LeaderDashboard"
-                                          : User.IsInRole("Developer") ? "DeveloperDashboard"
-                                          : "TesterDashboard")"
-                           class="nav-link">
-                            <i class="nav-icon fas fa-tachometer-alt"></i>
-                            <p>Dashboard</p>
-                        </a>
-
-
+                            <a asp-controller="Dashboard"
+                               asp-action="@SideDashboardAction"
+                               class="nav-link">
+                                <i class="nav-icon fas fa-tachometer-alt"></i>
+                                <p>Dashboard</p>
+                            </a>
                         </li>
 
                         <!-- Tickets -->
