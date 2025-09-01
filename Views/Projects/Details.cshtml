@@ -66,15 +66,15 @@
                                             <td>@ticket.AssignedToUser?.UserName</td>
                                             <td>@ticket.DueDate?.ToString("dd MMM yyyy")</td>
                                             <td>
-                                                <a asp-action="Details" asp-route-id="@ticket.Id"
+                                                <a asp-controller="Tickets" asp-action="Details" asp-route-id="@ticket.Id"
                                                     class="btn btn-sm btn-outline-secondary">
                                                     <i class="fas fa-eye"></i> View
                                                 </a>
-                                                <a asp-action="Edit" asp-route-id="@ticket.Id"
+                                                <a asp-controller="Tickets" asp-action="Edit" asp-route-id="@ticket.Id"
                                                     class="btn btn-sm btn-outline-warning">
                                                     <i class="fas fa-edit"></i> Edit
                                                 </a>
-                                                <a asp-action="Delete" asp-route-id="@ticket.Id"
+                                                <a asp-controller="Tickets" asp-action="Delete" asp-route-id="@ticket.Id"
                                                     class="btn btn-sm btn-outline-danger">
                                                     <i class="fas fa-trash"></i> Delete
                                                 </a>
