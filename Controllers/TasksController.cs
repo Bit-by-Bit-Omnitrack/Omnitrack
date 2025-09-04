@@ -142,8 +142,12 @@ namespace UserRoles.Controllers
             if (!await _context.TaskStatuses.AnyAsync(s => s.Id == form.StatusID))
                 ModelState.AddModelError(nameof(form.StatusID), "Please select a valid status.");
 
-            if (!await _context.Projects.AnyAsync(p => p.ProjectId == form.ProjectId))
-                ModelState.AddModelError(nameof(form.ProjectId), "Please select a valid project.");
+            if (form.ProjectId.HasValue)
+            {
+                var projectExists = await _context.Projects.AnyAsync(p => p.ProjectId == form.ProjectId.Value);
+                if (!projectExists)
+                    ModelState.AddModelError(nameof(form.ProjectId), "Please select a valid project.");
+            }
 
             // (Optional) AssignedToUserId can be null; if provided, validate it exists
             if (!string.IsNullOrEmpty(form.AssignedToUserId) &&
@@ -209,4 +213,5 @@ namespace UserRoles.Controllers
             return _context.Tasks.Any(e => e.Id == id);
         }
     }
+
 }
