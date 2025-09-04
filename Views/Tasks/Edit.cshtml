@@ -41,6 +41,15 @@
                     <span asp-validation-for="ProjectId" class="text-danger small"></span>
                 </div>
 
+                <!-- Status Dropdown -->
+                <div class="mb-3">
+                    <label asp-for="StatusID" class="form-label fw-semibold">Status</label>
+                    <select asp-for="StatusID" class="form-select" asp-items="ViewBag.Statuses">
+                        <option value="">-- Select Status --</option>
+                    </select>
+                    <span asp-validation-for="StatusID" class="text-danger small"></span>
+                </div>
+
                 <!-- Task Details -->
                 <div class="mb-3">
                     <label asp-for="Details" class="form-label fw-semibold">Details</label>
