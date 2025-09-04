@@ -130,34 +130,46 @@ namespace UserRoles.Controllers
         // POST: Tasks/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,AssignedToUserId,Details,DueDate,ProjectId,StatusID")] Tasks tasks)
+        public async Task<IActionResult> Edit(int id, UserRoles.Models.Tasks form)
         {
-            if (id != tasks.Id) return NotFound();
+            if (id != form.Id) return NotFound();
 
-            if (ModelState.IsValid)
+            // Load the existing row so we don't clobber other columns
+            var task = await _context.Tasks.FirstOrDefaultAsync(t => t.Id == id);
+            if (task == null) return NotFound();
+
+            // Validate foreign keys exist (prevents FK exceptions)
+            if (!await _context.TaskStatuses.AnyAsync(s => s.Id == form.StatusID))
+                ModelState.AddModelError(nameof(form.StatusID), "Please select a valid status.");
+
+            if (!await _context.Projects.AnyAsync(p => p.ProjectId == form.ProjectId))
+                ModelState.AddModelError(nameof(form.ProjectId), "Please select a valid project.");
+
+            // (Optional) AssignedToUserId can be null; if provided, validate it exists
+            if (!string.IsNullOrEmpty(form.AssignedToUserId) &&
+                !await _userManager.Users.AnyAsync(u => u.Id == form.AssignedToUserId))
+                ModelState.AddModelError(nameof(form.AssignedToUserId), "Please select a valid user.");
+
+            if (!ModelState.IsValid)
             {
-                try
-                {
-                    var existingTask = await _context.Tasks.AsNoTracking().FirstOrDefaultAsync(t => t.Id == id);
-                    if (existingTask == null) return NotFound();
-
-                    tasks.CreatedById = existingTask.CreatedById;
-
-                    _context.Update(tasks);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!TasksExists(tasks.Id)) return NotFound();
-                    else throw;
-                }
-                return RedirectToAction(nameof(Index));
+                // Re-populate dropdowns and return the posted values
+                ViewBag.Users = new SelectList(await _userManager.Users.Where(u => u.IsActive).ToListAsync(), "Id", "UserName", form.AssignedToUserId);
+                ViewBag.Projects = new SelectList(await _context.Projects.ToListAsync(), "ProjectId", "ProjectName", form.ProjectId);
+                ViewBag.Statuses = new SelectList(await _context.TaskStatuses.ToListAsync(), "Id", "StatusName", form.StatusID);
+                return View(form);
             }
 
-            ViewBag.Users = new SelectList(await _userManager.Users.Where(u => u.IsActive).ToListAsync(), "Id", "UserName", tasks.AssignedToUserId);
-            ViewBag.Projects = new SelectList(await _context.Projects.ToListAsync(), "ProjectId", "ProjectName", tasks.ProjectId);
-            ViewBag.Statuses = new SelectList(await _context.TaskStatuses.ToListAsync(), "Id", "StatusName", tasks.StatusID);
-            return View(tasks);
+            // Map only editable fields
+            task.Name = form.Name;
+            task.AssignedToUserId = form.AssignedToUserId;
+            task.ProjectId = form.ProjectId;
+            task.StatusID = form.StatusID;
+            task.Details = form.Details;
+            task.DueDate = form.DueDate;
+            // (Keep CreatedById/CreatedDate as-is; update Updated* metadata here if you have them)
+
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: Tasks/Delete/5
