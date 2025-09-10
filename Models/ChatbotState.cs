@@ -21,7 +21,9 @@
             CreatingTask_AskAssignedUser,
             CreatingTask_AskDueDate,
             CreatingTask_AskProject,
-            CreatingTask_AskStatus
+            CreatingTask_AskStatus,
+
+            CountingTickets_AskUser
         }
 
         public BotAction CurrentAction { get; set; } = BotAction.None;

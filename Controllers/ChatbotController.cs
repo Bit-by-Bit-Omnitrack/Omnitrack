@@ -66,15 +66,20 @@ namespace UserRoles.Controllers
                 }
                 // Check if the current conversation is for assigning a project
                 else if (chatbotState.CurrentAction >= ChatbotState.BotAction.AssigningProject_AskUser &&
-                         chatbotState.CurrentAction <= ChatbotState.BotAction.AssigningProject_AskProject)
+                        chatbotState.CurrentAction <= ChatbotState.BotAction.AssigningProject_AskProject)
                 {
                     return await HandleProjectAssignmentConversation(input);
                 }
-                // New: Check if the current conversation is for creating a task
+                // Check if the current conversation is for creating a task
                 else if (chatbotState.CurrentAction >= ChatbotState.BotAction.CreatingTask_AskName &&
-                         chatbotState.CurrentAction <= ChatbotState.BotAction.CreatingTask_AskStatus)
+                        chatbotState.CurrentAction <= ChatbotState.BotAction.CreatingTask_AskStatus)
                 {
                     return await HandleTaskCreationConversation(input);
+                }
+                // New: Check if the current conversation is for counting tickets
+                else if (chatbotState.CurrentAction == ChatbotState.BotAction.CountingTickets_AskUser)
+                {
+                    return await HandleTicketCountingConversation(input);
                 }
             }
 
@@ -93,6 +98,16 @@ namespace UserRoles.Controllers
                 chatbotState.Reset();
                 chatbotState.CurrentAction = ChatbotState.BotAction.CreatingTicket_AskTitle;
                 return "Okay, let's create a new ticket. What is the title of the ticket?";
+            }
+
+            if (input.Contains("tickets assigned to"))
+            {
+                chatbotState.Reset();
+                chatbotState.CurrentAction = ChatbotState.BotAction.CountingTickets_AskUser;
+                var users = await _userManager.Users.Where(u => u.IsActive).ToListAsync();
+                var userList = string.Join(", ", users.Select(u => u.UserName));
+                if (!users.Any()) return "No active users found. I can't count tickets right now.";
+                return $"Whose assigned tickets do you want to count? Available users: {userList}";
             }
 
             if (input.Contains("assign project"))
@@ -114,8 +129,40 @@ namespace UserRoles.Controllers
                 return "Okay, let's create a new task. What is the name of the task?";
             }
 
-            return "Sorry, I didn’t understand that. Can you rephrase? You can ask me to 'create ticket', 'assign project', or 'create task'.";
+            return "Sorry, I didn’t understand that. Can you rephrase? You can ask me to 'create ticket', 'assign project', 'create task', or 'count tickets assigned to'.";
         }
+        
+       
+        private async Task<string> HandleTicketCountingConversation(string input)
+        {
+            switch (chatbotState.CurrentAction)
+            {
+                case ChatbotState.BotAction.CountingTickets_AskUser:
+                    var userName = input;
+                    var user = await _userManager.Users.FirstOrDefaultAsync(u => u.UserName.ToLower() == userName.ToLower());
+
+                    if (user != null)
+                    {
+                        var assignedTicketsCount = await _context.Tickets
+                            .Where(t => t.AssignedToUserId == user.Id)
+                            .CountAsync();
+
+                        chatbotState.Reset();
+                        return $"'{user.UserName}' has {assignedTicketsCount} tickets assigned.";
+                    }
+                    else
+                    {
+                        var usersAgain = await _userManager.Users.Where(u => u.IsActive).ToListAsync();
+                        var userListAgain = string.Join(", ", usersAgain.Select(u => u.UserName));
+                        return $"User '{userName}' not found. Please try again. Available users: {userListAgain}";
+                    }
+                default:
+                    chatbotState.Reset();
+                    return "An error occurred during the ticket count process. Please type 'tickets assigned to' to start over.";
+            }
+        }
+
+
 
         private async Task<string> HandleTicketCreationConversation(string input)
         {
@@ -205,6 +252,8 @@ namespace UserRoles.Controllers
             }
         }
 
+     
+
         private async Task<string> HandleProjectAssignmentConversation(string input)
         {
             switch (chatbotState.CurrentAction)
@@ -269,6 +318,8 @@ namespace UserRoles.Controllers
                     return "An error occurred during project assignment. Please type 'assign project' to start over.";
             }
         }
+
+      
 
         private async Task<string> HandleTaskCreationConversation(string input)
         {
@@ -363,10 +414,12 @@ namespace UserRoles.Controllers
             }
         }
 
+     
+
         private async Task<string> CreateTaskFromChatbot()
         {
             var newTask = chatbotState.TempTask;
-           // newTask.CreatedDate = DateTime.UtcNow;
+            // newTask.CreatedDate = DateTime.UtcNow;
 
             // Set a default status if none was provided
             if (newTask.StatusID == 0)
@@ -399,6 +452,8 @@ namespace UserRoles.Controllers
                 return "I encountered an error while trying to create the task. Please try again later or contact support.";
             }
         }
+
+
 
         private async Task<string> CreateTicketFromChatbot()
         {
