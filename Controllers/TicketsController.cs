@@ -359,6 +359,44 @@ namespace UserRoles.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        // GET: Tickets/ChartData
+        public async Task<IActionResult> ChartData()
+        {
+  
+            var allTickets = await _context.Tickets
+                .Include(t => t.CreatedByUser)
+                .Include(t => t.AssignedToUser)
+                .ToListAsync();
+
+           
+            var createdTickets = allTickets
+                .GroupBy(t => t.CreatedByUser?.UserName ?? "Unassigned")
+                .Select(g => new { User = g.Key, Count = g.Count() })
+                .ToDictionary(x => x.User, x => x.Count);
+
+           
+            var assignedTickets = allTickets
+                .Where(t => t.AssignedToUser != null)
+                .GroupBy(t => t.AssignedToUser.UserName)
+                .Select(g => new { User = g.Key, Count = g.Count() })
+                .ToDictionary(x => x.User, x => x.Count);
+
+      
+            var chartData = new
+            {
+                Created = createdTickets,
+                Assigned = assignedTickets
+            };
+
+            return Json(chartData);
+        }
+
+        // GET: Tickets/Charts
+        public IActionResult Charts()
+        {
+            return View();
+        }
+
         private bool TicketExists(int id)
         {
             return _context.Tickets.Any(e => e.Id == id);

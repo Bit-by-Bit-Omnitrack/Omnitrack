@@ -85,6 +85,8 @@
                         <span>OmniBot</span>
                     </a>
                 </li>
+
+           
                 
                 <!-- Search -->
                 <li class="nav-item">
@@ -162,6 +164,7 @@
                             </a>
                         </li>
 
+                    
                         <!-- ================= SYSTEM ADMIN ONLY ================= -->
                         @if (User.IsInRole("System Administrator"))
                         {
@@ -199,6 +202,7 @@
                                 </ul>
                             </li>
 
+   
                             <!-- Reports -->
                             <li class="nav-item">
                                 <a asp-controller="Reports" asp-action="Summary"
@@ -248,6 +252,13 @@
                                 </a>
                             </li>
                         }
+                    <li class="nav-item">
+                        <a asp-controller="Tickets" asp-action="Charts"
+                           class="nav-link">
+                            <i class="nav-icon fas fa-chart-pie"></i>
+                            <p>Chart</p>
+                        </a>
+                    </li>
                     </ul>
                 </nav>
                 <!-- /.sidebar-menu -->
@@ -312,6 +323,8 @@
     <script src="~/AdminLTE/plugins/datatables-buttons/js/buttons.html5.min.js"></script>
     <script src="~/AdminLTE/plugins/datatables-buttons/js/buttons.print.min.js"></script>
     <script src="~/AdminLTE/plugins/datatables-buttons/js/buttons.colVis.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         $(function () {
             $("#example1").DataTable({
