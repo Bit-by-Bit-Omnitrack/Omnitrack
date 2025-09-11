@@ -66,7 +66,6 @@ namespace UserRoles.Controllers
         }
 
         // GET: Tickets/History
-        // GET: Tickets/History
         public async Task<IActionResult> History(int? statusId)
         {
             var completedTicketsQuery = _context.Tickets
@@ -281,7 +280,7 @@ namespace UserRoles.Controllers
                 ViewBag.Statuses = new SelectList(await _context.TicketStatuses.ToListAsync(), "Id", "StatusName", ticket.StatusID);
                 ViewBag.Priorities = new SelectList(await _context.Priorities.ToListAsync(), "Id", "Name", ticket.PriorityId);
                 ViewBag.Tasks = new SelectList(await _context.Tasks.ToListAsync(), "Id", "Name", ticket.TasksId); // Re-populate with selected TaskId
-                ViewBag.Projects = new SelectList(await _context.Projects.ToListAsync(), "ProjectId", "ProjectName", ticket.ProjectId);                                                                                                   
+                ViewBag.Projects = new SelectList(await _context.Projects.ToListAsync(), "ProjectId", "ProjectName", ticket.ProjectId);
             }
 
             var existingTicket = await _context.Tickets.FirstOrDefaultAsync(t => t.Id == id);
@@ -319,15 +318,8 @@ namespace UserRoles.Controllers
         }
 
 
-        // POST: Tickets1/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-
-
-
         // GET: Tickets1/Delete/5
         [HttpGet]
-        // GET: Tickets1/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -362,26 +354,26 @@ namespace UserRoles.Controllers
         // GET: Tickets/ChartData
         public async Task<IActionResult> ChartData()
         {
-  
+
             var allTickets = await _context.Tickets
                 .Include(t => t.CreatedByUser)
                 .Include(t => t.AssignedToUser)
                 .ToListAsync();
 
-           
+
             var createdTickets = allTickets
                 .GroupBy(t => t.CreatedByUser?.UserName ?? "Unassigned")
                 .Select(g => new { User = g.Key, Count = g.Count() })
                 .ToDictionary(x => x.User, x => x.Count);
 
-           
+
             var assignedTickets = allTickets
                 .Where(t => t.AssignedToUser != null)
                 .GroupBy(t => t.AssignedToUser.UserName)
                 .Select(g => new { User = g.Key, Count = g.Count() })
                 .ToDictionary(x => x.User, x => x.Count);
 
-      
+
             var chartData = new
             {
                 Created = createdTickets,
@@ -389,6 +381,43 @@ namespace UserRoles.Controllers
             };
 
             return Json(chartData);
+        }
+
+        // Action to get data for the ticket status chart
+        [HttpGet]
+        public async Task<IActionResult> StatusChartData()
+        {
+            var statusCounts = await _context.Tickets
+                .Include(t => t.Status)
+                .GroupBy(t => t.Status.StatusName)
+                .Select(g => new { Status = g.Key, Count = g.Count() })
+                .ToDictionaryAsync(x => x.Status, x => x.Count);
+
+            return Json(statusCounts);
+        }
+
+        // New action to get data for the report
+        [HttpGet]
+        public async Task<IActionResult> GetReportData()
+        {
+            var tickets = await _context.Tickets
+                .Include(t => t.AssignedToUser)
+                .Include(t => t.Status)
+                .Include(t => t.Priority)
+                .Include(t => t.Tasks)
+                .Select(t => new
+                {
+                    t.Title,
+                    t.Description,
+                    DueDate = t.DueDate.HasValue ? t.DueDate.Value.ToString("yyyy-MM-dd") : string.Empty, // Format date for easy use
+                    Priority = t.Priority.Name,
+                    AssignedTo = t.AssignedToUser.UserName,
+                    Status = t.Status.StatusName,
+                    Task = t.Tasks.Name
+                })
+                .ToListAsync();
+
+            return Json(tickets);
         }
 
         // GET: Tickets/Charts
