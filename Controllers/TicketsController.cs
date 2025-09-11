@@ -8,8 +8,16 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualBasic;
 using UserRoles.Models;
+using UserRoles.ViewModels;
 using Microsoft.AspNetCore.Authorization;
-using UserRoles.Data; // Gives access to AppDbContext and other data-related classes
+using UserRoles.Data;
+using Syncfusion.DocIO;
+using Syncfusion.DocIO.DLS;
+using Syncfusion.Pdf;
+using Syncfusion.Pdf.Graphics;
+using System.Drawing;
+using Syncfusion.Pdf.Tables;
+using Syncfusion.Drawing; // Add this namespace for RectangleF and PointF
 
 namespace UserRoles.Controllers
 {
@@ -426,6 +434,222 @@ namespace UserRoles.Controllers
             return View();
         }
 
+        /// <summary>
+        /// Downloads a comprehensive report of all tasks and tickets as a CSV file.
+        /// Includes user roles and project details.
+        /// </summary>
+        /// <returns>A CSV file with the report data.</returns>
+        public async Task<IActionResult> DownloadCsvReport()
+        {
+            var reportData = await GetReportDataAsync();
+            var csvBuilder = new System.Text.StringBuilder();
+
+            // Add header row
+            csvBuilder.AppendLine("Project Name,Task Name,Task Details,Task Status,Task Due Date,Assigned To (Task),Assigned To Email (Task),Created By (Task),Ticket Title,Ticket Description,Ticket Status,Ticket Priority,Ticket Due Date,Assigned To (Ticket),Created By (Ticket)");
+
+            // Add data rows
+            foreach (var row in reportData)
+            {
+                csvBuilder.AppendLine(
+                    $"{EscapeCsv(row.ProjectName)}," +
+                    $"{EscapeCsv(row.TaskName)}," +
+                    $"{EscapeCsv(row.TaskDetails)}," +
+                    $"{EscapeCsv(row.TaskStatus)}," +
+                    $"{row.TaskDueDate?.ToString("yyyy-MM-dd") ?? ""}," +
+                    $"{EscapeCsv(row.AssignedToUser)}," +
+                    $"{EscapeCsv(row.AssignedToUserEmail)}," +
+                    $"{EscapeCsv(row.CreatedByUser)}," +
+                    $"{EscapeCsv(row.TicketTitle)}," +
+                    $"{EscapeCsv(row.TicketDescription)}," +
+                    $"{EscapeCsv(row.TicketStatus)}," +
+                    $"{EscapeCsv(row.TicketPriority)}," +
+                    $"{row.TicketDueDate?.ToString("yyyy-MM-dd") ?? ""}," +
+                    $"{EscapeCsv(row.AssignedToUserTicket)}," +
+                    $"{EscapeCsv(row.CreatedByTicket)}"
+                );
+            }
+            return File(System.Text.Encoding.UTF8.GetBytes(csvBuilder.ToString()), "text/csv", $"Omnitrack_Report_{DateTime.Now:yyyyMMdd_HHmmss}.csv");
+        }
+
+        /// <summary>
+        /// Downloads a comprehensive report of all tasks and tickets as a Word document.
+        /// </summary>
+        [Authorize(Roles = "System Administrator, Project Leader")]
+        public async Task<IActionResult> DownloadDocReport()
+        {
+            var reportData = await GetReportDataAsync();
+            var stream = new MemoryStream(); // Create the stream outside the using block
+
+            // Create a new Word document
+            using (WordDocument document = new WordDocument())
+            {
+                // Add a section and a table to the document
+                IWSection section = document.AddSection();
+                WTable table = (WTable)section.AddTable(); 
+                table.ResetCells(reportData.Count + 1, 8); 
+
+                // Add table header
+                string[] headers = { "Project Name", "Ticket Title", "Ticket Description", "Ticket Status", "Ticket Priority", "Ticket Due Date", "Assigned To (Ticket)", "Created By (Ticket)" };
+                for (int i = 0; i < headers.Length; i++)
+                {
+                    table[0, i].AddParagraph().AppendText(headers[i]).CharacterFormat.Bold = true;
+                }
+
+                // Add data rows
+                for (int i = 0; i < reportData.Count; i++)
+                {
+                    var rowData = reportData[i];
+                    table[i + 1, 0].AddParagraph().AppendText(rowData.ProjectName);
+                    table[i + 1, 1].AddParagraph().AppendText(rowData.TicketTitle);
+                    table[i + 1, 2].AddParagraph().AppendText(rowData.TicketDescription);
+                    table[i + 1, 3].AddParagraph().AppendText(rowData.TicketStatus);
+                    table[i + 1, 4].AddParagraph().AppendText(rowData.TicketPriority);
+                    table[i + 1, 5].AddParagraph().AppendText(rowData.TicketDueDate?.ToString("yyyy-MM-dd"));
+                    table[i + 1, 6].AddParagraph().AppendText(rowData.AssignedToUserTicket);
+                    table[i + 1, 7].AddParagraph().AppendText(rowData.CreatedByTicket);
+                }
+
+                IWSection section1= document.AddSection();
+                WTable table1= (WTable)section1.AddTable();
+               table1.ResetCells(reportData.Count + 1, 7);
+
+                string[] headers2 = { "Task Name", "Task Details", "Task Status", "Task Due Date", "Assigned To (Task)", "Assigned To Email (Task)", "Created By (Task)" };
+                for (int i = 0; i < headers2.Length; i++)
+                {
+                   table1[0, i].AddParagraph().AppendText(headers2[i]).CharacterFormat.Bold = true;
+                }
+
+                // Add data rows
+                for (int i = 0; i < reportData.Count; i++)
+                {
+                    var rowData = reportData[i];
+                    
+                   table1[i + 1, 0].AddParagraph().AppendText(rowData.TaskName);
+                   table1[i + 1, 1].AddParagraph().AppendText(rowData.TaskDetails);
+                   table1[i + 1, 2].AddParagraph().AppendText(rowData.TaskStatus);
+                   table1[i + 1, 3].AddParagraph().AppendText(rowData.TaskDueDate?.ToString("yyyy-MM-dd"));
+                   table1[i + 1, 4].AddParagraph().AppendText(rowData.AssignedToUser);
+                   table1[i + 1, 5].AddParagraph().AppendText(rowData.AssignedToUserEmail);
+                   table1[i + 1, 6].AddParagraph().AppendText(rowData.CreatedByUser);
+                }
+
+                // Save the document to the stream
+                document.Save(stream, FormatType.Docx);
+            }
+            // Return the stream. The framework will handle its disposal.
+            stream.Position = 0;
+            return File(stream, "application/msword", $"Omnitrack_Report_{DateTime.Now:yyyyMMdd_HHmmss}.docx");
+        }
+
+        /// <summary>
+        /// Downloads a comprehensive report of all tasks and tickets as a PDF file.
+        /// </summary>
+        [Authorize(Roles = "System Administrator, Project Leader")]
+        public async Task<IActionResult> DownloadPdfReport()
+        {
+            var reportData = await GetReportDataAsync();
+            var stream = new MemoryStream(); // Create the stream outside the using block
+
+            // Create a new PDF document
+            using (PdfDocument document = new PdfDocument())
+            {
+                // Add a page
+                PdfPage page = document.Pages.Add();
+
+                // Create a table and add data
+                PdfLightTable pdfTable = new PdfLightTable();
+                pdfTable.DataSource = reportData.Select(r => new
+                {
+                    r.ProjectName,
+                    r.TaskName,
+                    TaskDetails = r.TaskDetails?.Substring(0, Math.Min(r.TaskDetails.Length, 30)) + "...",
+                    r.TaskStatus,
+                    TaskDueDate = r.TaskDueDate?.ToString("yyyy-MM-dd"),
+                    AssignedToUser = r.AssignedToUser,
+                    CreatedByUser = r.CreatedByUser,
+                    r.TicketTitle,
+                    TicketDescription = r.TicketDescription?.Substring(0, Math.Min(r.TicketDescription.Length, 30)) + "...",
+                    r.TicketStatus,
+                    r.TicketPriority,
+                    TicketDueDate = r.TicketDueDate?.ToString("yyyy-MM-dd"),
+                    AssignedToUserTicket = r.AssignedToUserTicket,
+                    CreatedByTicket = r.CreatedByTicket
+                }).ToList();
+
+            
+                Syncfusion.Drawing.RectangleF bounds = new Syncfusion.Drawing.RectangleF(0, 0, page.Graphics.ClientSize.Width, page.Graphics.ClientSize.Height);
+                pdfTable.Draw(page, bounds);
+
+                // Save the document to the stream
+                document.Save(stream);
+            }
+            // Return the stream. The framework will handle its disposal.
+            stream.Position = 0;
+            return File(stream, "application/pdf", $"Omnitrack_Report_{DateTime.Now:yyyyMMdd_HHmmss}.pdf");
+        }
+
+        // Helper method to fetch the data
+        private async Task<List<ReportViewModel>> GetReportDataAsync()
+        {
+            var reportData = await _context.Tasks
+                .Include(t => t.AssignedToUser)
+                .Include(t => t.CreatedByUser)
+                .Include(t => t.Project)
+                .Include(t => t.Status)
+                .GroupJoin(
+                    _context.Tickets.Include(ti => ti.AssignedToUser).Include(ti => ti.CreatedByUser).Include(ti => ti.Status).Include(ti => ti.Priority).Include(ti => ti.Project),
+                    task => task.Id,
+                    ticket => ticket.TasksId,
+                    (task, tickets) => new { task, tickets = tickets.DefaultIfEmpty() }
+                )
+                .SelectMany(
+                    x => x.tickets,
+                    (x, ticket) => new
+                    {
+                        Task = x.task,
+                        Ticket = ticket,
+                    }
+                )
+                .ToListAsync();
+
+            var reportRows = new List<ReportViewModel>();
+            foreach (var item in reportData)
+            {
+                reportRows.Add(new ReportViewModel
+                {
+                    ProjectName = item.Task?.Project?.ProjectName ?? item.Ticket?.Project?.ProjectName,
+                    TaskName = item.Task?.Name,
+                    TaskDetails = item.Task?.Details,
+                    TaskStatus = item.Task?.Status?.StatusName,
+                    TaskDueDate = item.Task?.DueDate,
+                    AssignedToUser = item.Task?.AssignedToUser?.UserName,
+                    AssignedToUserEmail = item.Task?.AssignedToUser?.Email,
+                    CreatedByUser = item.Task?.CreatedByUser?.UserName,
+                    CreatedByUserEmail = item.Task?.CreatedByUser?.Email,
+
+                    TicketTitle = item.Ticket?.Title,
+                    TicketDescription = item.Ticket?.Description,
+                    TicketStatus = item.Ticket?.Status?.StatusName,
+                    TicketPriority = item.Ticket?.Priority?.Name,
+                    TicketDueDate = item.Ticket?.DueDate,
+                    AssignedToUserTicket = item.Ticket?.AssignedToUser?.UserName,
+
+                    CreatedByTicket = item.Ticket?.CreatedByUser?.UserName,
+
+                });
+            }
+            return reportRows;
+        }
+        private string EscapeCsv(string value)
+        {
+            if (string.IsNullOrEmpty(value))
+                return string.Empty;
+            if (value.Contains(",") || value.Contains("\"") || value.Contains(System.Environment.NewLine))
+            {
+                return $"\"{value.Replace("\"", "\"\"")}\"";
+            }
+            return value;
+        }
         private bool TicketExists(int id)
         {
             return _context.Tickets.Any(e => e.Id == id);
