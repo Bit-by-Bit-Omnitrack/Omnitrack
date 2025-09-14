@@ -30,6 +30,9 @@ namespace UserRoles.Data
         // Add a new DbSet for TaskStatus
         public DbSet<TaskStatus> TaskStatuses { get; set; } = default!;
 
+        //  Added DbSet for Notifications
+        public DbSet<Notification> Notifications { get; set; } = default!;
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
