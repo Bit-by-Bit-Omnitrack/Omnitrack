@@ -6,6 +6,7 @@ namespace UserRoles.Models
     {
         public int Id { get; set; }
         public string UserId { get; set; }   // The recipient of the notification
+        public Users User { get; set; }      // Navigation property to link notification to a user
         public string Message { get; set; }
         public string Type { get; set; }     // Task, Project, Ticket
         public bool IsRead { get; set; } = false;
