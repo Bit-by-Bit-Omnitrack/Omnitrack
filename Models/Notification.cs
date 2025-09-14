@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace YourProjectNamespace.Models
+namespace UserRoles.Models
 {
     public class Notification
     {
