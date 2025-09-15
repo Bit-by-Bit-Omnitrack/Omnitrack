@@ -81,12 +81,19 @@
                 </li>
 
             <!--  NEW NOTIFICATIONS TAB -->
-            <li class="nav-item d-flex align-items-center">
-                <a asp-controller="Notifications" asp-action="Index" class="nav-link d-flex align-items-center">
-                    <i class="fas fa-bell mr-2"></i>
-                    <span>Notifications</span>
-                </a>
-            </li>
+                <li class="nav-item">
+                    <a class="nav-link position-relative text-dark" asp-controller="Notifications" asp-action="Index">
+                        Notifications
+                        @if (ViewBag.UnreadCount != null && ViewBag.UnreadCount > 0)
+                        {
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                @ViewBag.UnreadCount
+                                <span class="visually-hidden">unread notifications</span>
+                            </span>
+                        }
+                    </a>
+                </li>
+
             
                 <li class="nav-item d-flex align-items-center">
                     <a asp-controller="Chatbot" asp-action="Index" class="nav-link d-flex align-items-center">

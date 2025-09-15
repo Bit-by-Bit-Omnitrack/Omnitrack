@@ -1,0 +1,39 @@
+﻿@model IEnumerable<UserRoles.Models.Notification>
+
+@{
+    ViewData["Title"] = "My Notifications";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Message</th>
+            <th>Type</th>
+            <th>Date</th>
+            <th>Status</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var n in Model)
+        {
+            <tr class="@(n.IsRead ? "" : "table-warning")">
+                <td>@n.Message</td>
+                <td>@n.Type</td>
+                <td>@n.CreatedAt.ToLocalTime().ToString("g")</td>
+                <td>@(n.IsRead ? "Read" : "Unread")</td>
+                <td>
+                    @if (!n.IsRead)
+                    {
+                        <form asp-action="MarkAsRead" method="post">
+                            <input type="hidden" name="id" value="@n.Id" />
+                            <button type="submit" class="btn btn-sm btn-primary">Mark as Read</button>
+                        </form>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

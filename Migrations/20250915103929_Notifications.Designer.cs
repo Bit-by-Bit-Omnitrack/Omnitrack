@@ -12,8 +12,8 @@ using UserRoles.Data;
 namespace UserRoles.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250808155850_chatbot")]
-    partial class chatbot
+    [Migration("20250915103929_Notifications")]
+    partial class Notifications
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -311,6 +311,39 @@ namespace UserRoles.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("EmailLogs");
+                });
+
+            modelBuilder.Entity("UserRoles.Models.Notification", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Notifications");
                 });
 
             modelBuilder.Entity("UserRoles.Models.Priority", b =>
@@ -851,6 +884,17 @@ namespace UserRoles.Migrations
                     b.Navigation("Checklists");
                 });
 
+            modelBuilder.Entity("UserRoles.Models.Notification", b =>
+                {
+                    b.HasOne("UserRoles.Models.Users", "User")
+                        .WithMany("Notifications")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("UserRoles.Models.ProjectMember", b =>
                 {
                     b.HasOne("UserRoles.Models.Project", "Project")
@@ -1003,6 +1047,8 @@ namespace UserRoles.Migrations
 
             modelBuilder.Entity("UserRoles.Models.Users", b =>
                 {
+                    b.Navigation("Notifications");
+
                     b.Navigation("ProjectMemberships");
                 });
 #pragma warning restore 612, 618
