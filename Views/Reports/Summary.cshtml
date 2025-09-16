@@ -1,106 +1,172 @@
-﻿@{
-    ViewData["Title"] = "Summary Report";
-}
+﻿<div class="p-6 bg-white rounded-xl shadow-lg mt-8">
+<hr class="my-6 border-gray-300" />
 
-<div class="container-fluid py-4">
-    <!-- Page Header -->
-    <div class="mb-4">
-        <h1 class="fw-bold" Summary Report</h1>
-        <p class="text-muted">An overview of tickets, trends, and performance metrics. </p>
-    </div>
+<div class="text-center">
+    <h2 class="text-3xl font-bold text-gray-800">Omnitrack Project Analytics</h2>
+    <p class="mt-2 text-gray-600 max-w-2xl mx-auto">
+        This provides a clear overview of ticket distribution within the system. Visualize the number of tickets created and assigned to each team member to gain insight into workload and productivity.
+    </p>
+</div>
 
-    <!-- KPI Cards -->
-    <div class="row g-3 mb-4" id="kpiCards">
-        <div class="col-md-3">
-            <div class="card shadow-sm text-center p-3">
-                <h6 class="text-muted">Total Tickets</h6>
-                <h3 id="totalTickets" class="fw-bold placeholder-glow"><span class="placeholder col-6"></span></h3>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card shadow-sm text-center p-3">
-                <h6 class="text-muted">Open Tickets</h6>
-                <h3 id="openTickets" class="fw-bold placeholder-glow"><span class="placeholder col-6"></span></h3>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card shadow-sm text-center p-3">
-                <h6 class="text-muted">Closed Tickets</h6>
-                <h3 id="closedTickets" class="fw-bold placeholder-glow"><span class="placeholder col-6"></span></h3>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card shadow-sm text-center p-3">
-                <h6 class="text-muted">Avg. Resolution (Days)</h6>
-                <h3 id="avgResolution" class="fw-bold placeholder-glow"><span class="placeholder col-6"></span></h3>
-            </div>
-        </div>
-    </div>
-
-    <!-- Filter Form -->
-    <div class="card mb-4">
-        <div class="card-body">
-            <form id="filterForm" class="row g-3">
-                <div class="col-md-3">
-                    <label for="startDate" class="form-label">Start Date</label>
-                    <input type="date" id="startDate" class="form-control" />
-                </div>
-                <div class="col-md-3">
-                    <label for="endDate" class="form-label">End Date</label>
-                    <input type="date" id="endDate" class="form-control" />
-                </div>
-                <div class="col-md-3">
-                    <label for="projectSelect" class="form-label">Project</label>
-                    <select id="projectSelect" class="form-select">
-                        <option value="">All Projects</option>
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <label for="userSelect" class="form-label">User</label>
-                    <select id="userSelect" class="form-select">
-                        <option value="">All Users</option>
-                    </select>
-                </div>
-                <div class="col-md-12 text-end">
-                    <button type="submit" class="btn btn-primary mt-3 me-2">Apply Filters</button>
-                    <button id="clearFilters" type="button" class="btn btn-outline-secondary mt-3 me-2">Clear</button>
-                    <button id="exportTrendsCsv" type="button" class="btn btn-outline-secondary mt-3 me-2">Export Trends CSV</button>
-                    <button id="exportProjectsCsv" type="button" class="btn btn-outline-secondary mt-3">Export Projects CSV</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Charts -->
-    <div class="row mb-4">
-        <div class="col-md-6">
-            <h5>Status Overview</h5>
-            <canvas id="statusChart"></canvas>
-        </div>
-        <div class="col-md-6">
-            <h5>Priority Distribution</h5>
-            <canvas id="priorityChart"></canvas>
-        </div>
-    </div>
-    <div class="row mb-4">
-        <div class="col-md-6">
-            <h5>Projects Breakdown</h5>
-            <canvas id="projectChart"></canvas>
-        </div>
-        <div class="col-md-6">
-            <h5>User Activity</h5>
-            <canvas id="userChart"></canvas>
-        </div>
-    </div>
-    <div class="row mb-4">
-        <div class="col-md-12">
-            <h5>Ticket Trends</h5>
-            <canvas id="trendChart"></canvas>
-        </div>
+<div class="flex flex-col md:flex-row items-center justify-center p-4 bg-blue-50 rounded-lg shadow-inner mb-6 space-y-4 md:space-y-0 md:space-x-4">
+    <span class="text-xl font-medium text-gray-800">Total Tickets:</span>
+    <span id="totalTicketsCount" class="ml-2 text-2xl font-bold text-blue-600"></span>
+    <div class="flex-grow flex justify-end space-x-2 md:space-x-4">
+        <button id="generateCsv" class="px-4 py-2 bg-green-500 text-white font-semibold rounded-lg shadow-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-75 transition-all">
+            Download CSV
+        </button>
+        <button id="generateDoc" class="px-4 py-2 bg-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75 transition-all">
+            Download Word
+        </button>
+        <button id="generatePdf" class="px-4 py-2 bg-red-500 text-white font-semibold rounded-lg shadow-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-opacity-75 transition-all">
+            Download PDF
+        </button>
     </div>
 </div>
 
+<hr class="my-6 border-gray-300" />
+<div class="flex flex-col md:flex-row space-y-8 md:space-y-0 md:space-x-8">
+    <div class="w-full md:w-1/2 bg-gray-50 p-4 rounded-xl shadow-md">
+        <h3 class="text-lg font-semibold text-center mb-4">Tickets Created by User</h3>
+        <canvas id="createdTicketsChart"></canvas>
+    </div>
+    <div class="w-full md:w-1/2 bg-gray-50 p-4 rounded-xl shadow-md">
+        <h3 class="text-lg font-semibold text-center mb-4">Tickets Assigned to User</h3>
+        <canvas id="assignedTicketsChart"></canvas>
+    </div>
+    <div class="w-full md:w-1/2 bg-gray-50 p-4 rounded-xl shadow-md">
+        <h3 class="text-lg font-semibold text-center mb-4">Tickets by Status</h3>
+        <canvas id="statusTicketsChart"></canvas>
+    </div>
+</div>
+</div>
+
 @section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="~/js/summaryReport.js"></script>
+    <script>
+        $(document).ready(function () {
+            // Function to fetch data and render charts
+            function fetchAndRenderCharts() {
+                $.getJSON('/Tickets/ChartData', function (data) {
+                    const createdLabels = Object.keys(data.created);
+                    const createdCounts = Object.values(data.created);
+                    const assignedLabels = Object.keys(data.assigned);
+                    const assignedCounts = Object.values(data.assigned);
+
+                    const totalTickets = createdCounts.reduce((sum, count) => sum + count, 0);
+                    document.getElementById('totalTicketsCount').textContent = totalTickets;
+
+                    new Chart(document.getElementById('createdTicketsChart'), {
+                        type: 'pie',
+                        data: {
+                            labels: createdLabels,
+                            datasets: [{
+                                label: 'Tickets Created',
+                                data: createdCounts,
+                                backgroundColor: [
+                                    'rgba(44, 130, 201, 0.6)',
+                                    'rgba(255, 165, 0, 0.6)',
+                                    'rgba(119, 221, 119, 0.6)',
+                                    'rgba(128, 0, 128, 0.6)',
+                                    'rgba(105, 105, 105, 0.6)'
+                                ],
+                                borderColor: [
+                                    'rgba(44, 130, 201, 1)',
+                                    'rgba(255, 165, 0, 1)',
+                                    'rgba(119, 221, 119, 1)',
+                                    'rgba(128, 0, 128, 1)',
+                                    'rgba(105, 105, 105, 1)'
+                                ],
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: { position: 'top' },
+                                title: { display: true, text: 'Tickets Created Per User' }
+                            }
+                        }
+                    });
+
+                    new Chart(document.getElementById('assignedTicketsChart'), {
+                        type: 'bar',
+                        data: {
+                            labels: assignedLabels,
+                            datasets: [{
+                                label: 'Tickets Assigned',
+                                data: assignedCounts,
+                                backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                                borderColor: 'rgba(54, 162, 235, 1)',
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: { display: false },
+                                title: { display: true, text: 'Tickets Assigned Per User' }
+                            },
+                            scales: {
+                                y: { beginAtZero: true }
+                            }
+                        }
+                    });
+                });
+
+                $.getJSON('/Tickets/StatusChartData', function (statusData) {
+                    const statusLabels = Object.keys(statusData);
+                    const statusCounts = Object.values(statusData);
+
+                    new Chart(document.getElementById('statusTicketsChart'), {
+                        type: 'doughnut',
+                        data: {
+                            labels: statusLabels,
+                            datasets: [{
+                                label: 'Tickets by Status',
+                                data: statusCounts,
+                                backgroundColor: [
+                                    'rgba(54, 162, 235, 0.6)',    // To Do (Blue)
+                                    'rgba(255, 206, 86, 0.6)',    // In Progress (Yellow)
+                                    'rgba(255, 99, 132, 0.6)',    // Blocker (Red)
+                                    'rgba(75, 192, 192, 0.6)',    // Done (Green)
+                                ],
+                                borderColor: [
+                                    'rgba(54, 162, 235, 1)',
+                                    'rgba(255, 206, 86, 1)',
+                                    'rgba(255, 99, 132, 1)',
+                                    'rgba(75, 192, 192, 1)',
+                                ],
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: { position: 'top' },
+                                title: { display: true, text: 'Tickets by Status' }
+                            }
+                        }
+                    });
+                });
+            }
+
+            fetchAndRenderCharts();
+
+            // Attach event listeners to the buttons for server-side downloads
+            document.getElementById('generateCsv').addEventListener('click', function() {
+                window.location.href = '@Url.Action("DownloadCsvReport", "Tickets")';
+            });
+
+            document.getElementById('generateDoc').addEventListener('click', function() {
+                window.location.href = '@Url.Action("DownloadDocReport", "Tickets")';
+            });
+
+            document.getElementById('generatePdf').addEventListener('click', function() {
+                window.location.href = '@Url.Action("DownloadPdfReport", "Tickets")';
+            });
+        });
+    </script>
 }
