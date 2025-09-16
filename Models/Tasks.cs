@@ -19,7 +19,7 @@ namespace UserRoles.Models
         public Users? CreatedByUser { get; set; }
 
         public string Details { get; set; }
-        public DateTime DueDate { get; set; }
+        public DateTime? DueDate { get; set; }
 
         // Link to Project
         [ForeignKey("Project")]

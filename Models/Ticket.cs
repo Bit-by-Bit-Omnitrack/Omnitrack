@@ -8,7 +8,7 @@ namespace UserRoles.Models
     {
         public int Id { get; set; }
 
-        [BindNever] // This will prevent the model binder from binding this property
+        [BindNever] 
         public string TicketID { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
@@ -17,13 +17,13 @@ namespace UserRoles.Models
         public DateTime? DueDate { get; set; }
         public int StatusID { get; set; } = 1;
 
-        [BindNever] // This will prevent the model binder from binding this property
+        [BindNever] 
         public string TaskID { get; set; }
 
         // Use this for the creator's User ID
         //  [ForeignKey("CreatedByID")]
         [Editable(false)]
-        [BindNever] // This will prevent the model binder from binding this property
+        [BindNever] 
         public string CreatedByID { get; set; }
         [ForeignKey("CreatedByID")]
 

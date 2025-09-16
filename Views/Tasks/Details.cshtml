@@ -59,7 +59,7 @@
                     <i class="fas fa-calendar-alt me-1 text-primary"></i> Due Date
                 </dt>
                 <dd class="col-sm-9">
-                    @Model.DueDate.ToString("dddd, dd MMMM yyyy")
+                    @Model.DueDate?.ToString("dddd, dd MMMM yyyy")
                 </dd>
             </dl>
         </div>
