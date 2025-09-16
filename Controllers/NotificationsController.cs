@@ -63,6 +63,5 @@ namespace UserRoles.Controllers
                 ViewBag.UnreadCount = unreadCount;
             }
         }
-
     }
 }
