@@ -158,6 +158,25 @@ namespace UserRoles.Controllers
                 _context.Add(ticket);
                 await _context.SaveChangesAsync();
 
+                // To Notify User when assigned to a Ticket
+                if (!string.IsNullOrEmpty(ticket.AssignedToUserId))
+                {
+                    var assignedUser = await _userManager.FindByIdAsync(ticket.AssignedToUserId);
+                    if (assignedUser != null)
+                    {
+                        var notification = new Notification
+                        {
+                            UserId = assignedUser.Id,
+                            Message = $"You have been assigned a new ticket: {ticket.Title}",
+                            Type = "Ticket",
+                            IsRead = false,
+                            CreatedAt = DateTime.UtcNow
+                        };
+
+                        _context.Notifications.Add(notification);
+                        await _context.SaveChangesAsync();
+                    }
+
                 // NEW: Create a Calendar Event for the ticket's due date
                 if (ticket.DueDate.HasValue)
                 {
@@ -172,6 +191,7 @@ namespace UserRoles.Controllers
                     };
                     _context.CalendarEvents.Add(newCalendarEvent);
                     await _context.SaveChangesAsync();
+
                 }
 
                 return RedirectToAction(nameof(Index));

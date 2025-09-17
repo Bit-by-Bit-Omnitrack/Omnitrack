@@ -104,7 +104,27 @@ namespace UserRoles.Controllers
 
                 _context.Add(tasks);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+
+                // Send notification if a user is assigned
+                if (!string.IsNullOrEmpty(tasks.AssignedToUserId))
+                {
+                    var assignedUser = await _userManager.FindByIdAsync(tasks.AssignedToUserId);
+                    if (assignedUser != null)
+                    {
+                        var notification = new Notification
+                        {
+                            UserId = assignedUser.Id,
+                            Message = $"You have been assigned a new task: {tasks.Name}",
+                            Type = "Task",
+                            IsRead = false,
+                            CreatedAt = DateTime.UtcNow
+                        };
+
+                        _context.Notifications.Add(notification);
+                        await _context.SaveChangesAsync();
+                        return RedirectToAction(nameof(Index));
+                    }
+                }
             }
 
             ViewBag.Users = new SelectList(await _userManager.Users.Where(u => u.IsActive).ToListAsync(), "Id", "UserName", tasks.AssignedToUserId);

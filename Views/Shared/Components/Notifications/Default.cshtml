@@ -1,0 +1,13 @@
+﻿@model int
+
+<a class="nav-link position-relative text-dark" asp-controller="Notifications" asp-action="Index">
+    Notifications
+    @if (Model > 0)
+    {
+        <span class="position-absolute top-0 start-100 translate-middle badge rounded-circle bg-danger" 
+        style="font-size: 0.65rem; min-width: 16px; height: 16px; line-height: 16px; padding: 0;">
+            @Model
+            <span class="visually-hidden"></span>
+        </span>
+    }
+</a>

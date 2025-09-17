@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -12,6 +13,7 @@ namespace UserRoles.Controllers
     public class ProjectsController : Controller
     {
         private readonly AppDbContext _context;
+        private readonly UserManager<Users> _UserManager;
 
         public ProjectsController(AppDbContext context)
         {
@@ -78,6 +80,26 @@ namespace UserRoles.Controllers
 
             _context.Add(project);
             await _context.SaveChangesAsync();
+
+            foreach (var member in project.Members)
+            {
+                var user = await _context.Users.FindAsync(member.UserId);
+                if (user != null)
+                {
+                    var notification = new Notification
+                    {
+                        UserId = user.Id,
+                        Message = $"You have been added to the project: {project.ProjectName}",
+                        Type = "Project",
+                        IsRead = false,
+                        CreatedAt = DateTime.UtcNow
+                    };
+
+                    _context.Notifications.Add(notification);
+                }
+            }
+            await _context.SaveChangesAsync();
+
             return RedirectToAction(nameof(Index));
         }
 
@@ -168,6 +190,25 @@ namespace UserRoles.Controllers
 
             _context.ProjectMembers.Add(member);
             await _context.SaveChangesAsync();
+
+            // Send notification to the assigned user
+            var project = await _context.Projects.FindAsync(projectId);
+            var user = await _context.Users.FindAsync(userId);
+
+            if (project != null && user != null)
+            {
+                var notification = new Notification
+                {
+                    UserId = user.Id,
+                    Message = $"You have been added to the project: {project.ProjectName} as {role}.",
+                    Type = "Project",
+                    IsRead = false,
+                    CreatedAt = DateTime.UtcNow
+                };
+
+                _context.Notifications.Add(notification);
+                await _context.SaveChangesAsync();
+            }
 
             return RedirectToAction("Details", new { id = projectId });
         }

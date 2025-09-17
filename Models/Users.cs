@@ -29,5 +29,8 @@ namespace UserRoles.Models
 
         // Navigation property for projects this user is assigned to
         public ICollection<ProjectMember> ProjectMemberships { get; set; } = new List<ProjectMember>();
+
+        // Navigation property for notifications
+        public ICollection<Notification> Notifications { get; set; } = new List<Notification>();
     }
 }
