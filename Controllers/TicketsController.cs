@@ -160,6 +160,26 @@ namespace UserRoles.Controllers
             {
                 _context.Add(ticket);
                 await _context.SaveChangesAsync();
+
+                if (!string.IsNullOrEmpty(ticket.AssignedToUserId))
+                {
+                    var assignedUser = await _userManager.FindByIdAsync(ticket.AssignedToUserId);
+                    if (assignedUser != null)
+                    {
+                        var notification = new Notification
+                        {
+                            UserId = assignedUser.Id,
+                            Message = $"You have been assigned a new ticket: {ticket.Title}",
+                            Type = "Ticket",
+                            IsRead = false,
+                            CreatedAt = DateTime.UtcNow
+                        };
+
+                        _context.Notifications.Add(notification);
+                        await _context.SaveChangesAsync();
+                    }
+                }
+
                 return RedirectToAction(nameof(Index));
             }
 
