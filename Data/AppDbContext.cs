@@ -26,6 +26,12 @@ namespace UserRoles.Data
         public DbSet<Project> Projects { get; set; } = default!;
         public DbSet<ProjectMember> ProjectMembers { get; set; } = default!;
         public DbSet<SystemAdmin> SystemAdmins { get; set; } = default!;
+        public DbSet<CalendarEvent> CalendarEvents { get; set; }
+
+
+
+
+
 
         // Add a new DbSet for TaskStatus
         public DbSet<TaskStatus> TaskStatuses { get; set; } = default!;
@@ -36,7 +42,9 @@ namespace UserRoles.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-
+           
+            modelBuilder.Entity<CalendarEvent>()
+        .ToTable("CalendarEvent");
             // Tasks relationships
             modelBuilder.Entity<Tasks>()
                 .HasOne(t => t.CreatedByUser)
@@ -95,6 +103,9 @@ namespace UserRoles.Data
                 .HasOne(pm => pm.User)
                 .WithMany(u => u.ProjectMemberships)
                 .HasForeignKey(pm => pm.UserId);
+
+            modelBuilder.Entity<CalendarEvent>()
+    .ToTable("CalendarEvent", "dbo");
 
             // Seeding Priorities
             modelBuilder.Entity<Priority>().HasData(

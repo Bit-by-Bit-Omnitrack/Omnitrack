@@ -35,7 +35,7 @@
                                     <p class="card-text mb-1"><i class="fas fa-project-diagram me-1 text-muted"></i><strong>Project:</strong> @(item.Project?.ProjectName ?? "N/A")</p>
                                     <p class="card-text mb-1"><i class="fas fa-user-circle me-1 text-muted"></i><strong>Assigned To:</strong> @(item.AssignedToUser?.FullName ?? "N/A")</p>
                                     <p class="card-text mb-1"><i class="fas fa-align-left me-1 text-muted"></i><strong>Details:</strong> @item.Details</p>
-                                    <p class="card-text mb-1"><i class="fas fa-calendar-alt me-1 text-muted"></i><strong>Due:</strong> @(item.DueDate.ToString("dd MMM yyyy"))</p>
+                                    <p class="card-text mb-1"><i class="fas fa-calendar-alt me-1 text-muted"></i><strong>Due:</strong> @(item.DueDate?.ToString("dd MMM yyyy"))</p>
                                     <div class="text-end mt-2">
                                         <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-warning">Edit</a>
                                         <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary">Details</a>

@@ -17,7 +17,7 @@ using Syncfusion.Pdf;
 using Syncfusion.Pdf.Graphics;
 using System.Drawing;
 using Syncfusion.Pdf.Tables;
-using Syncfusion.Drawing; // Add this namespace for RectangleF and PointF
+using Syncfusion.Drawing;
 
 namespace UserRoles.Controllers
 {
@@ -135,9 +135,6 @@ namespace UserRoles.Controllers
         }
 
         // POST: Tickets1/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Ticket ticket)
@@ -161,6 +158,7 @@ namespace UserRoles.Controllers
                 _context.Add(ticket);
                 await _context.SaveChangesAsync();
 
+                // To Notify User when assigned to a Ticket
                 if (!string.IsNullOrEmpty(ticket.AssignedToUserId))
                 {
                     var assignedUser = await _userManager.FindByIdAsync(ticket.AssignedToUserId);
@@ -178,6 +176,22 @@ namespace UserRoles.Controllers
                         _context.Notifications.Add(notification);
                         await _context.SaveChangesAsync();
                     }
+
+                // NEW: Create a Calendar Event for the ticket's due date
+                if (ticket.DueDate.HasValue)
+                {
+                    var newCalendarEvent = new CalendarEvent
+                    {
+                        Title = $"Ticket Due: {ticket.Title}",
+                        Description = ticket.Description,
+                        ScheduledDate = ticket.DueDate.Value,
+                        UserId = ticket.CreatedByID,
+                        TicketId = ticket.Id, 
+                        EventType = "TicketDue"
+                    };
+                    _context.CalendarEvents.Add(newCalendarEvent);
+                    await _context.SaveChangesAsync();
+
                 }
 
                 return RedirectToAction(nameof(Index));
@@ -309,11 +323,16 @@ namespace UserRoles.Controllers
                 ViewBag.Priorities = new SelectList(await _context.Priorities.ToListAsync(), "Id", "Name", ticket.PriorityId);
                 ViewBag.Tasks = new SelectList(await _context.Tasks.ToListAsync(), "Id", "Name", ticket.TasksId); // Re-populate with selected TaskId
                 ViewBag.Projects = new SelectList(await _context.Projects.ToListAsync(), "ProjectId", "ProjectName", ticket.ProjectId);
+                return View(ticket);
             }
 
             var existingTicket = await _context.Tickets.FirstOrDefaultAsync(t => t.Id == id);
             if (existingTicket == null)
                 return NotFound();
+
+            // Store the old DueDate to check for changes
+            var oldDueDate = existingTicket.DueDate;
+            var oldTicketId = existingTicket.Id;
 
             try
             {
@@ -332,8 +351,39 @@ namespace UserRoles.Controllers
                 existingTicket.UpdatedBy = currentUser?.Id ?? "System";
                 existingTicket.UpdatedDate = DateTime.UtcNow;
 
-
                 await _context.SaveChangesAsync();
+
+                // NEW: Update or create a CalendarEvent
+                if (oldDueDate != ticket.DueDate)
+                {
+                    var calendarEvent = await _context.CalendarEvents.FirstOrDefaultAsync(e => e.TicketId == oldTicketId);
+
+                    if (calendarEvent != null)
+                    {
+                        // Update the existing calendar event
+                        calendarEvent.ScheduledDate = ticket.DueDate.HasValue ? ticket.DueDate.Value : calendarEvent.ScheduledDate;
+                        calendarEvent.Title = $"Ticket Due: {ticket.Title}";
+                        calendarEvent.Description = ticket.Description;
+                        calendarEvent.UserId = existingTicket.CreatedByID;
+                        _context.Update(calendarEvent);
+                    }
+                    else if (ticket.DueDate.HasValue)
+                    {
+                        // Create a new calendar event if one doesn't exist
+                        var newCalendarEvent = new CalendarEvent
+                        {
+                            Title = $"Ticket Due: {ticket.Title}",
+                            Description = ticket.Description,
+                            ScheduledDate = ticket.DueDate.Value,
+                            UserId = existingTicket.CreatedByID,
+                            TicketId = existingTicket.Id,
+                            EventType = "TicketDue"
+                        };
+                        _context.CalendarEvents.Add(newCalendarEvent);
+                    }
+                    await _context.SaveChangesAsync();
+                }
+
                 return RedirectToAction(nameof(Index));
             }
             catch (DbUpdateConcurrencyException)
@@ -505,8 +555,8 @@ namespace UserRoles.Controllers
             {
                 // Add a section and a table to the document
                 IWSection section = document.AddSection();
-                WTable table = (WTable)section.AddTable(); 
-                table.ResetCells(reportData.Count + 1, 8); 
+                WTable table = (WTable)section.AddTable();
+                table.ResetCells(reportData.Count + 1, 8);
 
                 // Add table header
                 string[] headers = { "Project Name", "Ticket Title", "Ticket Description", "Ticket Status", "Ticket Priority", "Ticket Due Date", "Assigned To (Ticket)", "Created By (Ticket)" };
@@ -529,28 +579,27 @@ namespace UserRoles.Controllers
                     table[i + 1, 7].AddParagraph().AppendText(rowData.CreatedByTicket);
                 }
 
-                IWSection section1= document.AddSection();
-                WTable table1= (WTable)section1.AddTable();
-               table1.ResetCells(reportData.Count + 1, 7);
+                IWSection section1 = document.AddSection();
+                WTable table1 = (WTable)section1.AddTable();
+                table1.ResetCells(reportData.Count + 1, 7);
 
                 string[] headers2 = { "Task Name", "Task Details", "Task Status", "Task Due Date", "Assigned To (Task)", "Assigned To Email (Task)", "Created By (Task)" };
                 for (int i = 0; i < headers2.Length; i++)
                 {
-                   table1[0, i].AddParagraph().AppendText(headers2[i]).CharacterFormat.Bold = true;
+                    table1[0, i].AddParagraph().AppendText(headers2[i]).CharacterFormat.Bold = true;
                 }
 
                 // Add data rows
                 for (int i = 0; i < reportData.Count; i++)
                 {
                     var rowData = reportData[i];
-                    
-                   table1[i + 1, 0].AddParagraph().AppendText(rowData.TaskName);
-                   table1[i + 1, 1].AddParagraph().AppendText(rowData.TaskDetails);
-                   table1[i + 1, 2].AddParagraph().AppendText(rowData.TaskStatus);
-                   table1[i + 1, 3].AddParagraph().AppendText(rowData.TaskDueDate?.ToString("yyyy-MM-dd"));
-                   table1[i + 1, 4].AddParagraph().AppendText(rowData.AssignedToUser);
-                   table1[i + 1, 5].AddParagraph().AppendText(rowData.AssignedToUserEmail);
-                   table1[i + 1, 6].AddParagraph().AppendText(rowData.CreatedByUser);
+                    table1[i + 1, 0].AddParagraph().AppendText(rowData.TaskName);
+                    table1[i + 1, 1].AddParagraph().AppendText(rowData.TaskDetails);
+                    table1[i + 1, 2].AddParagraph().AppendText(rowData.TaskStatus);
+                    table1[i + 1, 3].AddParagraph().AppendText(rowData.TaskDueDate?.ToString("yyyy-MM-dd"));
+                    table1[i + 1, 4].AddParagraph().AppendText(rowData.AssignedToUser);
+                    table1[i + 1, 5].AddParagraph().AppendText(rowData.AssignedToUserEmail);
+                    table1[i + 1, 6].AddParagraph().AppendText(rowData.CreatedByUser);
                 }
 
                 // Save the document to the stream
@@ -596,7 +645,7 @@ namespace UserRoles.Controllers
                     CreatedByTicket = r.CreatedByTicket
                 }).ToList();
 
-            
+
                 Syncfusion.Drawing.RectangleF bounds = new Syncfusion.Drawing.RectangleF(0, 0, page.Graphics.ClientSize.Width, page.Graphics.ClientSize.Height);
                 pdfTable.Draw(page, bounds);
 
