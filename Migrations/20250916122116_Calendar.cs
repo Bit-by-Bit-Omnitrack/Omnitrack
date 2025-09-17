@@ -8,11 +8,14 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace UserRoles.Migrations
 {
     /// <inheritdoc />
-    public partial class chatbot : Migration
+    public partial class Calendar : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.EnsureSchema(
+                name: "dbo");
+
             migrationBuilder.CreateTable(
                 name: "AspNetRoles",
                 columns: table => new
@@ -398,7 +401,7 @@ namespace UserRoles.Migrations
                     AssignedToUserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     CreatedById = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     Details = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    DueDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    DueDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     ProjectId = table.Column<int>(type: "int", nullable: true),
                     StatusID = table.Column<int>(type: "int", nullable: false)
                 },
@@ -491,6 +494,43 @@ namespace UserRoles.Migrations
                         name: "FK_Tickets_TicketStatuses_TicketStatusId",
                         column: x => x.TicketStatusId,
                         principalTable: "TicketStatuses",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "CalendarEvent",
+                schema: "dbo",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ScheduledDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    EndDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    EventType = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    TicketId = table.Column<int>(type: "int", nullable: true),
+                    TasksId = table.Column<int>(type: "int", nullable: true),
+                    ProjectId = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CalendarEvent", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_CalendarEvent_Projects_ProjectId",
+                        column: x => x.ProjectId,
+                        principalTable: "Projects",
+                        principalColumn: "ProjectId");
+                    table.ForeignKey(
+                        name: "FK_CalendarEvent_Tasks_TasksId",
+                        column: x => x.TasksId,
+                        principalTable: "Tasks",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_CalendarEvent_Tickets_TicketId",
+                        column: x => x.TicketId,
+                        principalTable: "Tickets",
                         principalColumn: "Id");
                 });
 
@@ -592,6 +632,24 @@ namespace UserRoles.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
+                name: "IX_CalendarEvent_ProjectId",
+                schema: "dbo",
+                table: "CalendarEvent",
+                column: "ProjectId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CalendarEvent_TasksId",
+                schema: "dbo",
+                table: "CalendarEvent",
+                column: "TasksId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CalendarEvent_TicketId",
+                schema: "dbo",
+                table: "CalendarEvent",
+                column: "TicketId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ChecklistItems_ChecklistsId",
                 table: "ChecklistItems",
                 column: "ChecklistsId");
@@ -689,6 +747,10 @@ namespace UserRoles.Migrations
 
             migrationBuilder.DropTable(
                 name: "AspNetUserTokens");
+
+            migrationBuilder.DropTable(
+                name: "CalendarEvent",
+                schema: "dbo");
 
             migrationBuilder.DropTable(
                 name: "Chats");
