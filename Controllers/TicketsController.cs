@@ -176,7 +176,8 @@ namespace UserRoles.Controllers
                         _context.Notifications.Add(notification);
                         await _context.SaveChangesAsync();
                     }
-
+                }
+                
                 // NEW: Create a Calendar Event for the ticket's due date
                 if (ticket.DueDate.HasValue)
                 {
